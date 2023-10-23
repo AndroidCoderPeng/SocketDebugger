@@ -2,8 +2,7 @@
 {
     public enum AlertType
     {
-        Question = 0,
-        Warning = 1,
-        Error = 2
+        Warning = 0,
+        Error = 1
     }
 }

@@ -76,19 +76,14 @@ namespace SocketDebugger.ViewModels
             var alertType = parameters.GetValue<AlertType>("AlertType");
             switch (alertType)
             {
-                case AlertType.Question:
-                    AlertIcon = "\ue68a";
-                    Title = "Question";
-                    AlertIconColor = "RoyalBlue";
-                    break;
                 case AlertType.Warning:
                     AlertIcon = "\ue701";
-                    Title = "Warning";
+                    Title = "温馨提示";
                     AlertIconColor = "DarkOrange";
                     break;
                 case AlertType.Error:
                     AlertIcon = "\ue667";
-                    Title = "Error";
+                    Title = "错误";
                     AlertIconColor = "Red";
                     break;
                 default:

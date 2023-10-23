@@ -24,8 +24,15 @@
 
     <Border
         Margin="3"
-        Background="White"
+        BorderBrush="{StaticResource DividerLineBrush}"
+        BorderThickness="1"
         CornerRadius="10">
+        <Border.Background>
+            <LinearGradientBrush>
+                <GradientStop Offset="0" Color="{StaticResource PrimaryColor}" />
+                <GradientStop Offset="1" Color="{StaticResource AuxiliaryColor}" />
+            </LinearGradientBrush>
+        </Border.Background>
         <Border.Effect>
             <DropShadowEffect
                 BlurRadius="5"
@@ -58,8 +65,8 @@
                     <TextBlock
                         Margin="0,0,20,0"
                         VerticalAlignment="Center"
-                        FontSize="18"
-                        FontWeight="Bold"
+                        FontSize="20"
+                        Foreground="White"
                         Text="{Binding Title}" />
                 </DockPanel>
 
@@ -67,6 +74,7 @@
                     Grid.Row="1"
                     Margin="70,0,20,0"
                     FontSize="16"
+                    Foreground="White"
                     Text="{Binding AlertMessage}"
                     TextWrapping="Wrap" />
             </Grid>

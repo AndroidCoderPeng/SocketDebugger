@@ -1,15 +1,15 @@
 ﻿<UserControl
-    Height="200"
-    Width="350"
-    d:DataContext="{d:DesignInstance Type=vm:AlertControlDialogViewModel}"
-    mc:Ignorable="d"
     x:Class="SocketDebugger.Dialogs.AlertControlDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    Width="350"
+    Height="200"
+    d:DataContext="{d:DesignInstance Type=vm:AlertControlDialogViewModel}"
+    mc:Ignorable="d">
 
     <prism:Dialog.WindowStyle>
         <Style TargetType="Window">
@@ -23,16 +23,23 @@
     </prism:Dialog.WindowStyle>
 
     <Border
-        Background="White"
-        CornerRadius="10"
-        Margin="3">
+        Margin="3"
+        BorderBrush="{StaticResource DividerLineBrush}"
+        BorderThickness="1"
+        CornerRadius="10">
+        <Border.Background>
+            <LinearGradientBrush>
+                <GradientStop Offset="0" Color="{StaticResource PrimaryColor}" />
+                <GradientStop Offset="1" Color="{StaticResource AuxiliaryColor}" />
+            </LinearGradientBrush>
+        </Border.Background>
         <Border.Effect>
             <DropShadowEffect
                 BlurRadius="5"
-                Color="{StaticResource PrimaryColor}"
                 Direction="0"
                 Opacity="0.5"
-                ShadowDepth="0" />
+                ShadowDepth="0"
+                Color="{StaticResource PrimaryColor}" />
         </Border.Effect>
 
         <Grid>
@@ -49,24 +56,25 @@
 
                 <DockPanel Grid.Row="0" LastChildFill="True">
                     <TextBlock
+                        Margin="20"
                         FontFamily="/SocketDebugger;component/IconFont/#iconfont"
                         FontSize="30"
                         Foreground="{Binding AlertIconColor}"
-                        Margin="20"
                         Text="{Binding AlertIcon}" />
 
                     <TextBlock
-                        FontSize="18"
-                        FontWeight="Bold"
                         Margin="0,0,20,0"
-                        Text="{Binding Title}"
-                        VerticalAlignment="Center" />
+                        VerticalAlignment="Center"
+                        FontSize="20"
+                        Foreground="White"
+                        Text="{Binding Title}" />
                 </DockPanel>
 
                 <TextBlock
-                    FontSize="16"
                     Grid.Row="1"
                     Margin="70,0,20,0"
+                    FontSize="16"
+                    Foreground="White"
                     Text="{Binding AlertMessage}"
                     TextWrapping="Wrap" />
             </Grid>
@@ -76,26 +84,26 @@
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
                 <Button
-                    Command="{Binding AlertCancelCommand}"
-                    Content="取消"
-                    FontSize="16"
+                    Width="80"
                     Height="35"
                     Margin="20"
-                    Width="80" />
+                    Command="{Binding AlertCancelCommand}"
+                    Content="取消"
+                    FontSize="16" />
 
                 <Button
+                    Width="80"
+                    Height="35"
+                    Margin="20"
                     BorderThickness="0"
                     Command="{Binding AlertDetermineCommand}"
                     Content="确定"
                     FontSize="16"
-                    Height="35"
-                    Margin="20"
-                    Style="{StaticResource ButtonPrimary}"
-                    Width="80">
+                    Style="{StaticResource ButtonPrimary}">
                     <Button.Background>
                         <LinearGradientBrush>
-                            <GradientStop Color="{StaticResource ListPrimaryColor}" Offset="0" />
-                            <GradientStop Color="{StaticResource ListAuxiliaryColor}" Offset="1" />
+                            <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
+                            <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
                         </LinearGradientBrush>
                     </Button.Background>
                 </Button>
