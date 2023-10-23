@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Services.Dialogs;
 using SocketDebugger.Model;
-using SocketDebugger.Pages;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
 using TouchSocket.Core;
@@ -23,7 +20,6 @@ namespace SocketDebugger.ViewModels
     {
         #region DelegateCommand
 
-        public DelegateCommand<UdpServerView> PageLoadedCommand { get; }
         public DelegateCommand<ListView> ConfigItemSelectedCommand { get; }
         public DelegateCommand AddConfigCommand { get; }
         public DelegateCommand DeleteConfigCommand { get; }
@@ -136,21 +132,12 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
-        private UdpServerView _viewPage;
         private ConnectedClientModel _selectedClientModel;
-        private readonly IApplicationDataService _applicationDataService;
         private readonly UdpSession _udpSession = new UdpSession();
 
-        public UdpServerViewModel(IApplicationDataService applicationDataService)
+        public UdpServerViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
-            _applicationDataService = applicationDataService;
-            PageLoadedCommand = new DelegateCommand<UdpServerView>(it =>
-            {
-                Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " TcpServerViewModel => 加载");
-                _viewPage = it;
-            });
-
-            ConfigModels = _applicationDataService.GetConfigModels();
+            ConfigModels = dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
                 ConfigModel = ConfigModels[0];
@@ -170,26 +157,26 @@ namespace SocketDebugger.ViewModels
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var message = _viewPage.TextRadioButton.IsChecked == true
-                        ? Encoding.UTF8.GetString(byteBlock.Buffer, 0, byteBlock.Len)
-                        : BitConverter.ToString(byteBlock.Buffer, 0, byteBlock.Len).Replace("-", " ");
-
-                    ChatMessages.Add(new ChatMessageModel
-                    {
-                        MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                        Message = message,
-                        IsSend = false
-                    });
-
-                    if (ConnectedClients.All(x => x.ClientId != endpoint.GetHashCode().ToString()))
-                    {
-                        ConnectedClients.Add(new ConnectedClientModel
-                        {
-                            ClientId = endpoint.GetHashCode().ToString(),
-                            ClientConnectColorBrush = "LimeGreen",
-                            ClientHostAddress = endpoint.GetIP() + ":" + endpoint.GetPort()
-                        });
-                    }
+                    // var message = _viewPage.TextRadioButton.IsChecked == true
+                    //     ? Encoding.UTF8.GetString(byteBlock.Buffer, 0, byteBlock.Len)
+                    //     : BitConverter.ToString(byteBlock.Buffer, 0, byteBlock.Len).Replace("-", " ");
+                    //
+                    // ChatMessages.Add(new ChatMessageModel
+                    // {
+                    //     MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                    //     Message = message,
+                    //     IsSend = false
+                    // });
+                    //
+                    // if (ConnectedClients.All(x => x.ClientId != endpoint.GetHashCode().ToString()))
+                    // {
+                    //     ConnectedClients.Add(new ConnectedClientModel
+                    //     {
+                    //         ClientId = endpoint.GetHashCode().ToString(),
+                    //         ClientConnectColorBrush = "LimeGreen",
+                    //         ClientHostAddress = endpoint.GetIP() + ":" + endpoint.GetPort()
+                    //     });
+                    // }
                 });
             };
 
@@ -219,7 +206,7 @@ namespace SocketDebugger.ViewModels
                         manager.Delete(ConfigModel);
                     }
 
-                    ConfigModels = _applicationDataService.GetConfigModels();
+                    ConfigModels = dataService.GetConfigModels();
                     if (ConfigModels.Any())
                     {
                         ConfigModel = ConfigModels[0];
@@ -308,39 +295,39 @@ namespace SocketDebugger.ViewModels
                 {
                     try
                     {
-                        if (_viewPage.TextRadioButton.IsChecked == true)
-                        {
-                            var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
-                            _udpSession.Send(endPoint, _userInputText);
-
-                            ChatMessages.Add(new ChatMessageModel
-                            {
-                                MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                                Message = _userInputText,
-                                IsSend = true
-                            });
-                        }
-                        else
-                        {
-                            if (_userInputText.IsHex())
-                            {
-                                var buffer = Encoding.UTF8.GetBytes(_userInputText);
-                                //以UTF-8的编码同步发送字符串
-                                var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
-                                _udpSession.Send(endPoint, buffer);
-
-                                ChatMessages.Add(new ChatMessageModel
-                                {
-                                    MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                                    Message = _userInputText,
-                                    IsSend = true
-                                });
-                            }
-                            else
-                            {
-                                MessageBox.Show("数据格式错误，无法发送", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                        }
+                        // if (_viewPage.TextRadioButton.IsChecked == true)
+                        // {
+                        //     var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
+                        //     _udpSession.Send(endPoint, _userInputText);
+                        //
+                        //     ChatMessages.Add(new ChatMessageModel
+                        //     {
+                        //         MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                        //         Message = _userInputText,
+                        //         IsSend = true
+                        //     });
+                        // }
+                        // else
+                        // {
+                        //     if (_userInputText.IsHex())
+                        //     {
+                        //         var buffer = Encoding.UTF8.GetBytes(_userInputText);
+                        //         //以UTF-8的编码同步发送字符串
+                        //         var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
+                        //         _udpSession.Send(endPoint, buffer);
+                        //
+                        //         ChatMessages.Add(new ChatMessageModel
+                        //         {
+                        //             MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                        //             Message = _userInputText,
+                        //             IsSend = true
+                        //         });
+                        //     }
+                        //     else
+                        //     {
+                        //         MessageBox.Show("数据格式错误，无法发送", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //     }
+                        // }
                     }
                     catch (NotConnectedException e)
                     {
@@ -351,15 +338,6 @@ namespace SocketDebugger.ViewModels
                 {
                     MessageBox.Show("请指定接收消息的客户端", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            });
-        }
-
-        private void AddConfigResult(object sender, ConnectionConfigModel model)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                ConfigModels = _applicationDataService.GetConfigModels();
-                ConfigModel = model;
             });
         }
     }
