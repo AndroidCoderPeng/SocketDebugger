@@ -312,7 +312,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="0.5" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="200" />
                 </Grid.ColumnDefinitions>
 
                 <ListBox
@@ -347,11 +347,14 @@
                         Foreground="White"
                         Text="客户端" />
 
+                    <Grid Height="0.5" Background="{StaticResource DividerLineBrush}" />
+
                     <ListView
                         x:Name="ClientListView"
                         Background="Transparent"
                         BorderThickness="0"
-                        ItemsSource="{Binding ConnectedClients}">
+                        ItemsSource="{Binding ConnectedClients}"
+                        ScrollViewer.HorizontalScrollBarVisibility="Hidden">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="SelectionChanged">
                                 <b:InvokeCommandAction Command="{Binding ClientItemSelectedCommand}" CommandParameter="{Binding ElementName=ClientListView}" />

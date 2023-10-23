@@ -286,7 +286,7 @@
 
                     <Button
                         Grid.Row="2"
-                        Width="80"
+                        Width="70"
                         Height="25"
                         Margin="0,10,10,10"
                         Padding="0"
