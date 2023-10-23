@@ -6,6 +6,7 @@ using Prism.Mvvm;
 using Prism.Regions;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
+using SocketDebugger.Utils;
 using SocketDebugger.Views;
 
 namespace SocketDebugger.ViewModels
@@ -35,6 +36,7 @@ namespace SocketDebugger.ViewModels
             MenuSelectedCommand = new DelegateCommand<ListView>(delegate(ListView view)
             {
                 //TODO 判断选择的菜单下面是否有数据，没有数据就显示EmptyView
+                MemoryCacheManager.SelectedMainMenu = MainMenuModels[view.SelectedIndex].MainMenuName;
 
                 var region = regionManager.Regions["ContentRegion"];
                 switch (view.SelectedIndex)
