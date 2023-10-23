@@ -1,5 +1,5 @@
 <UserControl
-    x:Class="SocketDebugger.Pages.WebSocketClientView"
+    x:Class="SocketDebugger.Views.WebSocketClientView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
@@ -8,17 +8,11 @@
     xmlns:local="clr-namespace:SocketDebugger.Utils"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
-    Width="715"
-    Height="560"
     d:DataContext="{d:DesignInstance Type=vm:WebSocketClientViewModel}"
-    Background="White"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    Background="Transparent"
     mc:Ignorable="d">
-
-    <b:Interaction.Triggers>
-        <b:EventTrigger EventName="Loaded">
-            <b:InvokeCommandAction Command="{Binding PageLoadedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Page}}" />
-        </b:EventTrigger>
-    </b:Interaction.Triggers>
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -30,117 +24,161 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="0.5" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition />
+                <RowDefinition Height="0.5" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!--  中间用户连接配置  -->
             <Grid Grid.Row="0">
-                <Border BorderBrush="LightGray" BorderThickness="0,0,1,0">
-                    <StackPanel
-                        VerticalAlignment="Center"
-                        Orientation="Vertical"
-                        Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyConvert}}">
-                        <Image Source="/SocketDebugger;component/Images/empty.png" />
+                <StackPanel
+                    VerticalAlignment="Center"
+                    Orientation="Vertical"
+                    Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyConvert}}">
+                    <Image Source="/SocketDebugger;component/Images/empty.png" />
 
-                        <TextBlock
-                            Margin="0,10"
-                            FontSize="14"
-                            Text="还未添加任何连接配置"
-                            TextAlignment="Center" />
+                    <TextBlock
+                        Margin="0,10"
+                        FontSize="14"
+                        Text="还未添加任何连接配置"
+                        TextAlignment="Center" />
 
-                        <TextBlock
-                            FontSize="14"
-                            Text="点击下方'+'添加"
-                            TextAlignment="Center" />
-                    </StackPanel>
-                </Border>
+                    <TextBlock
+                        FontSize="14"
+                        Text="点击下方'+'添加"
+                        TextAlignment="Center" />
+                </StackPanel>
 
                 <ListView
                     x:Name="ConfigListView"
-                    Background="White"
-                    BorderBrush="LightGray"
-                    BorderThickness="0,0,1,0"
+                    Background="Transparent"
+                    BorderThickness="0"
                     ItemsSource="{Binding ConfigModels}"
                     SelectedIndex="0"
                     Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewConvert}}">
 
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
-                            <b:InvokeCommandAction Command="{Binding ConfigItemSelectedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
+                            <b:InvokeCommandAction Command="{Binding ConfigItemSelectedCommand}" CommandParameter="{Binding ElementName=ConfigListView}" />
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
 
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
 
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        VerticalAlignment="Center"
-                                        FontSize="16"
-                                        Text="{Binding Comment}" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Margin="5"
+                                    FontSize="16"
+                                    Text="{Binding Comment}" />
 
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Margin="0,5"
-                                        VerticalAlignment="Center"
-                                        FontSize="14">
-                                        <TextBlock.Text>
-                                            <MultiBinding StringFormat="{}ws://{0}:{1}/">
-                                                <Binding Path="ConnHost" />
-                                                <Binding Path="ConnPort" />
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                </Grid>
-                            </StackPanel>
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Margin="5"
+                                    FontSize="14">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}ws://{0}:{1}/">
+                                            <Binding Path="ConnHost" />
+                                            <Binding Path="ConnPort" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
+
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Foreground" Value="White" />
+                            <Setter Property="Height" Value="65" />
+                            <Setter Property="Width" Value="185" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListViewItem">
+                                        <Border
+                                            x:Name="Bd"
+                                            Padding="{TemplateBinding Padding}"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            CornerRadius="5"
+                                            SnapsToDevicePixels="true">
+                                            <ContentPresenter
+                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush>
+                                                <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
+                                                <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.ItemContainerStyle>
                 </ListView>
             </Grid>
 
-            <Border
-                Grid.Row="1"
-                BorderBrush="LightGray"
-                BorderThickness="0,1,1,0">
-                <StackPanel Orientation="Horizontal">
-                    <Button
-                        Width="30"
-                        Height="30"
-                        Padding="5,0"
-                        BorderBrush="Transparent"
-                        Command="{Binding AddConfigCommand}"
-                        Content="&#xe67c;"
-                        FontFamily="/SocketDebugger;component/IconFont/#iconfont"
-                        FontSize="14" />
-                    <Button
-                        Width="30"
-                        Height="30"
-                        Padding="5,0"
-                        BorderBrush="Transparent"
-                        Command="{Binding DeleteConfigCommand}"
-                        Content="&#xe683;"
-                        FontFamily="/SocketDebugger;component/IconFont/#iconfont"
-                        FontSize="14" />
-                </StackPanel>
-            </Border>
+            <Grid Grid.Row="1" Background="{StaticResource DividerLineBrush}" />
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal">
+                <Button
+                    Width="30"
+                    Height="30"
+                    Padding="5,0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Command="{Binding AddConfigCommand}"
+                    Content="&#xe67c;"
+                    FontFamily="/SocketDebugger;component/IconFont/#iconfont"
+                    FontSize="14"
+                    Foreground="White"
+                    Style="{x:Null}" />
+                <Button
+                    Width="30"
+                    Height="30"
+                    Padding="5,0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Command="{Binding DeleteConfigCommand}"
+                    Content="&#xe683;"
+                    FontFamily="/SocketDebugger;component/IconFont/#iconfont"
+                    FontSize="14"
+                    Foreground="White"
+                    Style="{x:Null}" />
+            </StackPanel>
         </Grid>
 
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1" Background="{StaticResource DividerLineBrush}" />
+
+        <Grid Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="3*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="0.5" />
+                <RowDefinition Height="4*" />
+                <RowDefinition Height="0.5" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="0.5" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -163,7 +201,7 @@
                         VerticalAlignment="Center"
                         FontSize="16"
                         FontWeight="Normal"
-                        Foreground="Black"
+                        Foreground="White"
                         Text="{Binding ConfigModel.Comment}" />
 
                     <TextBlock
@@ -171,10 +209,10 @@
                         Margin="10,0"
                         FontSize="14"
                         FontWeight="Normal"
-                        Foreground="Black">
+                        Foreground="{StaticResource DividerLineBrush}">
                         <!--  多重绑定  -->
                         <TextBlock.Text>
-                            <MultiBinding StringFormat="{}ws://{0}:{1}/">
+                            <MultiBinding StringFormat="{}{0}:{1}">
                                 <Binding Path="ConfigModel.ConnHost" />
                                 <Binding Path="ConfigModel.ConnPort" />
                             </MultiBinding>
@@ -195,7 +233,7 @@
                             Margin="5,0,0,0"
                             FontSize="14"
                             FontWeight="Normal"
-                            Foreground="Black"
+                            Foreground="White"
                             Text="{Binding ConnectState}" />
                     </StackPanel>
                 </Grid>
@@ -209,52 +247,71 @@
 
                     <Button
                         Grid.Row="0"
-                        Width="40"
-                        Height="24"
-                        Margin="10,0"
+                        Width="50"
+                        Height="25"
+                        Margin="0,10,10,0"
                         Padding="0"
                         HorizontalAlignment="Right"
-                        BorderBrush="#0066FF"
+                        BorderThickness="0"
                         Command="{Binding EditConfigCommand}"
                         Content="编辑"
-                        Foreground="#0066FF"
-                        Style="{StaticResource ButtonDefault}" />
+                        Style="{StaticResource ButtonPrimary}">
+                        <Button.Background>
+                            <LinearGradientBrush>
+                                <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
+                                <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
+                            </LinearGradientBrush>
+                        </Button.Background>
+                    </Button>
 
                     <Button
                         Grid.Row="1"
-                        Width="40"
-                        Height="24"
-                        Margin="10,0"
+                        Width="50"
+                        Height="25"
+                        Margin="0,10,10,0"
                         Padding="0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
-                        BorderBrush="#0066FF"
+                        BorderThickness="0"
                         Command="{Binding ConnectServerCommand}"
                         Content="{Binding ConnectButtonState}"
-                        Foreground="#0066FF"
-                        Style="{StaticResource ButtonDefault}" />
+                        Style="{StaticResource ButtonPrimary}">
+                        <Button.Background>
+                            <LinearGradientBrush>
+                                <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
+                                <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
+                            </LinearGradientBrush>
+                        </Button.Background>
+                    </Button>
 
                     <Button
                         Grid.Row="2"
                         Width="70"
-                        Height="24"
-                        Margin="10,0"
+                        Height="25"
+                        Margin="0,10,10,10"
                         Padding="0"
                         HorizontalAlignment="Right"
-                        BorderBrush="#0066FF"
+                        BorderThickness="0"
                         Command="{Binding ClearMessageCommand}"
                         Content="清空消息"
-                        Foreground="#0066FF"
-                        Style="{StaticResource ButtonDefault}" />
+                        Style="{StaticResource ButtonPrimary}">
+                        <Button.Background>
+                            <LinearGradientBrush>
+                                <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
+                                <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
+                            </LinearGradientBrush>
+                        </Button.Background>
+                    </Button>
                 </Grid>
             </Grid>
 
+            <Grid Grid.Row="1" Background="{StaticResource DividerLineBrush}" />
+
             <!--  对话显示区域  -->
             <ListBox
-                Grid.Row="1"
-                Background="White"
-                BorderBrush="LightGray"
-                BorderThickness="0,1,0,1"
+                Grid.Row="2"
+                Background="Transparent"
+                BorderThickness="0"
                 ItemsSource="{Binding ChatMessages}"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
@@ -273,43 +330,66 @@
                 </b:Interaction.Behaviors>
             </ListBox>
 
-            <Grid Grid.Row="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="30" />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
+            <Grid Grid.Row="3" Background="{StaticResource DividerLineBrush}" />
 
-                <Grid Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
+            <Grid Grid.Row="4" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
 
-                    <Button
-                        Grid.Column="2"
-                        Width="50"
-                        Height="24"
-                        Margin="10,0"
-                        Padding="0"
-                        HorizontalAlignment="Right"
-                        Command="{Binding SendMessageCommand}"
-                        Content="发送"
-                        Style="{StaticResource ButtonPrimary}" />
-                </Grid>
-
-                <!--  输入显示区域  -->
-                <TextBox
-                    Grid.Row="1"
-                    Padding="3"
-                    VerticalContentAlignment="Top"
-                    BorderBrush="LightGray"
-                    BorderThickness="0,1,0,0"
+                <RadioButton
+                    x:Name="TextRadioButton"
+                    Grid.Column="0"
+                    Margin="10"
+                    Content="文本"
                     FontSize="14"
-                    Text="{Binding UserInputText}"
-                    TextWrapping="Wrap"
-                    VerticalScrollBarVisibility="Auto" />
+                    Foreground="White"
+                    GroupName="ModeGroup"
+                    IsChecked="True" />
+
+                <RadioButton
+                    Grid.Column="1"
+                    Content="16进制"
+                    FontSize="14"
+                    Foreground="White"
+                    GroupName="ModeGroup" />
+
+                <Button
+                    Grid.Column="2"
+                    Width="50"
+                    Height="25"
+                    Margin="10,0"
+                    Padding="0"
+                    HorizontalAlignment="Right"
+                    BorderThickness="0"
+                    Command="{Binding SendMessageCommand}"
+                    Content="发送"
+                    Style="{StaticResource ButtonPrimary}">
+                    <Button.Background>
+                        <LinearGradientBrush>
+                            <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
+                            <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
+                        </LinearGradientBrush>
+                    </Button.Background>
+                </Button>
             </Grid>
+
+            <Grid Grid.Row="5" Background="{StaticResource DividerLineBrush}" />
+
+            <!--  输入显示区域  -->
+            <TextBox
+                Grid.Row="6"
+                Padding="3"
+                VerticalContentAlignment="Top"
+                Background="Transparent"
+                BorderThickness="0"
+                FontSize="14"
+                Foreground="White"
+                Text="{Binding UserInputText}"
+                TextWrapping="Wrap"
+                VerticalScrollBarVisibility="Auto" />
         </Grid>
     </Grid>
 </UserControl>
