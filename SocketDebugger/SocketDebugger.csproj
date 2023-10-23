@@ -187,6 +187,12 @@
     <Compile Include="Converts\ListConvert.cs" />
     <Compile Include="Converts\ViewVisibilityConvert.cs" />
     <Compile Include="Converts\EmptyVisibilityConvert.cs" />
+    <Compile Include="Dialogs\AlertControlDialog.xaml.cs">
+      <DependentUpon>AlertControlDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\AlertMessageDialog.xaml.cs">
+      <DependentUpon>AlertMessageDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\ConfigDialog.xaml.cs">
       <DependentUpon>ConfigDialog.xaml</DependentUpon>
     </Compile>
@@ -196,12 +202,15 @@
     <Compile Include="Model\MainMenuModel.cs" />
     <Compile Include="Services\IApplicationDataService.cs" />
     <Compile Include="Services\ApplicationDataServiceImpl.cs" />
+    <Compile Include="Utils\AlertType.cs" />
     <Compile Include="Utils\AutoScrollBehavior.cs" />
     <Compile Include="Utils\ChatBubbleSelector.cs" />
     <Compile Include="Utils\DataBaseManager.cs" />
     <Compile Include="Utils\MemoryCacheManager.cs" />
     <Compile Include="Utils\MethodExtensions.cs" />
     <Compile Include="Utils\SystemHelper.cs" />
+    <Compile Include="ViewModels\AlertControlDialogViewModel.cs" />
+    <Compile Include="ViewModels\AlertMessageDialogViewModel.cs" />
     <Compile Include="ViewModels\ConfigDialogViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\TcpClientViewModel.cs" />
@@ -217,8 +226,8 @@
     <Compile Include="Views\EmptyView.xaml.cs">
       <DependentUpon>EmptyView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\HttpServerView.xaml.cs">
-      <DependentUpon>HttpServerView.xaml</DependentUpon>
+    <Compile Include="Views\SerialPortView.xaml.cs">
+      <DependentUpon>SerialPortView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -265,6 +274,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Dialogs\AlertControlDialog.xaml" />
+    <Page Include="Dialogs\AlertMessageDialog.xaml" />
     <Page Include="Dialogs\ConfigDialog.xaml" />
     <Page Include="Styles\ApplicationBrushs.xaml">
       <SubType>Designer</SubType>
@@ -284,7 +295,9 @@
     </Page>
     <Page Include="Styles\DialogTextBlockStyle.xaml" />
     <Page Include="Views\EmptyView.xaml" />
-    <Page Include="Views\HttpServerView.xaml" />
+    <Page Include="Views\SerialPortView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

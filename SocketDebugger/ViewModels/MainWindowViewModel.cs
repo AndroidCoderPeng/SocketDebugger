@@ -23,9 +23,9 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
-        public MainWindowViewModel(IRegionManager regionManager, IApplicationDataService applicationDataService)
+        public MainWindowViewModel(IRegionManager regionManager, IApplicationDataService dataService)
         {
-            MainMenuModels = applicationDataService.GetMainMenu();
+            MainMenuModels = dataService.GetMainMenu();
 
             CloseWindowCommand = new DelegateCommand<MainWindow>(delegate(MainWindow window) { window.Close(); });
             MiniSizeWindowCommand = new DelegateCommand<MainWindow>(delegate(MainWindow window)
@@ -59,7 +59,7 @@ namespace SocketDebugger.ViewModels
                         region.RequestNavigate("WebSocketServerView");
                         break;
                     case 6:
-                        region.RequestNavigate("HttpServerView");
+                        region.RequestNavigate("SerialPortView");
                         break;
                 }
             });

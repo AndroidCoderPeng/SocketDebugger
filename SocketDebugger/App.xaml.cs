@@ -43,10 +43,12 @@ namespace SocketDebugger
             containerRegistry.RegisterForNavigation<UdpServerView, UdpServerViewModel>();
             containerRegistry.RegisterForNavigation<WebSocketClientView, WebSocketClientViewModel>();
             containerRegistry.RegisterForNavigation<WebSocketServerView, WebSocketServerViewModel>();
-            containerRegistry.RegisterForNavigation<HttpServerView>();
+            containerRegistry.RegisterForNavigation<SerialPortView>();
 
             //Dialog or Window
             containerRegistry.RegisterDialog<ConfigDialog, ConfigDialogViewModel>();
+            containerRegistry.RegisterDialog<AlertMessageDialog, AlertMessageDialogViewModel>();
+            containerRegistry.RegisterDialog<AlertControlDialog, AlertControlDialogViewModel>();
         }
     }
 }

@@ -13,7 +13,6 @@ using SocketDebugger.Services;
 using SocketDebugger.Utils;
 using TouchSocket.Core;
 using TouchSocket.Sockets;
-using MessageBox = HandyControl.Controls.MessageBox;
 using TcpClient = TouchSocket.Sockets.TcpClient;
 
 namespace SocketDebugger.ViewModels
@@ -120,11 +119,14 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
+        private readonly IDialogService _dialogService;
         private readonly TcpClient _tcpClient = new TcpClient();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
 
         public TcpClientViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
+            _dialogService = dialogService;
+
             ConfigModels = dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
@@ -180,7 +182,7 @@ namespace SocketDebugger.ViewModels
                     ConnPort = "8080"
                 };
 
-                dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                _dialogService.ShowDialog("ConfigDialog", new DialogParameters
                 {
                     { "Title", "添加配置" }, { "ConfigModel", configModel }
                 }, delegate(IDialogResult result)
@@ -210,23 +212,36 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModels.Any())
                 {
-                    var result = MessageBox.Show("是否删除当前配置？", "温馨提示", MessageBoxButton.OKCancel,
-                        MessageBoxImage.Warning);
-                    if (result != MessageBoxResult.OK) return;
-                    using (var manager = new DataBaseManager())
-                    {
-                        manager.Delete(ConfigModel);
-                    }
+                    _dialogService.ShowDialog("AlertControlDialog", new DialogParameters
+                        {
+                            { "AlertType", AlertType.Warning }, { "Message", "是否删除当前配置？" }
+                        },
+                        delegate(IDialogResult dialogResult)
+                        {
+                            if (dialogResult.Result == ButtonResult.OK)
+                            {
+                                using (var manager = new DataBaseManager())
+                                {
+                                    manager.Delete(ConfigModel);
+                                }
 
-                    ConfigModels = dataService.GetConfigModels();
-                    if (ConfigModels.Any())
-                    {
-                        ConfigModel = ConfigModels[0];
-                    }
+                                ConfigModels = dataService.GetConfigModels();
+                                if (ConfigModels.Any())
+                                {
+                                    ConfigModel = ConfigModels[0];
+                                }
+                            }
+                        }
+                    );
                 }
                 else
                 {
-                    MessageBox.Show("没有配置，无法删除", "温馨提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                        {
+                            { "AlertType", AlertType.Error }, { "Message", "没有配置，无法删除" }
+                        },
+                        delegate { }
+                    );
                 }
             });
 
@@ -234,34 +249,40 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    MessageBox.Show("无配置项，无法编辑", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                        {
+                            { "AlertType", AlertType.Error }, { "Message", "无配置项，无法编辑" }
+                        },
+                        delegate { }
+                    );
                 }
                 else
                 {
-                    dialogService.ShowDialog("ConfigDialog", new DialogParameters
-                    {
-                        { "Title", "编辑配置" }, { "ConfigModel", _configModel }
-                    }, delegate(IDialogResult result)
-                    {
-                        if (result.Result == ButtonResult.OK)
+                    _dialogService.ShowDialog("ConfigDialog", new DialogParameters
                         {
-                            //更新列表
-                            ConfigModels = dataService.GetConfigModels();
-
-                            ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
-
-                            if (string.IsNullOrEmpty(ConfigModel.Message))
+                            { "Title", "编辑配置" }, { "ConfigModel", _configModel }
+                        },
+                        delegate(IDialogResult result)
+                        {
+                            if (result.Result == ButtonResult.OK)
                             {
-                                //停止循环
-                                _timer.Stop();
+                                //更新列表
+                                ConfigModels = dataService.GetConfigModels();
+
+                                ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
+
+                                if (string.IsNullOrEmpty(ConfigModel.Message))
+                                {
+                                    //停止循环
+                                    _timer.Stop();
+                                }
+                                else
+                                {
+                                    _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                                    _timer.Start();
+                                }
                             }
-                            else
-                            {
-                                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                                _timer.Start();
-                            }
-                        }
-                    });
+                        });
                 }
             });
 
@@ -269,7 +290,12 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    MessageBox.Show("无配置项，无法启动监听", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                        {
+                            { "AlertType", AlertType.Error }, { "Message", "无配置项，无法启动监听" }
+                        },
+                        delegate { }
+                    );
                 }
                 else
                 {
@@ -294,7 +320,12 @@ namespace SocketDebugger.ViewModels
                     }
                     catch (SocketException e)
                     {
-                        MessageBox.Show(e.Message, "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                        _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                            {
+                                { "AlertType", AlertType.Error }, { "Message", e.Message }
+                            },
+                            delegate { }
+                        );
                     }
                 }
             });
@@ -314,7 +345,12 @@ namespace SocketDebugger.ViewModels
         {
             if (string.IsNullOrEmpty(message))
             {
-                MessageBox.Show("不能发送空消息", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                    {
+                        { "AlertType", AlertType.Error }, { "Message", "不能发送空消息" }
+                    },
+                    delegate { }
+                );
                 return;
             }
 

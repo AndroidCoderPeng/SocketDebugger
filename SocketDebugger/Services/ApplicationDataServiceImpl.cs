@@ -13,13 +13,13 @@ namespace SocketDebugger.Services
         {
             return new List<MainMenuModel>
             {
-                new MainMenuModel { MainMenuIcon = "\ue6a2", MainMenuName = "TCP客户端" },
-                new MainMenuModel { MainMenuIcon = "\ue6a2", MainMenuName = "TCP服务端" },
-                new MainMenuModel { MainMenuIcon = "\ue6a1", MainMenuName = "UDP客户端" },
-                new MainMenuModel { MainMenuIcon = "\ue6a1", MainMenuName = "UDP服务端" },
-                new MainMenuModel { MainMenuIcon = "\ue6a0", MainMenuName = "WebSocket客户端" },
-                new MainMenuModel { MainMenuIcon = "\ue6a0", MainMenuName = "WebSocket服务端" },
-                new MainMenuModel { MainMenuIcon = "\ue6a0", MainMenuName = "Http服务端" }
+                new MainMenuModel { MainMenuIcon = "\ue8a6", MainMenuName = "TCP客户端" },
+                new MainMenuModel { MainMenuIcon = "\ue8a6", MainMenuName = "TCP服务端" },
+                new MainMenuModel { MainMenuIcon = "\ue8a9", MainMenuName = "UDP客户端" },
+                new MainMenuModel { MainMenuIcon = "\ue8a9", MainMenuName = "UDP服务端" },
+                new MainMenuModel { MainMenuIcon = "\ue8b2", MainMenuName = "WebSocket客户端" },
+                new MainMenuModel { MainMenuIcon = "\ue8b2", MainMenuName = "WebSocket服务端" },
+                new MainMenuModel { MainMenuIcon = "\ue8a7", MainMenuName = "串口通信" }
             };
         }
 
