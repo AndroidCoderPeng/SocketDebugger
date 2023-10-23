@@ -35,7 +35,6 @@ namespace SocketDebugger.ViewModels
 
             MenuSelectedCommand = new DelegateCommand<ListView>(delegate(ListView view)
             {
-                //TODO 判断选择的菜单下面是否有数据，没有数据就显示EmptyView
                 MemoryCacheManager.SelectedMainMenu = MainMenuModels[view.SelectedIndex].MainMenuName;
 
                 var region = regionManager.Regions["ContentRegion"];

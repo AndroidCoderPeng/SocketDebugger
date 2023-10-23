@@ -173,7 +173,7 @@
 
         <Grid Grid.Column="1" Background="{StaticResource DividerLineBrush}" />
 
-        <Grid Grid.Column="2">
+        <Grid Grid.Column="2" Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewConvert}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="0.5" />
@@ -482,5 +482,13 @@
                 TextWrapping="Wrap"
                 VerticalScrollBarVisibility="Auto" />
         </Grid>
+
+        <StackPanel
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            Orientation="Vertical"
+            Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyConvert}}">
+            <Image Source="/SocketDebugger;component/Images/empty.png" />
+        </StackPanel>
     </Grid>
 </UserControl>
