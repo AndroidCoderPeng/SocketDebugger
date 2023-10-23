@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Controls;
 using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Services.Dialogs;
 using SocketDebugger.Model;
-using SocketDebugger.Pages;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
 using SuperSocket.SocketBase;
@@ -22,7 +21,6 @@ namespace SocketDebugger.ViewModels
     {
         #region DelegateCommand
 
-        public DelegateCommand<WebSocketServerView> PageLoadedCommand { get; }
         public DelegateCommand<ListView> ConfigItemSelectedCommand { get; }
         public DelegateCommand AddConfigCommand { get; }
         public DelegateCommand DeleteConfigCommand { get; }
@@ -135,20 +133,12 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
-        private WebSocketServerView _viewPage;
         private ConnectedClientModel _selectedClientModel;
-        private readonly IApplicationDataService _applicationDataService;
         private WebSocketServer _webSocketService;
 
-        public WebSocketServerViewModel(IApplicationDataService applicationDataService)
+        public WebSocketServerViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
-            _applicationDataService = applicationDataService;
-            PageLoadedCommand = new DelegateCommand<WebSocketServerView>(it =>
-            {
-                Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " TcpServerViewModel => 加载");
-                _viewPage = it;
-            });
-            ConfigModels = _applicationDataService.GetConfigModels();
+            ConfigModels = dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
                 ConfigModel = ConfigModels[0];
@@ -190,7 +180,7 @@ namespace SocketDebugger.ViewModels
                         manager.Delete(ConfigModel);
                     }
 
-                    ConfigModels = _applicationDataService.GetConfigModels();
+                    ConfigModels = dataService.GetConfigModels();
                     if (ConfigModels.Any())
                     {
                         ConfigModel = ConfigModels[0];
@@ -321,15 +311,6 @@ namespace SocketDebugger.ViewModels
                     Message = value,
                     IsSend = false
                 });
-            });
-        }
-
-        private void AddConfigResult(object sender, ConnectionConfigModel model)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                ConfigModels = _applicationDataService.GetConfigModels();
-                ConfigModel = model;
             });
         }
 
