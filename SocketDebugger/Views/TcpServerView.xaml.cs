@@ -1,12 +1,17 @@
 using System.Windows.Controls;
+using Prism.Services.Dialogs;
+using SocketDebugger.Services;
+using SocketDebugger.ViewModels;
 
-namespace SocketDebugger.Pages
+namespace SocketDebugger.Views
 {
     public partial class TcpServerView : UserControl
     {
-        public TcpServerView()
+        public TcpServerView(IApplicationDataService dataService, IDialogService dialogService)
         {
             InitializeComponent();
+            
+            DataContext = new TcpServerViewModel(dataService, dialogService);
         }
     }
 }

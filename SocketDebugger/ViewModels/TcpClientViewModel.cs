@@ -2,7 +2,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Sockets;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -131,7 +130,7 @@ namespace SocketDebugger.ViewModels
             {
                 ConfigModel = ConfigModels[0];
             }
-            
+
             _tcpClient.Connected += delegate
             {
                 ConnectColorBrush = "LimeGreen";
@@ -143,7 +142,7 @@ namespace SocketDebugger.ViewModels
                 ConnectColorBrush = "DarkGray";
                 ConnectState = "未连接";
                 ConnectButtonState = "连接";
-            
+
                 if (_timer.IsEnabled)
                 {
                     _timer.Stop();
@@ -151,26 +150,26 @@ namespace SocketDebugger.ViewModels
             };
             _tcpClient.Received += delegate(TcpClient client, ByteBlock block, IRequestInfo info)
             {
-                // Application.Current.Dispatcher.Invoke(() =>
-                // {
-                //     var message = _viewPage.TextRadioButton.IsChecked == true
-                //         ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
-                //         : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
-                //
-                //     ChatMessages.Add(new ChatMessageModel
-                //     {
-                //         MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                //         Message = message,
-                //         IsSend = false
-                //     });
-                // });
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // var message = _clientView.TextRadioButton.IsChecked == true
+                    //     ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
+                    //     : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
+                    //
+                    // ChatMessages.Add(new ChatMessageModel
+                    // {
+                    //     MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                    //     Message = message,
+                    //     IsSend = false
+                    // });
+                });
             };
-            
+
             ConfigItemSelectedCommand = new DelegateCommand<ListView>(delegate(ListView view)
             {
                 ConfigModel = (ConnectionConfigModel)view.SelectedItem;
             });
-            
+
             AddConfigCommand = new DelegateCommand(delegate
             {
                 var configModel = new ConnectionConfigModel
@@ -180,20 +179,77 @@ namespace SocketDebugger.ViewModels
                     ConnHost = dataService.GetHostAddress(),
                     ConnPort = "8080"
                 };
-            
-                dialogService.ShowDialog("ConfigDialog",
-                    new DialogParameters
+
+                dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                {
+                    { "Title", "添加配置" }, { "ConfigModel", configModel }
+                }, delegate(IDialogResult result)
+                {
+                    if (result.Result == ButtonResult.OK)
                     {
-                        { "Title", "添加配置" }, { "ConfigModel", configModel }
+                        //更新列表
+                        ConfigModels = dataService.GetConfigModels();
+
+                        ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
+
+                        if (string.IsNullOrEmpty(ConfigModel.Message))
+                        {
+                            //停止循环
+                            _timer.Stop();
+                        }
+                        else
+                        {
+                            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                            _timer.Start();
+                        }
+                    }
+                });
+            });
+
+            DeleteConfigCommand = new DelegateCommand(delegate
+            {
+                if (ConfigModels.Any())
+                {
+                    var result = MessageBox.Show("是否删除当前配置？", "温馨提示", MessageBoxButton.OKCancel,
+                        MessageBoxImage.Warning);
+                    if (result != MessageBoxResult.OK) return;
+                    using (var manager = new DataBaseManager())
+                    {
+                        manager.Delete(ConfigModel);
+                    }
+
+                    ConfigModels = dataService.GetConfigModels();
+                    if (ConfigModels.Any())
+                    {
+                        ConfigModel = ConfigModels[0];
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("没有配置，无法删除", "温馨提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                }
+            });
+
+            EditConfigCommand = new DelegateCommand(delegate
+            {
+                if (ConfigModel == null)
+                {
+                    MessageBox.Show("无配置项，无法编辑", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                    {
+                        { "Title", "编辑配置" }, { "ConfigModel", _configModel }
                     }, delegate(IDialogResult result)
                     {
                         if (result.Result == ButtonResult.OK)
                         {
                             //更新列表
                             ConfigModels = dataService.GetConfigModels();
-            
+
                             ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
-                            
+
                             if (string.IsNullOrEmpty(ConfigModel.Message))
                             {
                                 //停止循环
@@ -206,68 +262,9 @@ namespace SocketDebugger.ViewModels
                             }
                         }
                     });
-            });
-            
-            DeleteConfigCommand = new DelegateCommand(delegate
-            {
-                if (ConfigModels.Any())
-                {
-                    var result = MessageBox.Show("是否删除当前配置？", "温馨提示", MessageBoxButton.OKCancel,
-                        MessageBoxImage.Warning);
-                    if (result != MessageBoxResult.OK) return;
-                    using (var manager = new DataBaseManager())
-                    {
-                        manager.Delete(ConfigModel);
-                    }
-            
-                    ConfigModels = dataService.GetConfigModels();
-                    if (ConfigModels.Any())
-                    {
-                        ConfigModel = ConfigModels[0];
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("没有配置，无法删除", "温馨提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 }
             });
-            
-            EditConfigCommand = new DelegateCommand(delegate
-            {
-                if (ConfigModel == null)
-                {
-                    MessageBox.Show("无配置项，无法编辑", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                else
-                {
-                    dialogService.ShowDialog("ConfigDialog",
-                        new DialogParameters
-                        {
-                            { "Title", "添加配置" }, { "ConfigModel", _configModel }
-                        }, delegate(IDialogResult result)
-                        {
-                            if (result.Result == ButtonResult.OK)
-                            {
-                                //更新列表
-                                ConfigModels = dataService.GetConfigModels();
-            
-                                ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
-                                
-                                if (string.IsNullOrEmpty(ConfigModel.Message))
-                                {
-                                    //停止循环
-                                    _timer.Stop();
-                                }
-                                else
-                                {
-                                    _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                                    _timer.Start();
-                                }
-                            }
-                        });
-                }
-            });
-            
+
             ConnectServerCommand = new DelegateCommand(delegate
             {
                 if (ConfigModel == null)
@@ -281,7 +278,7 @@ namespace SocketDebugger.ViewModels
                     config.SetRemoteIPHost(new IPHost(ConfigModel.ConnHost + ":" + ConfigModel.ConnPort))
                         .UsePlugin()
                         .ConfigurePlugins(manager => { manager.UseReconnection(5, true, 3000); });
-            
+
                     //载入配置
                     _tcpClient.Setup(config);
                     try
@@ -301,11 +298,11 @@ namespace SocketDebugger.ViewModels
                     }
                 }
             });
-            
+
             ClearMessageCommand = new DelegateCommand(delegate { ChatMessages.Clear(); });
-            
+
             SendMessageCommand = new DelegateCommand(delegate { SendMessage(_userInputText); });
-            
+
             //自动发消息
             _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
         }
@@ -320,8 +317,8 @@ namespace SocketDebugger.ViewModels
                 MessageBox.Show("不能发送空消息", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-        
-            // if (_viewPage.TextRadioButton.IsChecked == true)
+
+            // if (_clientView.TextRadioButton.IsChecked == true)
             // {
             //     if (ConnectState == "未连接")
             //     {

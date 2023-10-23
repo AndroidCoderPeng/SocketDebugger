@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Services.Dialogs;
 using SocketDebugger.Model;
-using SocketDebugger.Pages;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
 using TouchSocket.Core;
@@ -22,7 +21,6 @@ namespace SocketDebugger.ViewModels
     {
         #region DelegateCommand
 
-        public DelegateCommand<TcpServerView> PageLoadedCommand { get; }
         public DelegateCommand<ListView> ConfigItemSelectedCommand { get; }
         public DelegateCommand AddConfigCommand { get; }
         public DelegateCommand DeleteConfigCommand { get; }
@@ -135,21 +133,13 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
-        private TcpServerView _viewPage;
         private ConnectedClientModel _selectedClientModel;
-        private readonly IApplicationDataService _applicationDataService;
         private readonly TcpService _tcpService = new TcpService();
+        private readonly DispatcherTimer _timer = new DispatcherTimer();
 
-        public TcpServerViewModel(IApplicationDataService applicationDataService)
+        public TcpServerViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
-            _applicationDataService = applicationDataService;
-            PageLoadedCommand = new DelegateCommand<TcpServerView>(it =>
-            {
-                Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " TcpServerViewModel => 加载");
-                _viewPage = it;
-            });
-
-            ConfigModels = _applicationDataService.GetConfigModels();
+            ConfigModels = dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
                 ConfigModel = ConfigModels[0];
@@ -198,16 +188,16 @@ namespace SocketDebugger.ViewModels
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var message = _viewPage.TextRadioButton.IsChecked == true
-                        ? Encoding.UTF8.GetString(byteBlock.Buffer, 0, byteBlock.Len)
-                        : BitConverter.ToString(byteBlock.Buffer, 0, byteBlock.Len).Replace("-", " ");
-
-                    ChatMessages.Add(new ChatMessageModel
-                    {
-                        MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                        Message = message,
-                        IsSend = false
-                    });
+                    // var message = _viewPage.TextRadioButton.IsChecked == true
+                    //     ? Encoding.UTF8.GetString(byteBlock.Buffer, 0, byteBlock.Len)
+                    //     : BitConverter.ToString(byteBlock.Buffer, 0, byteBlock.Len).Replace("-", " ");
+                    //
+                    // ChatMessages.Add(new ChatMessageModel
+                    // {
+                    //     MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                    //     Message = message,
+                    //     IsSend = false
+                    // });
                 });
             };
 
@@ -220,9 +210,31 @@ namespace SocketDebugger.ViewModels
                     ConnHost = SystemHelper.GetHostAddress(),
                     ConnPort = "8080"
                 };
-                // var dialog = new ConfigDialog(configModel) { Owner = Window.GetWindow(_viewPage) };
-                // dialog.AddConfigEventHandler += AddConfigResult;
-                // dialog.ShowDialog();
+
+                dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                {
+                    { "Title", "添加配置" }, { "ConfigModel", configModel }
+                }, delegate(IDialogResult result)
+                {
+                    if (result.Result == ButtonResult.OK)
+                    {
+                        //更新列表
+                        ConfigModels = dataService.GetConfigModels();
+
+                        ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
+
+                        if (string.IsNullOrEmpty(ConfigModel.Message))
+                        {
+                            //停止循环
+                            _timer.Stop();
+                        }
+                        else
+                        {
+                            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                            _timer.Start();
+                        }
+                    }
+                });
             });
 
             DeleteConfigCommand = new DelegateCommand(delegate
@@ -237,7 +249,7 @@ namespace SocketDebugger.ViewModels
                         manager.Delete(ConfigModel);
                     }
 
-                    ConfigModels = _applicationDataService.GetConfigModels();
+                    ConfigModels = dataService.GetConfigModels();
                     if (ConfigModels.Any())
                     {
                         ConfigModel = ConfigModels[0];
@@ -257,9 +269,30 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    // var dialog = new ConfigDialog(ConfigModel) { Owner = Window.GetWindow(_viewPage) };
-                    // dialog.AddConfigEventHandler += AddConfigResult;
-                    // dialog.ShowDialog();
+                    dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                    {
+                        { "Title", "编辑配置" }, { "ConfigModel", _configModel }
+                    }, delegate(IDialogResult result)
+                    {
+                        if (result.Result == ButtonResult.OK)
+                        {
+                            //更新列表
+                            ConfigModels = dataService.GetConfigModels();
+
+                            ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
+
+                            if (string.IsNullOrEmpty(ConfigModel.Message))
+                            {
+                                //停止循环
+                                _timer.Stop();
+                            }
+                            else
+                            {
+                                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                                _timer.Start();
+                            }
+                        }
+                    });
                 }
             });
 
@@ -326,52 +359,52 @@ namespace SocketDebugger.ViewModels
                 {
                     try
                     {
-                        if (_viewPage.TextRadioButton.IsChecked == true)
-                        {
-                            try
-                            {
-                                _tcpService.Send(_selectedClientModel.ClientId, _userInputText);
-
-                                ChatMessages.Add(new ChatMessageModel
-                                {
-                                    MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                                    Message = _userInputText,
-                                    IsSend = true
-                                });
-                            }
-                            catch (ClientNotFindException)
-                            {
-                                MessageBox.Show("客户端已断开，无法发送消息", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                        }
-                        else
-                        {
-                            if (_userInputText.IsHex())
-                            {
-                                try
-                                {
-                                    var buffer = Encoding.UTF8.GetBytes(_userInputText);
-                                    //以UTF-8的编码同步发送字符串
-                                    _tcpService.Send(_selectedClientModel.ClientId, buffer);
-
-                                    ChatMessages.Add(new ChatMessageModel
-                                    {
-                                        MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                                        Message = _userInputText,
-                                        IsSend = true
-                                    });
-                                }
-                                catch (ClientNotFindException)
-                                {
-                                    MessageBox.Show("客户端已断开，无法发送消息", "温馨提示", MessageBoxButton.OK,
-                                        MessageBoxImage.Error);
-                                }
-                            }
-                            else
-                            {
-                                MessageBox.Show("数据格式错误，无法发送", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                        }
+                        // if (_viewPage.TextRadioButton.IsChecked == true)
+                        // {
+                        //     try
+                        //     {
+                        //         _tcpService.Send(_selectedClientModel.ClientId, _userInputText);
+                        //
+                        //         ChatMessages.Add(new ChatMessageModel
+                        //         {
+                        //             MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                        //             Message = _userInputText,
+                        //             IsSend = true
+                        //         });
+                        //     }
+                        //     catch (ClientNotFindException)
+                        //     {
+                        //         MessageBox.Show("客户端已断开，无法发送消息", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //     }
+                        // }
+                        // else
+                        // {
+                        //     if (_userInputText.IsHex())
+                        //     {
+                        //         try
+                        //         {
+                        //             var buffer = Encoding.UTF8.GetBytes(_userInputText);
+                        //             //以UTF-8的编码同步发送字符串
+                        //             _tcpService.Send(_selectedClientModel.ClientId, buffer);
+                        //
+                        //             ChatMessages.Add(new ChatMessageModel
+                        //             {
+                        //                 MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                        //                 Message = _userInputText,
+                        //                 IsSend = true
+                        //             });
+                        //         }
+                        //         catch (ClientNotFindException)
+                        //         {
+                        //             MessageBox.Show("客户端已断开，无法发送消息", "温馨提示", MessageBoxButton.OK,
+                        //                 MessageBoxImage.Error);
+                        //         }
+                        //     }
+                        //     else
+                        //     {
+                        //         MessageBox.Show("数据格式错误，无法发送", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //     }
+                        // }
                     }
                     catch (NotConnectedException e)
                     {
@@ -382,15 +415,6 @@ namespace SocketDebugger.ViewModels
                 {
                     MessageBox.Show("请指定接收消息的客户端", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            });
-        }
-
-        private void AddConfigResult(object sender, ConnectionConfigModel model)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                ConfigModels = _applicationDataService.GetConfigModels();
-                ConfigModel = model;
             });
         }
     }

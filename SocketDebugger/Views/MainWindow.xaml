@@ -10,7 +10,7 @@
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     x:Name="TargetWindow"
     Title="SocketDebugger"
-    Width="900"
+    Width="1000"
     Height="600"
     d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
     AllowsTransparency="True"
