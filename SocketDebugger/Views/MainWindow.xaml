@@ -15,7 +15,6 @@
     d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
     AllowsTransparency="True"
     Background="Transparent"
-    Loaded="MainWindow_OnLoaded"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"

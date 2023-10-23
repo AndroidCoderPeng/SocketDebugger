@@ -1,7 +1,4 @@
 ﻿using System.Windows.Controls;
-using Prism.Services.Dialogs;
-using SocketDebugger.Services;
-using SocketDebugger.ViewModels;
 
 namespace SocketDebugger.Views
 {
@@ -10,11 +7,9 @@ namespace SocketDebugger.Views
     /// </summary>
     public partial class TcpClientView : UserControl
     {
-        public TcpClientView(IApplicationDataService dataService, IDialogService dialogService)
+        public TcpClientView()
         {
             InitializeComponent();
-
-            DataContext = new TcpClientViewModel(dataService, dialogService);
         }
     }
 }
