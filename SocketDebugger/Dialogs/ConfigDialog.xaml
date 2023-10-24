@@ -55,11 +55,47 @@
                 Margin="10,10,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                hc:BorderElement.CornerRadius="15"
-                Background="Red"
-                BorderThickness="0"
                 Command="{Binding CloseWindowCommand}"
-                ToolTip="关闭" />
+                ToolTip="关闭">
+                <Button.Template>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border
+                            Name="PART_Background"
+                            Background="Red"
+                            BorderBrush="{TemplateBinding Control.BorderBrush}"
+                            BorderThickness="0"
+                            CornerRadius="7.5">
+                            <ContentPresenter
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Content="{TemplateBinding ContentControl.Content}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="UIElement.IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
+                            <Trigger Property="ButtonBase.IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontFamily="/SocketDebugger;component/IconFont/#iconfont"
+                    FontSize="12"
+                    Foreground="White"
+                    RenderTransformOrigin="0.5,0.5"
+                    Text="&#xe604;">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="45" />
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+            </Button>
 
             <Border Grid.Row="0" CornerRadius="10">
                 <StackPanel Orientation="Vertical">
