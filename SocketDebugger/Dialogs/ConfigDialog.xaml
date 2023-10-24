@@ -163,7 +163,7 @@
                         <TextBlock Style="{StaticResource TextBlockStyle}" Text="数据类型" />
 
                         <ComboBox
-                            x:Name="DataTypeComboBox"
+                            x:Name="MsgTypeComboBox"
                             Width="215"
                             Padding="7"
                             HorizontalAlignment="Left"

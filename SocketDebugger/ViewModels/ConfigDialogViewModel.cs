@@ -93,6 +93,8 @@ namespace SocketDebugger.ViewModels
         {
             Title = parameters.GetValue<string>("Title");
             ConfigModel = parameters.GetValue<ConnectionConfigModel>("ConfigModel");
+
+            Console.WriteLine(ConfigModel.MsgType);
         }
     }
 }

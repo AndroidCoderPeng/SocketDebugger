@@ -286,41 +286,7 @@
                         </ListView.ItemTemplate>
 
                         <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="Foreground" Value="White" />
-                                <Setter Property="Height" Value="35" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ListViewItem">
-                                            <Border
-                                                x:Name="Bd"
-                                                Padding="{TemplateBinding Padding}"
-                                                Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="5"
-                                                SnapsToDevicePixels="true">
-                                                <ContentPresenter
-                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background">
-                                            <Setter.Value>
-                                                <LinearGradientBrush>
-                                                    <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
-                                                    <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
-                                                </LinearGradientBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
+                            <Style BasedOn="{StaticResource ClientListViewItemStyle}" TargetType="{x:Type ListViewItem}" />
                         </ListView.ItemContainerStyle>
                     </ListView>
                 </StackPanel>
@@ -334,7 +300,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                
+
                 <RadioButton
                     Grid.Column="0"
                     Margin="10"

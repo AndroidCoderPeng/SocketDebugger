@@ -220,16 +220,13 @@ namespace SocketDebugger.ViewModels
 
                             ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                            if (string.IsNullOrEmpty(ConfigModel.Message))
+                            if (_timer.IsEnabled)
                             {
-                                //停止循环
                                 _timer.Stop();
                             }
-                            else
-                            {
-                                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                                _timer.Start();
-                            }
+
+                            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                            _timer.Start();
                         }
                     }
                 );
@@ -288,16 +285,13 @@ namespace SocketDebugger.ViewModels
 
                                 ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                                if (string.IsNullOrEmpty(ConfigModel.Message))
+                                if (_timer.IsEnabled)
                                 {
-                                    //停止循环
                                     _timer.Stop();
                                 }
-                                else
-                                {
-                                    _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                                    _timer.Start();
-                                }
+
+                                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                                _timer.Start();
                             }
                         }
                     );
