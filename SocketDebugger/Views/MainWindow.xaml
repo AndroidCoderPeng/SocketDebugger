@@ -75,6 +75,7 @@
 
                 <!--  左边功能列表  -->
                 <ListView
+                    x:Name="MainMenuListView"
                     VerticalAlignment="Top"
                     Background="Transparent"
                     BorderThickness="0"
@@ -84,7 +85,7 @@
 
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
-                            <b:InvokeCommandAction Command="{Binding MenuSelectedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
+                            <b:InvokeCommandAction Command="{Binding MenuSelectedCommand}" CommandParameter="{Binding ElementName=MainMenuListView}" />
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
 
@@ -114,41 +115,8 @@
                     </ListView.ItemTemplate>
 
                     <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="Foreground" Value="White" />
-                            <Setter Property="Height" Value="60" />
+                        <Style BasedOn="{StaticResource ConfigListViewItemStyle}" TargetType="{x:Type ListViewItem}">
                             <Setter Property="Width" Value="155" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ListViewItem">
-                                        <Border
-                                            x:Name="Bd"
-                                            Padding="{TemplateBinding Padding}"
-                                            Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                            CornerRadius="5"
-                                            SnapsToDevicePixels="true">
-                                            <ContentPresenter
-                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush>
-                                                <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
-                                                <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </Style.Triggers>
                         </Style>
                     </ListView.ItemContainerStyle>
                 </ListView>

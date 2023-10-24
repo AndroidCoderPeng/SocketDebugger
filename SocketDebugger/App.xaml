@@ -11,9 +11,12 @@
 
                 <ResourceDictionary Source="Styles/ApplicationBrushs.xaml" />
                 <ResourceDictionary Source="Styles/ApplicationColors.xaml" />
+                <ResourceDictionary Source="Styles/ApplicationButtonStyle.xaml" />
                 <ResourceDictionary Source="Styles/ChatListBoxItemStyle.xaml" />
+                <ResourceDictionary Source="Styles/ConfigListViewItemStyle.xaml" />
                 <ResourceDictionary Source="Styles/ChatMessageDataTemplate.xaml" />
                 <ResourceDictionary Source="Styles/DialogTextBlockStyle.xaml" />
+                <ResourceDictionary Source="Styles/UserInputTextBoxStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

@@ -101,41 +101,8 @@
                     </ListView.ItemTemplate>
 
                     <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="Foreground" Value="White" />
-                            <Setter Property="Height" Value="65" />
+                        <Style BasedOn="{StaticResource ConfigListViewItemStyle}" TargetType="{x:Type ListViewItem}">
                             <Setter Property="Width" Value="185" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ListViewItem">
-                                        <Border
-                                            x:Name="Bd"
-                                            Padding="{TemplateBinding Padding}"
-                                            Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                            CornerRadius="5"
-                                            SnapsToDevicePixels="true">
-                                            <ContentPresenter
-                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush>
-                                                <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
-                                                <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </Style.Triggers>
                         </Style>
                     </ListView.ItemContainerStyle>
                 </ListView>
@@ -144,30 +111,8 @@
             <Grid Grid.Row="1" Background="{StaticResource DividerLineBrush}" />
 
             <StackPanel Grid.Row="2" Orientation="Horizontal">
-                <Button
-                    Width="30"
-                    Height="30"
-                    Padding="5,0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Command="{Binding AddConfigCommand}"
-                    Content="&#xe604;"
-                    FontFamily="/SocketDebugger;component/IconFont/#iconfont"
-                    FontSize="14"
-                    Foreground="White"
-                    Style="{x:Null}" />
-                <Button
-                    Width="30"
-                    Height="30"
-                    Padding="5,0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Command="{Binding DeleteConfigCommand}"
-                    Content="&#xe6ef;"
-                    FontFamily="/SocketDebugger;component/IconFont/#iconfont"
-                    FontSize="14"
-                    Foreground="White"
-                    Style="{x:Null}" />
+                <Button Command="{Binding AddConfigCommand}" Style="{StaticResource AddConfigButtonStyle}" />
+                <Button Command="{Binding DeleteConfigCommand}" Style="{StaticResource DeleteConfigButtonStyle}" />
             </StackPanel>
         </Grid>
 
@@ -249,61 +194,20 @@
 
                     <Button
                         Grid.Row="0"
-                        Width="50"
-                        Height="25"
-                        Margin="0,10,10,0"
-                        Padding="0"
-                        HorizontalAlignment="Right"
-                        BorderThickness="0"
                         Command="{Binding EditConfigCommand}"
-                        Content="编辑"
-                        Style="{StaticResource ButtonPrimary}">
-                        <Button.Background>
-                            <LinearGradientBrush>
-                                <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
-                                <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
-                            </LinearGradientBrush>
-                        </Button.Background>
-                    </Button>
+                        Style="{StaticResource EditeConfigButtonStyle}" />
 
                     <Button
                         Grid.Row="1"
                         Width="70"
-                        Height="25"
-                        Margin="0,10,10,0"
-                        Padding="0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        BorderThickness="0"
                         Command="{Binding StartListenCommand}"
                         Content="{Binding ConnectButtonState}"
-                        Style="{StaticResource ButtonPrimary}">
-                        <Button.Background>
-                            <LinearGradientBrush>
-                                <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
-                                <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
-                            </LinearGradientBrush>
-                        </Button.Background>
-                    </Button>
+                        Style="{StaticResource ConnectStateButtonStyle}" />
 
                     <Button
                         Grid.Row="2"
-                        Width="70"
-                        Height="25"
-                        Margin="0,10,10,10"
-                        Padding="0"
-                        HorizontalAlignment="Right"
-                        BorderThickness="0"
                         Command="{Binding ClearMessageCommand}"
-                        Content="清空消息"
-                        Style="{StaticResource ButtonPrimary}">
-                        <Button.Background>
-                            <LinearGradientBrush>
-                                <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
-                                <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
-                            </LinearGradientBrush>
-                        </Button.Background>
-                    </Button>
+                        Style="{StaticResource ClearMessageButtonStyle}" />
                 </Grid>
             </Grid>
 
@@ -449,22 +353,8 @@
 
                 <Button
                     Grid.Column="2"
-                    Width="50"
-                    Height="25"
-                    Margin="10,0"
-                    Padding="0"
-                    HorizontalAlignment="Right"
-                    BorderThickness="0"
                     Command="{Binding SendMessageCommand}"
-                    Content="发送"
-                    Style="{StaticResource ButtonPrimary}">
-                    <Button.Background>
-                        <LinearGradientBrush>
-                            <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
-                            <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
-                        </LinearGradientBrush>
-                    </Button.Background>
-                </Button>
+                    Style="{StaticResource SendMessageButtonStyle}" />
             </Grid>
 
             <Grid Grid.Row="5" Background="{StaticResource DividerLineBrush}" />
@@ -472,15 +362,8 @@
             <!--  输入显示区域  -->
             <TextBox
                 Grid.Row="6"
-                Padding="3"
-                VerticalContentAlignment="Top"
-                Background="Transparent"
-                BorderThickness="0"
-                FontSize="14"
-                Foreground="White"
-                Text="{Binding UserInputText}"
-                TextWrapping="Wrap"
-                VerticalScrollBarVisibility="Auto" />
+                Style="{StaticResource UserInputTextBoxStyle}"
+                Text="{Binding UserInputText}" />
         </Grid>
 
         <StackPanel
