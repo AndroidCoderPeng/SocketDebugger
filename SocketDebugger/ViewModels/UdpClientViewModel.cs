@@ -213,12 +213,7 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Error }, { "Message", "没有配置，无法删除" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "没有配置，无法删除");
                 }
             });
 
@@ -226,12 +221,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Warning }, { "Message", "无配置项，无法编辑" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法编辑");
                 }
                 else
                 {
@@ -270,23 +260,13 @@ namespace SocketDebugger.ViewModels
             {
                 if (string.IsNullOrEmpty(_userInputText))
                 {
-                    dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Warning }, { "Message", "不能发送空消息" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "不能发送空消息");
                     return;
                 }
 
                 if (ConfigModel == null)
                 {
-                    dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Warning }, { "Message", "未选择UDP目的服务器，无法发送数据" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "未选择UDP目的服务器，无法发送数据");
                     return;
                 }
 
@@ -326,12 +306,7 @@ namespace SocketDebugger.ViewModels
                         }
                         else
                         {
-                            dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                                {
-                                    { "AlertType", AlertType.Error }, { "Message", "数据格式错误，无法发送" }
-                                },
-                                delegate { }
-                            );
+                            ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
                         }
                     }
                 }

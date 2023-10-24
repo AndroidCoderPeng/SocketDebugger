@@ -158,12 +158,15 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
+        private readonly IDialogService _dialogService;
         private ConnectedClientModel _selectedClientModel;
         private readonly UdpSession _udpSession = new UdpSession();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
 
         public UdpServerViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
+            _dialogService = dialogService;
+            
             ConfigModels = dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
@@ -273,12 +276,7 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Error }, { "Message", "没有配置，无法删除" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "没有配置，无法删除");
                 }
             });
 
@@ -286,12 +284,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Warning }, { "Message", "无配置项，无法编辑" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "没有配置，无法编辑");
                 }
                 else
                 {
@@ -328,12 +321,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Warning }, { "Message", "无配置项，无法启动监听" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法启动监听");
                 }
                 else
                 {
@@ -384,12 +372,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (string.IsNullOrEmpty(_userInputText))
                 {
-                    dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Warning }, { "Message", "不能发送空消息" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "不能发送空消息");
                     return;
                 }
 
@@ -427,12 +410,7 @@ namespace SocketDebugger.ViewModels
                             }
                             else
                             {
-                                dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                                    {
-                                        { "AlertType", AlertType.Error }, { "Message", "数据格式错误，无法发送" }
-                                    },
-                                    delegate { }
-                                );
+                                ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
                             }
                         }
                     }
@@ -443,14 +421,22 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Warning }, { "Message", "请指定接收消息的客户端" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "请指定接收消息的客户端");
                 }
             });
+        }
+        
+        /// <summary>
+        /// 显示普通提示对话框
+        /// </summary>
+        private void ShowAlertMessageDialog(AlertType type, string message)
+        {
+            _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                {
+                    { "AlertType", type }, { "Message", message }
+                },
+                delegate { }
+            );
         }
     }
 }
