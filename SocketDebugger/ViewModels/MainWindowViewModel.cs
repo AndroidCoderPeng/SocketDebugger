@@ -23,7 +23,7 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
-        public MainWindowViewModel(IRegionManager regionManager, IApplicationDataService dataService)
+        public MainWindowViewModel(IApplicationDataService dataService, IRegionManager regionManager)
         {
             MainMenuModels = dataService.GetMainMenu();
 

@@ -5,8 +5,8 @@
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:cvt="clr-namespace:SocketDebugger.Converts"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:SocketDebugger.Utils"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ut="clr-namespace:SocketDebugger.Utils"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:TcpClientViewModel}"
     d:DesignHeight="600"
@@ -321,12 +321,12 @@
 
                 <!--  接收、发送消息数据选择器  -->
                 <ListBox.ItemTemplateSelector>
-                    <local:ChatBubbleSelector />
+                    <ut:ChatBubbleSelector />
                 </ListBox.ItemTemplateSelector>
 
                 <!--  绑定自定义行为  -->
                 <b:Interaction.Behaviors>
-                    <local:AutoScrollBehavior />
+                    <ut:AutoScrollBehavior />
                 </b:Interaction.Behaviors>
             </ListBox>
 
@@ -340,21 +340,21 @@
                 </Grid.ColumnDefinitions>
 
                 <RadioButton
-                    x:Name="TextRadioButton"
                     Grid.Column="0"
                     Margin="10"
                     Content="文本"
                     FontSize="14"
                     Foreground="White"
                     GroupName="ModeGroup"
-                    IsChecked="True" />
+                    IsChecked="{Binding IsTextChecked}" />
 
                 <RadioButton
                     Grid.Column="1"
                     Content="16进制"
                     FontSize="14"
                     Foreground="White"
-                    GroupName="ModeGroup" />
+                    GroupName="ModeGroup"
+                    IsChecked="{Binding IsHexChecked}" />
 
                 <Button
                     Grid.Column="2"

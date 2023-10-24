@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -105,6 +106,30 @@ namespace SocketDebugger.ViewModels
             }
         }
 
+        private bool _isTextChecked = true;
+
+        public bool IsTextChecked
+        {
+            get => _isTextChecked;
+            set
+            {
+                _isTextChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _isHexChecked = true;
+
+        public bool IsHexChecked
+        {
+            get => _isHexChecked;
+            set
+            {
+                _isHexChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
         #endregion
 
         #region DelegateCommand
@@ -152,18 +177,18 @@ namespace SocketDebugger.ViewModels
             };
             _tcpClient.Received += delegate(TcpClient client, ByteBlock block, IRequestInfo info)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                var message = _isTextChecked
+                    ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
+                    : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
+
+                Application.Current.Dispatcher.Invoke(delegate
                 {
-                    // var message = _clientView.TextRadioButton.IsChecked == true
-                    //     ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
-                    //     : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
-                    //
-                    // ChatMessages.Add(new ChatMessageModel
-                    // {
-                    //     MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                    //     Message = message,
-                    //     IsSend = false
-                    // });
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                        Message = message,
+                        IsSend = false
+                    });
                 });
             };
 
@@ -354,49 +379,64 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            // if (_clientView.TextRadioButton.IsChecked == true)
-            // {
-            //     if (ConnectState == "未连接")
-            //     {
-            //         MessageBox.Show("未连接成功，无法发送消息", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
-            //         return;
-            //     }
-            //
-            //     _tcpClient.Send(message);
-            //
-            //     ChatMessages.Add(new ChatMessageModel
-            //     {
-            //         MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-            //         Message = message,
-            //         IsSend = true
-            //     });
-            // }
-            // else
-            // {
-            //     if (message.IsHex())
-            //     {
-            //         if (ConnectState == "未连接")
-            //         {
-            //             MessageBox.Show("未连接成功，无法发送消息", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
-            //             return;
-            //         }
-            //
-            //         var buffer = Encoding.UTF8.GetBytes(message);
-            //         //以UTF-8的编码同步发送字符串
-            //         _tcpClient.Send(buffer);
-            //
-            //         ChatMessages.Add(new ChatMessageModel
-            //         {
-            //             MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-            //             Message = message,
-            //             IsSend = true
-            //         });
-            //     }
-            //     else
-            //     {
-            //         MessageBox.Show("数据格式错误，无法发送", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
-            //     }
-            // }
+            if (_isTextChecked)
+            {
+                if (ConnectState == "未连接")
+                {
+                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                        {
+                            { "AlertType", AlertType.Warning }, { "Message", "未连接成功，无法发送消息" }
+                        },
+                        delegate { }
+                    );
+                    return;
+                }
+
+                _tcpClient.Send(message);
+
+                ChatMessages.Add(new ChatMessageModel
+                {
+                    MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                    Message = message,
+                    IsSend = true
+                });
+            }
+            else
+            {
+                if (message.IsHex())
+                {
+                    if (ConnectState == "未连接")
+                    {
+                        _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                            {
+                                { "AlertType", AlertType.Warning }, { "Message", "未连接成功，无法发送消息" }
+                            },
+                            delegate { }
+                        );
+                        return;
+                    }
+
+                    var buffer = Encoding.UTF8.GetBytes(message);
+                    //以UTF-8的编码同步发送字符串
+                    _tcpClient.Send(buffer);
+
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                        Message = message,
+                        IsSend = true
+                    });
+                }
+                else
+                {
+                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                        {
+                            { "AlertType", AlertType.Error }, { "Message", "数据格式错误，无法发送" }
+                        },
+                        delegate { }
+                    );
+                }
+            }
         }
     }
 }

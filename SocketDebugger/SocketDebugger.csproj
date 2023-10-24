@@ -213,6 +213,7 @@
     <Compile Include="ViewModels\AlertMessageDialogViewModel.cs" />
     <Compile Include="ViewModels\ConfigDialogViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\SerialPortViewModel.cs" />
     <Compile Include="ViewModels\TcpClientViewModel.cs" />
     <Compile Include="ViewModels\TcpServerViewModel.cs" />
     <Compile Include="ViewModels\UdpClientViewModel.cs" />
@@ -223,9 +224,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\WebSocketServerViewModel.cs" />
-    <Compile Include="Views\EmptyView.xaml.cs">
-      <DependentUpon>EmptyView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\SerialPortView.xaml.cs">
       <DependentUpon>SerialPortView.xaml</DependentUpon>
     </Compile>
@@ -294,7 +292,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Styles\DialogTextBlockStyle.xaml" />
-    <Page Include="Views\EmptyView.xaml" />
     <Page Include="Views\SerialPortView.xaml">
       <SubType>Designer</SubType>
     </Page>

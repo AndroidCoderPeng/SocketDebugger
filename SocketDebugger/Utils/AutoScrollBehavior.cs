@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows.Controls;
 using Microsoft.Xaml.Behaviors;
 
@@ -9,26 +10,21 @@ namespace SocketDebugger.Utils
         protected override void OnAttached()
         {
             base.OnAttached();
-            AssociatedObject.SelectionChanged += AssociatedObjectSelectionChanged;
+            ((ICollectionView)AssociatedObject.Items).CollectionChanged += AssociatedObjectCollectionChanged;
         }
 
-        private static void AssociatedObjectSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void AssociatedObjectCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            var listbox = (ListBox)sender;
-            if (listbox.SelectedItem != null)
+            if (AssociatedObject.HasItems)
             {
-                listbox.Dispatcher.BeginInvoke((Action)delegate
-                {
-                    listbox.UpdateLayout();
-                    listbox.ScrollIntoView(listbox.SelectedItem);
-                });
+                AssociatedObject.ScrollIntoView(AssociatedObject.Items[AssociatedObject.Items.Count - 1]);
             }
         }
 
         protected override void OnDetaching()
         {
             base.OnDetaching();
-            AssociatedObject.SelectionChanged -= AssociatedObjectSelectionChanged;
+            ((ICollectionView)AssociatedObject.Items).CollectionChanged -= AssociatedObjectCollectionChanged;
         }
     }
 }

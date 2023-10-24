@@ -3,7 +3,6 @@ using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Regions;
 using SocketDebugger.Dialogs;
-using SocketDebugger.Pages;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
 using SocketDebugger.ViewModels;
@@ -36,14 +35,13 @@ namespace SocketDebugger
             containerRegistry.Register<IApplicationDataService, ApplicationDataServiceImpl>();
 
             //Navigation
-            containerRegistry.RegisterForNavigation<EmptyView>();
             containerRegistry.RegisterForNavigation<TcpClientView, TcpClientViewModel>();
             containerRegistry.RegisterForNavigation<TcpServerView, TcpServerViewModel>();
             containerRegistry.RegisterForNavigation<UdpClientView, UdpClientViewModel>();
             containerRegistry.RegisterForNavigation<UdpServerView, UdpServerViewModel>();
             containerRegistry.RegisterForNavigation<WebSocketClientView, WebSocketClientViewModel>();
             containerRegistry.RegisterForNavigation<WebSocketServerView, WebSocketServerViewModel>();
-            containerRegistry.RegisterForNavigation<SerialPortView>();
+            containerRegistry.RegisterForNavigation<SerialPortView, SerialPortViewModel>();
 
             //Dialog or Window
             containerRegistry.RegisterDialog<ConfigDialog, ConfigDialogViewModel>();

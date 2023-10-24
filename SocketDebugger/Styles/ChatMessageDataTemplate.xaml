@@ -27,7 +27,7 @@
                     Margin="10,3,0,0"
                     HorizontalAlignment="Left"
                     FontSize="12"
-                    Foreground="Gray"
+                    Foreground="White"
                     Text="{Binding MessageTime}" />
 
                 <Border
@@ -116,7 +116,7 @@
                     Margin="0,3,10,0"
                     HorizontalAlignment="Right"
                     FontSize="12"
-                    Foreground="Gray"
+                    Foreground="White"
                     Text="{Binding MessageTime}" />
 
                 <Border
