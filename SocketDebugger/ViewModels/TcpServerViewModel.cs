@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -13,7 +14,6 @@ using SocketDebugger.Services;
 using SocketDebugger.Utils;
 using TouchSocket.Core;
 using TouchSocket.Sockets;
-using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace SocketDebugger.ViewModels
 {
@@ -131,14 +131,41 @@ namespace SocketDebugger.ViewModels
             }
         }
 
+        private bool _isTextChecked = true;
+
+        public bool IsTextChecked
+        {
+            get => _isTextChecked;
+            set
+            {
+                _isTextChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _isHexChecked = true;
+
+        public bool IsHexChecked
+        {
+            get => _isHexChecked;
+            set
+            {
+                _isHexChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
         #endregion
 
+        private readonly IDialogService _dialogService;
         private ConnectedClientModel _selectedClientModel;
         private readonly TcpService _tcpService = new TcpService();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
 
         public TcpServerViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
+            _dialogService = dialogService;
+
             ConfigModels = dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
@@ -155,7 +182,7 @@ namespace SocketDebugger.ViewModels
                 ConfigModel = (ConnectionConfigModel)it.SelectedItem;
             });
 
-            _tcpService.Connected = (client, e) =>
+            _tcpService.Connected = delegate(SocketClient client, TouchSocketEventArgs args)
             {
                 Application.Current.Dispatcher.Invoke(delegate
                 {
@@ -167,7 +194,7 @@ namespace SocketDebugger.ViewModels
                     });
                 });
             };
-            _tcpService.Disconnected = (client, e) =>
+            _tcpService.Disconnected = delegate(SocketClient client, DisconnectEventArgs args)
             {
                 Application.Current.Dispatcher.Invoke(delegate
                 {
@@ -184,20 +211,20 @@ namespace SocketDebugger.ViewModels
                     }
                 });
             };
-            _tcpService.Received = (client, byteBlock, requestInfo) =>
+            _tcpService.Received = delegate(SocketClient client, ByteBlock block, IRequestInfo info)
             {
+                var message = _isTextChecked
+                    ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
+                    : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
+
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // var message = _viewPage.TextRadioButton.IsChecked == true
-                    //     ? Encoding.UTF8.GetString(byteBlock.Buffer, 0, byteBlock.Len)
-                    //     : BitConverter.ToString(byteBlock.Buffer, 0, byteBlock.Len).Replace("-", " ");
-                    //
-                    // ChatMessages.Add(new ChatMessageModel
-                    // {
-                    //     MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                    //     Message = message,
-                    //     IsSend = false
-                    // });
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                        Message = message,
+                        IsSend = false
+                    });
                 });
             };
 
@@ -241,23 +268,31 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModels.Any())
                 {
-                    var result = MessageBox.Show("是否删除当前配置？", "温馨提示", MessageBoxButton.OKCancel,
-                        MessageBoxImage.Warning);
-                    if (result != MessageBoxResult.OK) return;
-                    using (var manager = new DataBaseManager())
-                    {
-                        manager.Delete(ConfigModel);
-                    }
+                    dialogService.ShowDialog("AlertControlDialog", new DialogParameters
+                        {
+                            { "AlertType", AlertType.Warning }, { "Message", "是否删除当前配置？" }
+                        },
+                        delegate(IDialogResult dialogResult)
+                        {
+                            if (dialogResult.Result == ButtonResult.OK)
+                            {
+                                using (var manager = new DataBaseManager())
+                                {
+                                    manager.Delete(ConfigModel);
+                                }
 
-                    ConfigModels = dataService.GetConfigModels();
-                    if (ConfigModels.Any())
-                    {
-                        ConfigModel = ConfigModels[0];
-                    }
+                                ConfigModels = dataService.GetConfigModels();
+                                if (ConfigModels.Any())
+                                {
+                                    ConfigModel = ConfigModels[0];
+                                }
+                            }
+                        }
+                    );
                 }
                 else
                 {
-                    MessageBox.Show("没有配置，无法删除", "温馨提示", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法删除");
                 }
             });
 
@@ -265,34 +300,36 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    MessageBox.Show("无配置项，无法编辑", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法编辑");
                 }
                 else
                 {
                     dialogService.ShowDialog("ConfigDialog", new DialogParameters
-                    {
-                        { "Title", "编辑配置" }, { "ConfigModel", _configModel }
-                    }, delegate(IDialogResult result)
-                    {
-                        if (result.Result == ButtonResult.OK)
                         {
-                            //更新列表
-                            ConfigModels = dataService.GetConfigModels();
-
-                            ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
-
-                            if (string.IsNullOrEmpty(ConfigModel.Message))
+                            { "Title", "编辑配置" }, { "ConfigModel", _configModel }
+                        },
+                        delegate(IDialogResult result)
+                        {
+                            if (result.Result == ButtonResult.OK)
                             {
-                                //停止循环
-                                _timer.Stop();
-                            }
-                            else
-                            {
-                                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                                _timer.Start();
+                                //更新列表
+                                ConfigModels = dataService.GetConfigModels();
+
+                                ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
+
+                                if (string.IsNullOrEmpty(ConfigModel.Message))
+                                {
+                                    //停止循环
+                                    _timer.Stop();
+                                }
+                                else
+                                {
+                                    _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                                    _timer.Start();
+                                }
                             }
                         }
-                    });
+                    );
                 }
             });
 
@@ -300,7 +337,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    MessageBox.Show("无配置项，无法启动监听", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法启动监听");
                 }
                 else
                 {
@@ -330,7 +367,7 @@ namespace SocketDebugger.ViewModels
                     }
                     catch (SocketException e)
                     {
-                        MessageBox.Show(e.Message, "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                        ShowAlertMessageDialog(AlertType.Error, e.Message);
                     }
                 }
             });
@@ -351,7 +388,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (string.IsNullOrEmpty(_userInputText))
                 {
-                    MessageBox.Show("不能发送空消息", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ShowAlertMessageDialog(AlertType.Warning, "不能发送空消息");
                     return;
                 }
 
@@ -359,63 +396,75 @@ namespace SocketDebugger.ViewModels
                 {
                     try
                     {
-                        // if (_viewPage.TextRadioButton.IsChecked == true)
-                        // {
-                        //     try
-                        //     {
-                        //         _tcpService.Send(_selectedClientModel.ClientId, _userInputText);
-                        //
-                        //         ChatMessages.Add(new ChatMessageModel
-                        //         {
-                        //             MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                        //             Message = _userInputText,
-                        //             IsSend = true
-                        //         });
-                        //     }
-                        //     catch (ClientNotFindException)
-                        //     {
-                        //         MessageBox.Show("客户端已断开，无法发送消息", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
-                        //     }
-                        // }
-                        // else
-                        // {
-                        //     if (_userInputText.IsHex())
-                        //     {
-                        //         try
-                        //         {
-                        //             var buffer = Encoding.UTF8.GetBytes(_userInputText);
-                        //             //以UTF-8的编码同步发送字符串
-                        //             _tcpService.Send(_selectedClientModel.ClientId, buffer);
-                        //
-                        //             ChatMessages.Add(new ChatMessageModel
-                        //             {
-                        //                 MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
-                        //                 Message = _userInputText,
-                        //                 IsSend = true
-                        //             });
-                        //         }
-                        //         catch (ClientNotFindException)
-                        //         {
-                        //             MessageBox.Show("客户端已断开，无法发送消息", "温馨提示", MessageBoxButton.OK,
-                        //                 MessageBoxImage.Error);
-                        //         }
-                        //     }
-                        //     else
-                        //     {
-                        //         MessageBox.Show("数据格式错误，无法发送", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
-                        //     }
-                        // }
+                        if (_isTextChecked)
+                        {
+                            try
+                            {
+                                _tcpService.Send(_selectedClientModel.ClientId, _userInputText);
+
+                                ChatMessages.Add(new ChatMessageModel
+                                {
+                                    MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                                    Message = _userInputText,
+                                    IsSend = true
+                                });
+                            }
+                            catch (ClientNotFindException e)
+                            {
+                                ShowAlertMessageDialog(AlertType.Error, e.Message);
+                            }
+                        }
+                        else
+                        {
+                            if (_userInputText.IsHex())
+                            {
+                                try
+                                {
+                                    var buffer = Encoding.UTF8.GetBytes(_userInputText);
+                                    //以UTF-8的编码同步发送字符串
+                                    _tcpService.Send(_selectedClientModel.ClientId, buffer);
+
+                                    ChatMessages.Add(new ChatMessageModel
+                                    {
+                                        MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                                        Message = _userInputText,
+                                        IsSend = true
+                                    });
+                                }
+                                catch (ClientNotFindException e)
+                                {
+                                    ShowAlertMessageDialog(AlertType.Error, e.Message);
+                                }
+                            }
+                            else
+                            {
+                                ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
+                            }
+                        }
                     }
                     catch (NotConnectedException e)
                     {
-                        MessageBox.Show(e.Message, "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                        ShowAlertMessageDialog(AlertType.Error, e.Message);
                     }
                 }
                 else
                 {
-                    MessageBox.Show("请指定接收消息的客户端", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ShowAlertMessageDialog(AlertType.Error, "请指定接收消息的客户端");
                 }
             });
+        }
+
+        /// <summary>
+        /// 显示普通提示对话框
+        /// </summary>
+        private void ShowAlertMessageDialog(AlertType type, string message)
+        {
+            _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                {
+                    { "AlertType", type }, { "Message", message }
+                },
+                delegate { }
+            );
         }
     }
 }

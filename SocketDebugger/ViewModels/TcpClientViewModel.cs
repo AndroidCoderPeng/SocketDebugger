@@ -208,29 +208,31 @@ namespace SocketDebugger.ViewModels
                 };
 
                 _dialogService.ShowDialog("ConfigDialog", new DialogParameters
-                {
-                    { "Title", "添加配置" }, { "ConfigModel", configModel }
-                }, delegate(IDialogResult result)
-                {
-                    if (result.Result == ButtonResult.OK)
                     {
-                        //更新列表
-                        ConfigModels = dataService.GetConfigModels();
-
-                        ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
-
-                        if (string.IsNullOrEmpty(ConfigModel.Message))
+                        { "Title", "添加配置" }, { "ConfigModel", configModel }
+                    },
+                    delegate(IDialogResult result)
+                    {
+                        if (result.Result == ButtonResult.OK)
                         {
-                            //停止循环
-                            _timer.Stop();
-                        }
-                        else
-                        {
-                            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                            _timer.Start();
+                            //更新列表
+                            ConfigModels = dataService.GetConfigModels();
+
+                            ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
+
+                            if (string.IsNullOrEmpty(ConfigModel.Message))
+                            {
+                                //停止循环
+                                _timer.Stop();
+                            }
+                            else
+                            {
+                                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                                _timer.Start();
+                            }
                         }
                     }
-                });
+                );
             });
 
             DeleteConfigCommand = new DelegateCommand(delegate
@@ -261,12 +263,7 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Error }, { "Message", "没有配置，无法删除" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法删除");
                 }
             });
 
@@ -274,12 +271,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Error }, { "Message", "无配置项，无法编辑" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Warning, "无配置项，无法编辑");
                 }
                 else
                 {
@@ -307,7 +299,8 @@ namespace SocketDebugger.ViewModels
                                     _timer.Start();
                                 }
                             }
-                        });
+                        }
+                    );
                 }
             });
 
@@ -315,12 +308,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Error }, { "Message", "无配置项，无法启动监听" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Warning, "无配置项，无法连接服务端");
                 }
                 else
                 {
@@ -345,12 +333,7 @@ namespace SocketDebugger.ViewModels
                     }
                     catch (SocketException e)
                     {
-                        _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                            {
-                                { "AlertType", AlertType.Error }, { "Message", e.Message }
-                            },
-                            delegate { }
-                        );
+                        ShowAlertMessageDialog(AlertType.Error, e.Message);
                     }
                 }
             });
@@ -370,12 +353,7 @@ namespace SocketDebugger.ViewModels
         {
             if (string.IsNullOrEmpty(message))
             {
-                _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                    {
-                        { "AlertType", AlertType.Error }, { "Message", "不能发送空消息" }
-                    },
-                    delegate { }
-                );
+                ShowAlertMessageDialog(AlertType.Warning, "不能发送空消息");
                 return;
             }
 
@@ -383,12 +361,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConnectState == "未连接")
                 {
-                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Warning }, { "Message", "未连接成功，无法发送消息" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Warning, "未连接成功，无法发送消息");
                     return;
                 }
 
@@ -407,12 +380,7 @@ namespace SocketDebugger.ViewModels
                 {
                     if (ConnectState == "未连接")
                     {
-                        _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                            {
-                                { "AlertType", AlertType.Warning }, { "Message", "未连接成功，无法发送消息" }
-                            },
-                            delegate { }
-                        );
+                        ShowAlertMessageDialog(AlertType.Warning, "未连接成功，无法发送消息");
                         return;
                     }
 
@@ -429,14 +397,22 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Error }, { "Message", "数据格式错误，无法发送" }
-                        },
-                        delegate { }
-                    );
+                    ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
                 }
             }
+        }
+
+        /// <summary>
+        /// 显示普通提示对话框
+        /// </summary>
+        private void ShowAlertMessageDialog(AlertType type, string message)
+        {
+            _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                {
+                    { "AlertType", type }, { "Message", message }
+                },
+                delegate { }
+            );
         }
     }
 }

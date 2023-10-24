@@ -233,21 +233,21 @@
                 </Grid.ColumnDefinitions>
 
                 <RadioButton
-                    x:Name="TextRadioButton"
                     Grid.Column="0"
                     Margin="10"
                     Content="文本"
                     FontSize="14"
                     Foreground="White"
                     GroupName="ModeGroup"
-                    IsChecked="True" />
+                    IsChecked="{Binding IsTextChecked}" />
 
                 <RadioButton
                     Grid.Column="1"
                     Content="16进制"
                     FontSize="14"
                     Foreground="White"
-                    GroupName="ModeGroup" />
+                    GroupName="ModeGroup"
+                    IsChecked="{Binding IsHexChecked}" />
 
                 <Button
                     Grid.Column="2"
