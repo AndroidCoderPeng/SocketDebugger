@@ -313,15 +313,12 @@
     <Page Include="Views\WebSocketServerView.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Monitor.png" />
     <Resource Include="Images\Net.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\empty.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\launcher_1.png" />
-    <Resource Include="Images\launcher_2.jpg" />
     <Content Include="supersocket.cmd" />
     <Content Include="supersocket.sh" />
   </ItemGroup>

@@ -156,8 +156,18 @@ namespace SocketDebugger.ViewModels
             if (ConfigModels.Any())
             {
                 ConfigModel = ConfigModels[0];
+                if (ConfigModel.MsgType == "文本")
+                {
+                    IsTextChecked = true;
+                    IsHexChecked = false;
+                }
+                else
+                {
+                    IsTextChecked = false;
+                    IsHexChecked = true;
+                }
             }
-
+            
             _tcpClient.Connected += delegate
             {
                 ConnectColorBrush = "LimeGreen";
@@ -185,7 +195,7 @@ namespace SocketDebugger.ViewModels
                 {
                     ChatMessages.Add(new ChatMessageModel
                     {
-                        MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
                         Message = message,
                         IsSend = false
                     });
@@ -391,7 +401,7 @@ namespace SocketDebugger.ViewModels
 
                 ChatMessages.Add(new ChatMessageModel
                 {
-                    MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
                     Message = message,
                     IsSend = true
                 });
@@ -412,7 +422,7 @@ namespace SocketDebugger.ViewModels
 
                     ChatMessages.Add(new ChatMessageModel
                     {
-                        MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
                         Message = message,
                         IsSend = true
                     });

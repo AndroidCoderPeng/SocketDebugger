@@ -153,6 +153,16 @@ namespace SocketDebugger.ViewModels
             if (ConfigModels.Any())
             {
                 ConfigModel = ConfigModels[0];
+                if (ConfigModel.MsgType == "文本")
+                {
+                    IsTextChecked = true;
+                    IsHexChecked = false;
+                }
+                else
+                {
+                    IsTextChecked = false;
+                    IsHexChecked = true;
+                }
             }
 
             ConfigItemSelectedCommand = new DelegateCommand<ListView>(it =>
@@ -347,7 +357,7 @@ namespace SocketDebugger.ViewModels
 
                 ChatMessages.Add(new ChatMessageModel
                 {
-                    MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
                     Message = _userInputText,
                     IsSend = true
                 });
@@ -374,7 +384,7 @@ namespace SocketDebugger.ViewModels
             {
                 ChatMessages.Add(new ChatMessageModel
                 {
-                    MessageTime = DateTime.Now.ToString("yyyy年MM月dd HH时mm分ss秒"),
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
                     Message = e.Message,
                     IsSend = false
                 });
