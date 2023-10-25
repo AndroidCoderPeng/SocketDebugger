@@ -6,7 +6,9 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Foreground" Value="White" />
+        <Setter Property="CaretBrush" Value="White" />
         <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="AcceptsReturn" Value="True" />
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
     </Style>
 </ResourceDictionary>
