@@ -154,7 +154,7 @@ namespace SocketDebugger.ViewModels
                 RaisePropertyChanged();
             }
         }
-        
+
         #endregion
 
         private readonly IDialogService _dialogService;
@@ -165,7 +165,7 @@ namespace SocketDebugger.ViewModels
         public WebSocketServerViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
             _dialogService = dialogService;
-            
+
             ConfigModels = dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
@@ -201,7 +201,7 @@ namespace SocketDebugger.ViewModels
                     ConnHost = SystemHelper.GetHostAddress(),
                     ConnPort = "8080"
                 };
-                
+
                 dialogService.ShowDialog("ConfigDialog", new DialogParameters
                     {
                         { "Title", "添加配置" }, { "ConfigModel", configModel }
@@ -223,7 +223,7 @@ namespace SocketDebugger.ViewModels
                             {
                                 IsHexChecked = true;
                             }
-                            
+
                             if (_timer.IsEnabled)
                             {
                                 _timer.Stop();
@@ -302,7 +302,7 @@ namespace SocketDebugger.ViewModels
                                 {
                                     IsHexChecked = true;
                                 }
-                            
+
                                 if (_timer.IsEnabled)
                                 {
                                     _timer.Stop();
@@ -383,37 +383,45 @@ namespace SocketDebugger.ViewModels
                 _selectedClientModel = (ConnectedClientModel)it.SelectedItem;
             });
 
-            SendMessageCommand = new DelegateCommand(delegate
+            SendMessageCommand = new DelegateCommand(delegate { SendMessage(_userInputText); });
+
+            //自动发消息
+            _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
+        }
+
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        private void SendMessage(string message)
+        {
+            if (string.IsNullOrEmpty(message))
             {
-                if (string.IsNullOrEmpty(_userInputText))
-                {
-                    ShowAlertMessageDialog(AlertType.Error, "不能发送空消息");
-                    return;
-                }
+                ShowAlertMessageDialog(AlertType.Error, "不能发送空消息");
+                return;
+            }
 
-                if (_selectedClientModel != null)
+            if (_selectedClientModel != null)
+            {
+                try
                 {
-                    try
-                    {
-                        _webSocketService.GetSessionByID(_selectedClientModel.ClientId).Send(_userInputText);
+                    _webSocketService.GetSessionByID(_selectedClientModel.ClientId).Send(message);
 
-                        ChatMessages.Add(new ChatMessageModel
-                        {
-                            MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                            Message = _userInputText,
-                            IsSend = true
-                        });
-                    }
-                    catch (ClientNotFindException e)
+                    ChatMessages.Add(new ChatMessageModel
                     {
-                        ShowAlertMessageDialog(AlertType.Error, e.Message);
-                    }
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = message,
+                        IsSend = true
+                    });
                 }
-                else
+                catch (ClientNotFindException e)
                 {
-                    ShowAlertMessageDialog(AlertType.Error, "请指定接收消息的客户端");
+                    ShowAlertMessageDialog(AlertType.Error, e.Message);
                 }
-            });
+            }
+            else
+            {
+                ShowAlertMessageDialog(AlertType.Error, "请指定接收消息的客户端");
+            }
         }
 
         private void MessageReceivedEvent(WebSocketSession session, string value)
@@ -459,7 +467,7 @@ namespace SocketDebugger.ViewModels
                 }
             });
         }
-        
+
         /// <summary>
         /// 显示普通提示对话框
         /// </summary>

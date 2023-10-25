@@ -268,7 +268,7 @@ namespace SocketDebugger.ViewModels
                         {
                             IsHexChecked = true;
                         }
-                            
+
                         if (_timer.IsEnabled)
                         {
                             _timer.Stop();
@@ -346,7 +346,7 @@ namespace SocketDebugger.ViewModels
                                 {
                                     IsHexChecked = true;
                                 }
-                            
+
                                 if (_timer.IsEnabled)
                                 {
                                     _timer.Stop();
@@ -416,28 +416,59 @@ namespace SocketDebugger.ViewModels
                 _selectedClientModel = (ConnectedClientModel)it.SelectedItem;
             });
 
-            SendMessageCommand = new DelegateCommand(delegate
-            {
-                if (string.IsNullOrEmpty(_userInputText))
-                {
-                    ShowAlertMessageDialog(AlertType.Warning, "不能发送空消息");
-                    return;
-                }
+            SendMessageCommand = new DelegateCommand(delegate { SendMessage(_userInputText); });
 
-                if (_selectedClientModel != null)
+            //自动发消息
+            _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
+        }
+
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        private void SendMessage(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                ShowAlertMessageDialog(AlertType.Warning, "不能发送空消息");
+                return;
+            }
+
+            if (_selectedClientModel != null)
+            {
+                try
                 {
-                    try
+                    if (_isTextChecked)
                     {
-                        if (_isTextChecked)
+                        try
+                        {
+                            _tcpService.Send(_selectedClientModel.ClientId, message);
+
+                            ChatMessages.Add(new ChatMessageModel
+                            {
+                                MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                                Message = message,
+                                IsSend = true
+                            });
+                        }
+                        catch (ClientNotFindException e)
+                        {
+                            ShowAlertMessageDialog(AlertType.Error, e.Message);
+                        }
+                    }
+                    else
+                    {
+                        if (message.IsHex())
                         {
                             try
                             {
-                                _tcpService.Send(_selectedClientModel.ClientId, _userInputText);
+                                var buffer = Encoding.UTF8.GetBytes(message);
+                                //以UTF-8的编码同步发送字符串
+                                _tcpService.Send(_selectedClientModel.ClientId, buffer);
 
                                 ChatMessages.Add(new ChatMessageModel
                                 {
                                     MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                                    Message = _userInputText,
+                                    Message = message,
                                     IsSend = true
                                 });
                             }
@@ -448,42 +479,19 @@ namespace SocketDebugger.ViewModels
                         }
                         else
                         {
-                            if (_userInputText.IsHex())
-                            {
-                                try
-                                {
-                                    var buffer = Encoding.UTF8.GetBytes(_userInputText);
-                                    //以UTF-8的编码同步发送字符串
-                                    _tcpService.Send(_selectedClientModel.ClientId, buffer);
-
-                                    ChatMessages.Add(new ChatMessageModel
-                                    {
-                                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                                        Message = _userInputText,
-                                        IsSend = true
-                                    });
-                                }
-                                catch (ClientNotFindException e)
-                                {
-                                    ShowAlertMessageDialog(AlertType.Error, e.Message);
-                                }
-                            }
-                            else
-                            {
-                                ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
-                            }
+                            ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
                         }
                     }
-                    catch (NotConnectedException e)
-                    {
-                        ShowAlertMessageDialog(AlertType.Error, e.Message);
-                    }
                 }
-                else
+                catch (NotConnectedException e)
                 {
-                    ShowAlertMessageDialog(AlertType.Error, "请指定接收消息的客户端");
+                    ShowAlertMessageDialog(AlertType.Error, e.Message);
                 }
-            });
+            }
+            else
+            {
+                ShowAlertMessageDialog(AlertType.Error, "请指定接收消息的客户端");
+            }
         }
 
         /// <summary>

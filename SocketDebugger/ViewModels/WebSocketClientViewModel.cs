@@ -339,31 +339,39 @@ namespace SocketDebugger.ViewModels
 
             ClearMessageCommand = new DelegateCommand(() => { ChatMessages.Clear(); });
 
-            SendMessageCommand = new DelegateCommand(delegate
-            {
-                if (string.IsNullOrEmpty(_userInputText))
-                {
-                    ShowAlertMessageDialog(AlertType.Error, "不能发送空消息");
-                    return;
-                }
+            SendMessageCommand = new DelegateCommand(delegate { SendMessage(_userInputText); });
 
-                if (ConnectState == "未连接")
-                {
-                    ShowAlertMessageDialog(AlertType.Error, "未连接成功，无法发送消息");
-                    return;
-                }
-
-                _webSocketClient?.Send(_userInputText);
-
-                ChatMessages.Add(new ChatMessageModel
-                {
-                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                    Message = _userInputText,
-                    IsSend = true
-                });
-            });
+            //自动发消息
+            _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
         }
 
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        private void SendMessage(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                ShowAlertMessageDialog(AlertType.Error, "不能发送空消息");
+                return;
+            }
+
+            if (ConnectState == "未连接")
+            {
+                ShowAlertMessageDialog(AlertType.Error, "未连接成功，无法发送消息");
+                return;
+            }
+
+            _webSocketClient?.Send(message);
+
+            ChatMessages.Add(new ChatMessageModel
+            {
+                MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                Message = message,
+                IsSend = true
+            });
+        }
+        
         private void WebSocketOpened(object sender, EventArgs e)
         {
             ConnectColorBrush = "LimeGreen";

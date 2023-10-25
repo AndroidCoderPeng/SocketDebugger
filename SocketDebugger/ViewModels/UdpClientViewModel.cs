@@ -113,7 +113,7 @@ namespace SocketDebugger.ViewModels
         public UdpClientViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
             _dialogService = dialogService;
-            
+
             ConfigModels = dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
@@ -188,7 +188,7 @@ namespace SocketDebugger.ViewModels
                             {
                                 IsHexChecked = true;
                             }
-                            
+
                             if (_timer.IsEnabled)
                             {
                                 _timer.Stop();
@@ -267,7 +267,7 @@ namespace SocketDebugger.ViewModels
                                 {
                                     IsHexChecked = true;
                                 }
-                            
+
                                 if (_timer.IsEnabled)
                                 {
                                     _timer.Stop();
@@ -288,67 +288,75 @@ namespace SocketDebugger.ViewModels
 
             ClearMessageCommand = new DelegateCommand(() => { ChatMessages.Clear(); });
 
-            SendMessageCommand = new DelegateCommand(delegate
+            SendMessageCommand = new DelegateCommand(delegate { SendMessage(_userInputText); });
+
+            //自动发消息
+            _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
+        }
+
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        private void SendMessage(string message)
+        {
+            if (string.IsNullOrEmpty(message))
             {
-                if (string.IsNullOrEmpty(_userInputText))
-                {
-                    ShowAlertMessageDialog(AlertType.Error, "不能发送空消息");
-                    return;
-                }
+                ShowAlertMessageDialog(AlertType.Error, "不能发送空消息");
+                return;
+            }
 
-                if (ConfigModel == null)
-                {
-                    ShowAlertMessageDialog(AlertType.Error, "未选择UDP目的服务器，无法发送数据");
-                    return;
-                }
+            if (ConfigModel == null)
+            {
+                ShowAlertMessageDialog(AlertType.Error, "未选择UDP目的服务器，无法发送数据");
+                return;
+            }
 
-                var config = new TouchSocketConfig();
-                var host = new IPHost(ConfigModel.ConnHost + ":" + ConfigModel.ConnPort);
-                config.SetBindIPHost(0).SetRemoteIPHost(host);
-                _udpSession.Setup(config).Start();
-                var endPoint = host.EndPoint;
+            var config = new TouchSocketConfig();
+            var host = new IPHost(ConfigModel.ConnHost + ":" + ConfigModel.ConnPort);
+            config.SetBindIPHost(0).SetRemoteIPHost(host);
+            _udpSession.Setup(config).Start();
+            var endPoint = host.EndPoint;
 
-                try
+            try
+            {
+                if (_isTextChecked)
                 {
-                    if (_isTextChecked)
+                    _udpSession.Send(endPoint, message);
+
+                    ChatMessages.Add(new ChatMessageModel
                     {
-                        _udpSession.Send(endPoint, _userInputText);
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = message,
+                        IsSend = true
+                    });
+                }
+                else
+                {
+                    if (message.IsHex())
+                    {
+                        var buffer = Encoding.UTF8.GetBytes(message);
+                        //以UTF-8的编码同步发送字符串
+                        _udpSession.Send(endPoint, buffer);
 
                         ChatMessages.Add(new ChatMessageModel
                         {
                             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                            Message = _userInputText,
+                            Message = message,
                             IsSend = true
                         });
                     }
                     else
                     {
-                        if (_userInputText.IsHex())
-                        {
-                            var buffer = Encoding.UTF8.GetBytes(_userInputText);
-                            //以UTF-8的编码同步发送字符串
-                            _udpSession.Send(endPoint, buffer);
-
-                            ChatMessages.Add(new ChatMessageModel
-                            {
-                                MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                                Message = _userInputText,
-                                IsSend = true
-                            });
-                        }
-                        else
-                        {
-                            ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
-                        }
+                        ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
                     }
                 }
-                catch (NotConnectedException e)
-                {
-                    ShowAlertMessageDialog(AlertType.Error, e.Message);
-                }
-            });
+            }
+            catch (NotConnectedException e)
+            {
+                ShowAlertMessageDialog(AlertType.Error, e.Message);
+            }
         }
-        
+
         /// <summary>
         /// 显示普通提示对话框
         /// </summary>
