@@ -205,16 +205,27 @@ namespace SocketDebugger.ViewModels
 
                             ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                            if (string.IsNullOrEmpty(ConfigModel.Message))
+                            if (ConfigModel.MsgType == "文本")
                             {
-                                //停止循环
-                                _timer.Stop();
+                                IsTextChecked = true;
                             }
                             else
                             {
-                                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                                _timer.Start();
+                                IsHexChecked = true;
                             }
+                            
+                            if (_timer.IsEnabled)
+                            {
+                                _timer.Stop();
+                            }
+
+                            if (ConfigModel.TimePeriod == null)
+                            {
+                                return;
+                            }
+
+                            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                            _timer.Start();
                         }
                     }
                 );
@@ -273,16 +284,27 @@ namespace SocketDebugger.ViewModels
 
                                 ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                                if (string.IsNullOrEmpty(ConfigModel.Message))
+                                if (ConfigModel.MsgType == "文本")
                                 {
-                                    //停止循环
-                                    _timer.Stop();
+                                    IsTextChecked = true;
                                 }
                                 else
                                 {
-                                    _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                                    _timer.Start();
+                                    IsHexChecked = true;
                                 }
+                            
+                                if (_timer.IsEnabled)
+                                {
+                                    _timer.Stop();
+                                }
+
+                                if (ConfigModel.TimePeriod == null)
+                                {
+                                    return;
+                                }
+
+                                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                                _timer.Start();
                             }
                         }
                     );

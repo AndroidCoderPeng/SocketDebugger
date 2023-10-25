@@ -35,6 +35,11 @@ namespace SocketDebugger.Services
             }
         }
 
+        public List<string> GetDataType()
+        {
+            return new List<string> { "文本", "16进制" };
+        }
+
         public string GetHostAddress()
         {
             var host = "";

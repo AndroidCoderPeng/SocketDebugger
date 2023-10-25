@@ -220,9 +220,23 @@ namespace SocketDebugger.ViewModels
 
                             ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
+                            if (ConfigModel.MsgType == "文本")
+                            {
+                                IsTextChecked = true;
+                            }
+                            else
+                            {
+                                IsHexChecked = true;
+                            }
+                            
                             if (_timer.IsEnabled)
                             {
                                 _timer.Stop();
+                            }
+
+                            if (ConfigModel.TimePeriod == null)
+                            {
+                                return;
                             }
 
                             _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
@@ -285,9 +299,23 @@ namespace SocketDebugger.ViewModels
 
                                 ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
+                                if (ConfigModel.MsgType == "文本")
+                                {
+                                    IsTextChecked = true;
+                                }
+                                else
+                                {
+                                    IsHexChecked = true;
+                                }
+
                                 if (_timer.IsEnabled)
                                 {
                                     _timer.Stop();
+                                }
+
+                                if (ConfigModel.TimePeriod == null)
+                                {
+                                    return;
                                 }
 
                                 _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));

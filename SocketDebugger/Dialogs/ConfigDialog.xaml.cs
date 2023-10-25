@@ -1,5 +1,4 @@
 ﻿using System.Windows.Controls;
-using SocketDebugger.ViewModels;
 
 namespace SocketDebugger.Dialogs
 {
@@ -8,8 +7,6 @@ namespace SocketDebugger.Dialogs
         public ConfigDialog()
         {
             InitializeComponent();
-
-            DataContext = new ConfigDialogViewModel();
         }
     }
 }

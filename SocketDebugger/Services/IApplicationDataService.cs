@@ -10,6 +10,8 @@ namespace SocketDebugger.Services
         
         ObservableCollection<ConnectionConfigModel> GetConfigModels();
 
+        List<string> GetDataType();
+        
         string GetHostAddress();
     }
 }
