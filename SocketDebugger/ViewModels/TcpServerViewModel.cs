@@ -313,7 +313,7 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法删除");
+                    "无配置项，无法删除".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             });
 
@@ -321,7 +321,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法编辑");
+                    "无配置项，无法编辑".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
                 else
                 {
@@ -369,7 +369,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法启动监听");
+                    "无配置项，无法启动监听".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
                 else
                 {
@@ -399,7 +399,7 @@ namespace SocketDebugger.ViewModels
                     }
                     catch (SocketException e)
                     {
-                        ShowAlertMessageDialog(AlertType.Error, e.Message);
+                        e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
                     }
                 }
             });
@@ -429,7 +429,7 @@ namespace SocketDebugger.ViewModels
         {
             if (string.IsNullOrEmpty(message))
             {
-                ShowAlertMessageDialog(AlertType.Warning, "不能发送空消息");
+                "不能发送空消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 return;
             }
 
@@ -452,7 +452,7 @@ namespace SocketDebugger.ViewModels
                         }
                         catch (ClientNotFindException e)
                         {
-                            ShowAlertMessageDialog(AlertType.Error, e.Message);
+                            e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
                         }
                     }
                     else
@@ -474,37 +474,24 @@ namespace SocketDebugger.ViewModels
                             }
                             catch (ClientNotFindException e)
                             {
-                                ShowAlertMessageDialog(AlertType.Error, e.Message);
+                                e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
                             }
                         }
                         else
                         {
-                            ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
+                            "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                         }
                     }
                 }
                 catch (NotConnectedException e)
                 {
-                    ShowAlertMessageDialog(AlertType.Error, e.Message);
+                    e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             }
             else
             {
-                ShowAlertMessageDialog(AlertType.Error, "请指定接收消息的客户端");
+                "请指定接收消息的客户端".ShowAlertMessageDialog(_dialogService, AlertType.Error);
             }
-        }
-
-        /// <summary>
-        /// 显示普通提示对话框
-        /// </summary>
-        private void ShowAlertMessageDialog(AlertType type, string message)
-        {
-            _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                {
-                    { "AlertType", type }, { "Message", message }
-                },
-                delegate { }
-            );
         }
     }
 }

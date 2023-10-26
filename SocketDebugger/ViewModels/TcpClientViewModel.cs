@@ -167,7 +167,7 @@ namespace SocketDebugger.ViewModels
                     IsHexChecked = true;
                 }
             }
-            
+
             _tcpClient.Connected += delegate
             {
                 ConnectColorBrush = "LimeGreen";
@@ -238,7 +238,7 @@ namespace SocketDebugger.ViewModels
                             {
                                 IsHexChecked = true;
                             }
-                            
+
                             if (_timer.IsEnabled)
                             {
                                 _timer.Stop();
@@ -284,7 +284,7 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    ShowAlertMessageDialog(AlertType.Error, "无配置项，无法删除");
+                    "无配置项，无法删除".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             });
 
@@ -292,7 +292,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    ShowAlertMessageDialog(AlertType.Warning, "无配置项，无法编辑");
+                    "无配置项，无法编辑".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
                 }
                 else
                 {
@@ -340,7 +340,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModel == null)
                 {
-                    ShowAlertMessageDialog(AlertType.Warning, "无配置项，无法连接服务端");
+                    "无配置项，无法连接服务端".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
                 }
                 else
                 {
@@ -365,7 +365,7 @@ namespace SocketDebugger.ViewModels
                     }
                     catch (SocketException e)
                     {
-                        ShowAlertMessageDialog(AlertType.Error, e.Message);
+                        e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
                     }
                 }
             });
@@ -385,7 +385,7 @@ namespace SocketDebugger.ViewModels
         {
             if (string.IsNullOrEmpty(message))
             {
-                ShowAlertMessageDialog(AlertType.Warning, "不能发送空消息");
+                "不能发送空消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 return;
             }
 
@@ -393,7 +393,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConnectState == "未连接")
                 {
-                    ShowAlertMessageDialog(AlertType.Warning, "未连接成功，无法发送消息");
+                    "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                     return;
                 }
 
@@ -412,7 +412,7 @@ namespace SocketDebugger.ViewModels
                 {
                     if (ConnectState == "未连接")
                     {
-                        ShowAlertMessageDialog(AlertType.Warning, "未连接成功，无法发送消息");
+                        "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
                         return;
                     }
 
@@ -429,22 +429,9 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    ShowAlertMessageDialog(AlertType.Error, "数据格式错误，无法发送");
+                    "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             }
-        }
-
-        /// <summary>
-        /// 显示普通提示对话框
-        /// </summary>
-        private void ShowAlertMessageDialog(AlertType type, string message)
-        {
-            _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                {
-                    { "AlertType", type }, { "Message", message }
-                },
-                delegate { }
-            );
         }
     }
 }
