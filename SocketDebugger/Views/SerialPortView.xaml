@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ut="clr-namespace:SocketDebugger.Utils"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:SerialPortViewModel}"
     d:DesignHeight="600"
@@ -25,6 +26,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="0.5" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="0.5" />
                 <RowDefinition />
             </Grid.RowDefinitions>
 
@@ -202,11 +204,105 @@
                 </Grid>
             </StackPanel>
 
-            <Grid Grid.Row="3" Background="Beige" />
+            <Grid Grid.Row="3" Background="{StaticResource DividerLineBrush}" />
+
+            <StackPanel
+                Grid.Row="4"
+                Margin="15"
+                Orientation="Vertical">
+                <DockPanel LastChildFill="True">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="16"
+                        Foreground="White"
+                        Text="指令发送记录" />
+
+                    <Button
+                        Padding="5,3"
+                        HorizontalAlignment="Right"
+                        Content="清空"
+                        Style="{x:Null}" />
+                </DockPanel>
+
+                <ListView Margin="0,15,0,0" />
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Column="1" Background="{StaticResource DividerLineBrush}" />
 
-        <Grid Grid.Column="2" />
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="0.5" />
+                <RowDefinition Height="4*" />
+                <RowDefinition Height="0.5" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="0.5" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" />
+
+            <Grid Grid.Row="1" Background="{StaticResource DividerLineBrush}" />
+
+            <ListBox
+                Grid.Row="2"
+                Background="Transparent"
+                BorderThickness="0"
+                ItemsSource="{Binding ChatMessages}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                <ListBox.ItemContainerStyle>
+                    <Style BasedOn="{StaticResource ChatListBoxItemStyle}" TargetType="{x:Type ListBoxItem}" />
+                </ListBox.ItemContainerStyle>
+
+                <ListBox.ItemTemplateSelector>
+                    <ut:ChatBubbleSelector />
+                </ListBox.ItemTemplateSelector>
+
+                <b:Interaction.Behaviors>
+                    <ut:AutoScrollBehavior />
+                </b:Interaction.Behaviors>
+            </ListBox>
+
+            <Grid Grid.Row="3" Background="{StaticResource DividerLineBrush}" />
+
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <RadioButton
+                    Grid.Column="0"
+                    Margin="10"
+                    Content="文本"
+                    FontSize="14"
+                    Foreground="White"
+                    GroupName="ModeGroup"
+                    IsChecked="{Binding IsTextChecked}" />
+
+                <RadioButton
+                    Grid.Column="1"
+                    Content="16进制"
+                    FontSize="14"
+                    Foreground="White"
+                    GroupName="ModeGroup"
+                    IsChecked="{Binding IsHexChecked}" />
+
+                <Button
+                    Grid.Column="2"
+                    Command="{Binding SendMessageCommand}"
+                    Style="{StaticResource SendMessageButtonStyle}" />
+            </Grid>
+
+            <Grid Grid.Row="5" Background="{StaticResource DividerLineBrush}" />
+
+            <TextBox
+                Grid.Row="6"
+                Style="{StaticResource UserInputTextBoxStyle}"
+                Text="{Binding UserInputText}" />
+        </Grid>
     </Grid>
 </UserControl>
