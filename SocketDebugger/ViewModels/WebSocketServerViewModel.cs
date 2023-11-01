@@ -351,6 +351,7 @@ namespace SocketDebugger.ViewModels
                         }
                         else
                         {
+                            _timer.Stop();
                             _webSocketService.Stop();
 
                             ConnectColorBrush = "DarkGray";

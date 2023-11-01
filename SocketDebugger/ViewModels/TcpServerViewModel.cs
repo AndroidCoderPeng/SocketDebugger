@@ -390,6 +390,7 @@ namespace SocketDebugger.ViewModels
                         }
                         else
                         {
+                            _timer.Stop();
                             _tcpService.Stop();
 
                             ConnectColorBrush = "DarkGray";

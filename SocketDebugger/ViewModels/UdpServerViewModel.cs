@@ -374,6 +374,7 @@ namespace SocketDebugger.ViewModels
                         }
                         else
                         {
+                            _timer.Stop();
                             _udpSession.Stop();
 
                             ConnectColorBrush = "DarkGray";
