@@ -9,6 +9,7 @@
     Width="350"
     Height="200"
     d:DataContext="{d:DesignInstance Type=vm:AlertControlDialogViewModel}"
+    Background="White"
     mc:Ignorable="d">
 
     <prism:Dialog.WindowStyle>
@@ -16,98 +17,59 @@
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
             <Setter Property="ShowInTaskbar" Value="False" />
             <Setter Property="SizeToContent" Value="WidthAndHeight" />
-            <Setter Property="WindowStyle" Value="None" />
-            <Setter Property="AllowsTransparency" Value="True" />
-            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="ResizeMode" Value="NoResize" />
         </Style>
     </prism:Dialog.WindowStyle>
 
-    <Border
-        Margin="3"
-        BorderBrush="{StaticResource DividerLineBrush}"
-        BorderThickness="1"
-        CornerRadius="10">
-        <Border.Background>
-            <LinearGradientBrush>
-                <GradientStop Offset="0" Color="{StaticResource PrimaryColor}" />
-                <GradientStop Offset="1" Color="{StaticResource AuxiliaryColor}" />
-            </LinearGradientBrush>
-        </Border.Background>
-        <Border.Effect>
-            <DropShadowEffect
-                BlurRadius="5"
-                Direction="0"
-                Opacity="0.5"
-                ShadowDepth="0"
-                Color="{StaticResource PrimaryColor}" />
-        </Border.Effect>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-        <Grid>
+        <Grid Grid.Row="0">
             <Grid.RowDefinitions>
-                <RowDefinition />
                 <RowDefinition Height="Auto" />
+                <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-
-                <DockPanel Grid.Row="0" LastChildFill="True">
-                    <TextBlock
-                        Margin="20"
-                        FontFamily="/SocketDebugger;component/IconFont/#iconfont"
-                        FontSize="30"
-                        Foreground="{Binding AlertIconColor}"
-                        Text="{Binding AlertIcon}" />
-
-                    <TextBlock
-                        Margin="0,0,20,0"
-                        VerticalAlignment="Center"
-                        FontSize="20"
-                        Foreground="White"
-                        Text="{Binding Title}" />
-                </DockPanel>
+            <DockPanel Grid.Row="0" LastChildFill="True">
+                <TextBlock
+                    Margin="20"
+                    FontFamily="/SocketDebugger;component/IconFont/#iconfont"
+                    FontSize="30"
+                    Foreground="{Binding AlertIconColor}"
+                    Text="{Binding AlertIcon}" />
 
                 <TextBlock
-                    Grid.Row="1"
-                    Margin="70,0,20,0"
-                    FontSize="16"
-                    Foreground="White"
-                    Text="{Binding AlertMessage}"
-                    TextWrapping="Wrap" />
-            </Grid>
+                    Margin="0,0,20,0"
+                    VerticalAlignment="Center"
+                    FontSize="20"
+                    Text="{Binding Title}" />
+            </DockPanel>
 
-            <StackPanel
+            <TextBlock
                 Grid.Row="1"
-                HorizontalAlignment="Right"
-                Orientation="Horizontal">
-                <Button
-                    Width="80"
-                    Height="35"
-                    Margin="20"
-                    Command="{Binding AlertCancelCommand}"
-                    Content="取消"
-                    FontSize="16" />
-
-                <Button
-                    Width="80"
-                    Height="35"
-                    Margin="20"
-                    BorderThickness="0"
-                    Command="{Binding AlertDetermineCommand}"
-                    Content="确定"
-                    FontSize="16"
-                    Style="{StaticResource ButtonPrimary}">
-                    <Button.Background>
-                        <LinearGradientBrush>
-                            <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
-                            <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
-                        </LinearGradientBrush>
-                    </Button.Background>
-                </Button>
-            </StackPanel>
+                Margin="70,0,20,0"
+                FontSize="16"
+                Text="{Binding AlertMessage}"
+                TextWrapping="Wrap" />
         </Grid>
-    </Border>
+
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Command="{Binding AlertCancelCommand}"
+                Content="取消"
+                Foreground="White" />
+
+            <Button
+                Margin="20"
+                Command="{Binding AlertDetermineCommand}"
+                Content="确定"
+                Foreground="White" />
+        </StackPanel>
+    </Grid>
 </UserControl>

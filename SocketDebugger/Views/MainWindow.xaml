@@ -10,187 +10,76 @@
     x:Name="TargetWindow"
     Title="SocketDebugger"
     Width="1000"
-    Height="600"
+    Height="680"
     d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
-    AllowsTransparency="True"
-    Background="Transparent"
+    Background="White"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterScreen"
-    WindowStyle="None"
     mc:Ignorable="d">
 
-    <Border Margin="3" CornerRadius="10">
-        <Border.Background>
-            <LinearGradientBrush>
-                <GradientStop Offset="0" Color="{StaticResource PrimaryColor}" />
-                <GradientStop Offset="1" Color="{StaticResource AuxiliaryColor}" />
-            </LinearGradientBrush>
-        </Border.Background>
-        <Border.Effect>
-            <DropShadowEffect
-                BlurRadius="5"
-                Direction="0"
-                Opacity="0.5"
-                ShadowDepth="0"
-                Color="{StaticResource PrimaryColor}" />
-        </Border.Effect>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
 
-        <Grid>
+        <Grid Grid.Row="0" Background="LightGray" />
+
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="170" />
-                <ColumnDefinition Width="0.5" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="1" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <DockPanel Grid.Column="0" LastChildFill="True">
-                <Grid DockPanel.Dock="Top">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Button
-                        Grid.Column="0"
-                        Width="15"
-                        Height="15"
-                        Margin="10,10,0,0"
-                        Command="{Binding CloseWindowCommand}"
-                        CommandParameter="{Binding ElementName=TargetWindow}"
-                        ToolTip="关闭">
-                        <Button.Template>
-                            <ControlTemplate TargetType="{x:Type Button}">
-                                <Border
-                                    Name="PART_Background"
-                                    Background="Red"
-                                    BorderBrush="{TemplateBinding Control.BorderBrush}"
-                                    BorderThickness="0"
-                                    CornerRadius="7.5">
-                                    <ContentPresenter
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Content="{TemplateBinding ContentControl.Content}" />
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="UIElement.IsMouseOver" Value="True">
-                                        <Setter Property="Opacity" Value="0.5" />
-                                    </Trigger>
-                                    <Trigger Property="ButtonBase.IsPressed" Value="True">
-                                        <Setter Property="Opacity" Value="0.5" />
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
 
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="/SocketDebugger;component/IconFont/#iconfont"
-                            FontSize="12"
-                            Foreground="White"
-                            RenderTransformOrigin="0.5,0.5"
-                            Text="&#xe604;">
-                            <TextBlock.RenderTransform>
-                                <TransformGroup>
-                                    <RotateTransform Angle="45" />
-                                </TransformGroup>
-                            </TextBlock.RenderTransform>
-                        </TextBlock>
-                    </Button>
+            <!--  左边功能列表  -->
+            <ListView
+                x:Name="MainMenuListView"
+                Grid.Column="0"
+                VerticalAlignment="Top"
+                BorderThickness="0"
+                DockPanel.Dock="Bottom"
+                ItemsSource="{Binding MainMenuModels}"
+                SelectedIndex="0">
 
-                    <Button
-                        Grid.Column="1"
-                        Width="15"
-                        Height="15"
-                        Margin="10,10,0,0"
-                        Command="{Binding MiniSizeWindowCommand}"
-                        CommandParameter="{Binding ElementName=TargetWindow}"
-                        ToolTip="最小化">
-                        <Button.Template>
-                            <ControlTemplate TargetType="{x:Type Button}">
-                                <Border
-                                    Name="PART_Background"
-                                    Background="Orange"
-                                    BorderBrush="{TemplateBinding Control.BorderBrush}"
-                                    BorderThickness="0"
-                                    CornerRadius="7.5">
-                                    <ContentPresenter
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Content="{TemplateBinding ContentControl.Content}" />
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="UIElement.IsMouseOver" Value="True">
-                                        <Setter Property="Opacity" Value="0.5" />
-                                    </Trigger>
-                                    <Trigger Property="ButtonBase.IsPressed" Value="True">
-                                        <Setter Property="Opacity" Value="0.5" />
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="SelectionChanged">
+                        <b:InvokeCommandAction Command="{Binding MenuSelectedCommand}" CommandParameter="{Binding ElementName=MainMenuListView}" />
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
 
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="/SocketDebugger;component/IconFont/#iconfont"
-                            FontSize="12"
-                            Foreground="White"
-                            Text="&#xe6ef;" />
-                    </Button>
-                </Grid>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Width="150" Height="50">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                <!--  左边功能列表  -->
-                <ListView
-                    x:Name="MainMenuListView"
-                    VerticalAlignment="Top"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    DockPanel.Dock="Bottom"
-                    ItemsSource="{Binding MainMenuModels}"
-                    SelectedIndex="0">
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="5,0"
+                                VerticalAlignment="Center"
+                                FontFamily="/SocketDebugger;component/IconFont/#iconfont"
+                                FontSize="30"
+                                Text="{Binding MainMenuIcon}" />
 
-                    <b:Interaction.Triggers>
-                        <b:EventTrigger EventName="SelectionChanged">
-                            <b:InvokeCommandAction Command="{Binding MenuSelectedCommand}" CommandParameter="{Binding ElementName=MainMenuListView}" />
-                        </b:EventTrigger>
-                    </b:Interaction.Triggers>
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="2,0"
+                                VerticalAlignment="Center"
+                                FontSize="18"
+                                Text="{Binding MainMenuName}"
+                                TextWrapping="Wrap" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    Margin="2,0,7,0"
-                                    VerticalAlignment="Center"
-                                    FontFamily="/SocketDebugger;component/IconFont/#iconfont"
-                                    FontSize="30"
-                                    Text="{Binding MainMenuIcon}" />
-
-                                <TextBlock
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    FontSize="18"
-                                    Text="{Binding MainMenuName}"
-                                    TextWrapping="Wrap" />
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-
-                    <ListView.ItemContainerStyle>
-                        <Style BasedOn="{StaticResource ConfigListViewItemStyle}" TargetType="{x:Type ListViewItem}">
-                            <Setter Property="Width" Value="155" />
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                </ListView>
-            </DockPanel>
-
-            <Grid Grid.Column="1" Background="{StaticResource DividerLineBrush}" />
+            <Grid Grid.Column="1" Background="LightGray" />
 
             <!--  右边连接详细信息  -->
             <ContentControl Grid.Column="2" prism:RegionManager.RegionName="ContentRegion" />
         </Grid>
-    </Border>
+    </Grid>
 </Window>
