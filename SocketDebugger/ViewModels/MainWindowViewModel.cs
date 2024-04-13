@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
+using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
@@ -19,19 +22,23 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
-        public MainWindowViewModel(IApplicationDataService dataService, IRegionManager regionManager)
+        public MainWindowViewModel(IApplicationDataService dataService, IRegionManager regionManager,
+            IEventAggregator eventAggregator)
         {
             MainMenuModels = dataService.GetMainMenu();
 
             MenuSelectedCommand = new DelegateCommand<ListView>(delegate(ListView view)
             {
-                MemoryCacheManager.SelectedMainMenu = MainMenuModels[view.SelectedIndex].MainMenuName;
+                var mainMenuModel = view.SelectedItem as MainMenuModel;
+                MemoryCacheManager.SelectedMainMenu = mainMenuModel?.MainMenuName;
 
                 var region = regionManager.Regions["ContentRegion"];
-                switch (view.SelectedIndex)
+                var selectedIndex = view.SelectedIndex;
+                switch (selectedIndex)
                 {
                     case 0:
                         region.RequestNavigate("TcpClientView");
+                        eventAggregator.GetEvent<MainMenuSelectedEvent>().Publish(selectedIndex);
                         break;
                     case 1:
                         region.RequestNavigate("TcpServerView");

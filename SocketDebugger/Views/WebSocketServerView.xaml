@@ -199,6 +199,7 @@
                         Height="30"
                         Margin="10,10,10,0"
                         Command="{Binding EditConfigCommand}"
+                        Content="编辑"
                         Foreground="White" />
 
                     <Button
@@ -214,6 +215,7 @@
                         Height="30"
                         Margin="10,0,10,10"
                         Command="{Binding ClearMessageCommand}"
+                        Content="清空消息"
                         Foreground="White" />
                 </Grid>
             </Grid>

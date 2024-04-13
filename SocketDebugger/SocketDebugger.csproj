@@ -199,6 +199,7 @@
     <Compile Include="Dialogs\ConfigDialog.xaml.cs">
       <DependentUpon>ConfigDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Events\MainMenuSelectedEvent.cs" />
     <Compile Include="Model\ChatMessageModel.cs" />
     <Compile Include="Model\ConnectedClientModel.cs" />
     <Compile Include="Model\ConnectionConfigModel.cs" />

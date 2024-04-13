@@ -1,6 +1,4 @@
-﻿using System.Windows.Input;
-
-namespace SocketDebugger.Views
+﻿namespace SocketDebugger.Views
 {
     /// <summary>
     /// Interaction logic for xaml
@@ -10,12 +8,6 @@ namespace SocketDebugger.Views
         public MainWindow()
         {
             InitializeComponent();
-        }
-
-        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
-        {
-            base.OnMouseLeftButtonDown(e);
-            DragMove();
         }
     }
 }

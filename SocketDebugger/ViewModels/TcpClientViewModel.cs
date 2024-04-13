@@ -7,8 +7,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
+using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
@@ -144,29 +146,19 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
+        private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
         private readonly TcpClient _tcpClient = new TcpClient();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
 
-        public TcpClientViewModel(IApplicationDataService dataService, IDialogService dialogService)
+        public TcpClientViewModel(IApplicationDataService dataService, IDialogService dialogService,
+            IEventAggregator eventAggregator)
         {
+            _dataService = dataService;
             _dialogService = dialogService;
 
-            ConfigModels = dataService.GetConfigModels();
-            if (ConfigModels.Any())
-            {
-                ConfigModel = ConfigModels[0];
-                if (ConfigModel.MessageType == "文本")
-                {
-                    IsTextChecked = true;
-                    IsHexChecked = false;
-                }
-                else
-                {
-                    IsTextChecked = false;
-                    IsHexChecked = true;
-                }
-            }
+            InitMessageType(0);
+            eventAggregator.GetEvent<MainMenuSelectedEvent>().Subscribe(InitMessageType);
 
             _tcpClient.Connected += delegate
             {
@@ -204,7 +196,7 @@ namespace SocketDebugger.ViewModels
 
             ConfigItemSelectedCommand = new DelegateCommand<ListView>(delegate(ListView view)
             {
-                ConfigModel = (ConnectionConfigModel)view.SelectedItem;
+                ConfigModel = view.SelectedItem as ConnectionConfigModel;
             });
 
             AddConfigCommand = new DelegateCommand(delegate
@@ -376,6 +368,25 @@ namespace SocketDebugger.ViewModels
 
             //自动发消息
             _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
+        }
+
+        private void InitMessageType(int index)
+        {
+            ConfigModels = _dataService.GetConfigModels();
+            if (ConfigModels.Any())
+            {
+                ConfigModel = ConfigModels[index];
+                if (ConfigModel.MessageType == "文本")
+                {
+                    IsTextChecked = true;
+                    IsHexChecked = false;
+                }
+                else
+                {
+                    IsTextChecked = false;
+                    IsHexChecked = true;
+                }
+            }
         }
 
         /// <summary>

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
@@ -33,18 +32,6 @@ namespace SocketDebugger.ViewModels
 
         public List<string> DataTypeArray { get; }
 
-        private string _dataType = "文本";
-
-        public string DataType
-        {
-            get => _dataType;
-            set
-            {
-                _dataType = value;
-                RaisePropertyChanged();
-            }
-        }
-
         private bool _isRepeatBoxChecked;
 
         public bool IsRepeatBoxChecked
@@ -61,23 +48,14 @@ namespace SocketDebugger.ViewModels
 
         #region DelegateCommand
 
-        public DelegateCommand CloseWindowCommand { get; set; }
         public DelegateCommand<ComboBox> DataTypeSelectedCommand { set; get; }
         public DelegateCommand SaveConfigCommand { get; set; }
 
         #endregion
 
-        private readonly IDialogService _dialogService;
-
         public ConfigDialogViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
             DataTypeArray = dataService.GetDataType();
-            _dialogService = dialogService;
-
-            CloseWindowCommand = new DelegateCommand(delegate
-            {
-                RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel, new DialogParameters()));
-            });
 
             DataTypeSelectedCommand = new DelegateCommand<ComboBox>(delegate(ComboBox box)
             {
@@ -109,7 +87,12 @@ namespace SocketDebugger.ViewModels
                         {
                             if (_configModel.Message.IsNullOrEmpty() || _configModel.TimePeriod.IsNullOrEmpty())
                             {
-                                ShowAlertMessageDialog(AlertType.Warning, "请完善需要连续发送的信息");
+                                dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
+                                    {
+                                        { "AlertType", AlertType.Warning }, { "Message", "请完善需要连续发送的信息" }
+                                    },
+                                    delegate { }
+                                );
                                 return;
                             }
 
@@ -160,19 +143,6 @@ namespace SocketDebugger.ViewModels
             {
                 IsRepeatBoxChecked = false;
             }
-        }
-
-        /// <summary>
-        /// 显示普通提示对话框
-        /// </summary>
-        private void ShowAlertMessageDialog(AlertType type, string message)
-        {
-            _dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                {
-                    { "AlertType", type }, { "Message", message }
-                },
-                delegate { }
-            );
         }
     }
 }

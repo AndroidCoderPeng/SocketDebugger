@@ -191,6 +191,7 @@
                         Height="30"
                         Margin="10,10,10,0"
                         Command="{Binding EditConfigCommand}"
+                        Content="编辑"
                         Foreground="White" />
 
                     <!--  占位  -->
@@ -198,7 +199,7 @@
                         Grid.Row="1"
                         Height="30"
                         Margin="10"
-                        Content="连接"
+                        Content=""
                         Foreground="White"
                         Visibility="Hidden" />
 
@@ -207,6 +208,7 @@
                         Height="30"
                         Margin="10,0,10,10"
                         Command="{Binding ClearMessageCommand}"
+                        Content="清空消息"
                         Foreground="White" />
                 </Grid>
             </Grid>

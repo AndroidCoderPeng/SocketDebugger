@@ -38,7 +38,6 @@
                 Grid.Column="0"
                 VerticalAlignment="Top"
                 BorderThickness="0"
-                DockPanel.Dock="Bottom"
                 ItemsSource="{Binding MainMenuModels}"
                 SelectedIndex="0">
 
