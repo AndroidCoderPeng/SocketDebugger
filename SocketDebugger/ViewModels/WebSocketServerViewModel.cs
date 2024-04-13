@@ -170,7 +170,7 @@ namespace SocketDebugger.ViewModels
             if (ConfigModels.Any())
             {
                 ConfigModel = ConfigModels[0];
-                if (ConfigModel.MsgType == "文本")
+                if (ConfigModel.MessageType == "文本")
                 {
                     IsTextChecked = true;
                     IsHexChecked = false;
@@ -196,10 +196,10 @@ namespace SocketDebugger.ViewModels
             {
                 var configModel = new ConnectionConfigModel
                 {
-                    Comment = "",
-                    ConnType = "WebSocket服务端",
-                    ConnHost = SystemHelper.GetHostAddress(),
-                    ConnPort = "8080"
+                    ConnectionTitle = "",
+                    ConnectionType = "WebSocket服务端",
+                    ConnectionHost = SystemHelper.GetHostAddress(),
+                    ConnectionPort = "8080"
                 };
 
                 dialogService.ShowDialog("ConfigDialog", new DialogParameters
@@ -215,7 +215,7 @@ namespace SocketDebugger.ViewModels
 
                             ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                            if (ConfigModel.MsgType == "文本")
+                            if (ConfigModel.MessageType == "文本")
                             {
                                 IsTextChecked = true;
                             }
@@ -294,7 +294,7 @@ namespace SocketDebugger.ViewModels
 
                                 ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                                if (ConfigModel.MsgType == "文本")
+                                if (ConfigModel.MessageType == "文本")
                                 {
                                     IsTextChecked = true;
                                 }
@@ -332,7 +332,7 @@ namespace SocketDebugger.ViewModels
                     if (_webSocketService == null)
                     {
                         _webSocketService = new WebSocketServer();
-                        _webSocketService.Setup(ConfigModel.ConnHost, Convert.ToInt32(ConfigModel.ConnPort));
+                        _webSocketService.Setup(ConfigModel.ConnectionHost, Convert.ToInt32(ConfigModel.ConnectionPort));
                     }
 
                     _webSocketService.NewSessionConnected += SessionConnectedEvent;

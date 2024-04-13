@@ -118,7 +118,7 @@ namespace SocketDebugger.ViewModels
             if (ConfigModels.Any())
             {
                 ConfigModel = ConfigModels[0];
-                if (ConfigModel.MsgType == "文本")
+                if (ConfigModel.MessageType == "文本")
                 {
                     IsTextChecked = true;
                     IsHexChecked = false;
@@ -161,10 +161,10 @@ namespace SocketDebugger.ViewModels
             {
                 var configModel = new ConnectionConfigModel
                 {
-                    Comment = "",
-                    ConnType = "UDP客户端",
-                    ConnHost = SystemHelper.GetHostAddress(),
-                    ConnPort = "8080"
+                    ConnectionTitle = "",
+                    ConnectionType = "UDP客户端",
+                    ConnectionHost = SystemHelper.GetHostAddress(),
+                    ConnectionPort = "8080"
                 };
 
                 dialogService.ShowDialog("ConfigDialog", new DialogParameters
@@ -180,7 +180,7 @@ namespace SocketDebugger.ViewModels
 
                             ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                            if (ConfigModel.MsgType == "文本")
+                            if (ConfigModel.MessageType == "文本")
                             {
                                 IsTextChecked = true;
                             }
@@ -259,7 +259,7 @@ namespace SocketDebugger.ViewModels
 
                                 ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                                if (ConfigModel.MsgType == "文本")
+                                if (ConfigModel.MessageType == "文本")
                                 {
                                     IsTextChecked = true;
                                 }
@@ -312,7 +312,7 @@ namespace SocketDebugger.ViewModels
             }
 
             var config = new TouchSocketConfig();
-            var host = new IPHost(ConfigModel.ConnHost + ":" + ConfigModel.ConnPort);
+            var host = new IPHost(ConfigModel.ConnectionHost + ":" + ConfigModel.ConnectionPort);
             config.SetBindIPHost(0).SetRemoteIPHost(host);
             _udpSession.Setup(config).Start();
             var endPoint = host.EndPoint;

@@ -23,7 +23,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="200" />
             <ColumnDefinition Width="1" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
@@ -82,7 +82,7 @@
                                     Grid.Row="0"
                                     Margin="3"
                                     FontSize="16"
-                                    Text="{Binding Comment}" />
+                                    Text="{Binding ConnectionTitle}" />
 
                                 <TextBlock
                                     Grid.Row="1"
@@ -90,8 +90,8 @@
                                     Foreground="Gray">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}{0}:{1}">
-                                            <Binding Path="ConnHost" />
-                                            <Binding Path="ConnPort" />
+                                            <Binding Path="ConnectionHost" />
+                                            <Binding Path="ConnectionPort" />
                                         </MultiBinding>
                                     </TextBlock.Text>
                                 </TextBlock>
@@ -154,7 +154,7 @@
                         Margin="10,0"
                         VerticalAlignment="Center"
                         FontSize="16"
-                        Text="{Binding ConfigModel.Comment}" />
+                        Text="{Binding ConfigModel.ConnectionTitle}" />
 
                     <TextBlock
                         Grid.Row="1"
@@ -163,8 +163,8 @@
                         <!--  多重绑定  -->
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0}:{1}">
-                                <Binding Path="ConfigModel.ConnHost" />
-                                <Binding Path="ConfigModel.ConnPort" />
+                                <Binding Path="ConfigModel.ConnectionHost" />
+                                <Binding Path="ConfigModel.ConnectionPort" />
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>

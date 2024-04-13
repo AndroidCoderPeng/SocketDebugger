@@ -153,7 +153,7 @@ namespace SocketDebugger.ViewModels
             if (ConfigModels.Any())
             {
                 ConfigModel = ConfigModels[0];
-                if (ConfigModel.MsgType == "文本")
+                if (ConfigModel.MessageType == "文本")
                 {
                     IsTextChecked = true;
                     IsHexChecked = false;
@@ -179,10 +179,10 @@ namespace SocketDebugger.ViewModels
             {
                 var configModel = new ConnectionConfigModel
                 {
-                    Comment = "",
-                    ConnType = "WebSocket客户端",
-                    ConnHost = SystemHelper.GetHostAddress(),
-                    ConnPort = "8080"
+                    ConnectionTitle = "",
+                    ConnectionType = "WebSocket客户端",
+                    ConnectionHost = SystemHelper.GetHostAddress(),
+                    ConnectionPort = "8080"
                 };
                 
                 dialogService.ShowDialog("ConfigDialog", new DialogParameters
@@ -198,7 +198,7 @@ namespace SocketDebugger.ViewModels
 
                             ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                            if (ConfigModel.MsgType == "文本")
+                            if (ConfigModel.MessageType == "文本")
                             {
                                 IsTextChecked = true;
                             }
@@ -277,7 +277,7 @@ namespace SocketDebugger.ViewModels
 
                                 ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                                if (ConfigModel.MsgType == "文本")
+                                if (ConfigModel.MessageType == "文本")
                                 {
                                     IsTextChecked = true;
                                 }
@@ -308,7 +308,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (_webSocketClient == null)
                 {
-                    _webSocketClient = new WebSocket("ws://" + ConfigModel.ConnHost + ":" + ConfigModel.ConnPort);
+                    _webSocketClient = new WebSocket("ws://" + ConfigModel.ConnectionHost + ":" + ConfigModel.ConnectionPort);
                 }
 
                 _webSocketClient.Opened += WebSocketOpened;

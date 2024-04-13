@@ -156,7 +156,7 @@ namespace SocketDebugger.ViewModels
             if (ConfigModels.Any())
             {
                 ConfigModel = ConfigModels[0];
-                if (ConfigModel.MsgType == "文本")
+                if (ConfigModel.MessageType == "文本")
                 {
                     IsTextChecked = true;
                     IsHexChecked = false;
@@ -211,10 +211,10 @@ namespace SocketDebugger.ViewModels
             {
                 var configModel = new ConnectionConfigModel
                 {
-                    Comment = "",
-                    ConnType = "TCP客户端",
-                    ConnHost = dataService.GetHostAddress(),
-                    ConnPort = "8080"
+                    ConnectionTitle = "",
+                    ConnectionType = "TCP客户端",
+                    ConnectionHost = dataService.GetHostAddress(),
+                    ConnectionPort = "8080"
                 };
 
                 _dialogService.ShowDialog("ConfigDialog", new DialogParameters
@@ -230,7 +230,7 @@ namespace SocketDebugger.ViewModels
 
                             ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                            if (ConfigModel.MsgType == "文本")
+                            if (ConfigModel.MessageType == "文本")
                             {
                                 IsTextChecked = true;
                             }
@@ -309,7 +309,7 @@ namespace SocketDebugger.ViewModels
 
                                 ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
 
-                                if (ConfigModel.MsgType == "文本")
+                                if (ConfigModel.MessageType == "文本")
                                 {
                                     IsTextChecked = true;
                                 }
@@ -346,7 +346,7 @@ namespace SocketDebugger.ViewModels
                 {
                     //声明配置
                     var config = new TouchSocketConfig();
-                    config.SetRemoteIPHost(new IPHost(ConfigModel.ConnHost + ":" + ConfigModel.ConnPort))
+                    config.SetRemoteIPHost(new IPHost(ConfigModel.ConnectionHost + ":" + ConfigModel.ConnectionPort))
                         .UsePlugin()
                         .ConfigurePlugins(manager => { manager.UseReconnection(5, true, 3000); });
 

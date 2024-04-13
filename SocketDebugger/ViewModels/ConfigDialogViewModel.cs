@@ -81,7 +81,7 @@ namespace SocketDebugger.ViewModels
 
             DataTypeSelectedCommand = new DelegateCommand<ComboBox>(delegate(ComboBox box)
             {
-                ConfigModel.MsgType = box.SelectedItem.ToString();
+                ConfigModel.MessageType = box.SelectedItem.ToString();
             });
 
             SaveConfigCommand = new DelegateCommand(delegate
@@ -99,11 +99,11 @@ namespace SocketDebugger.ViewModels
                         var configModel = new ConnectionConfigModel
                         {
                             Uuid = Guid.NewGuid().ToString("N"),
-                            Comment = _configModel.Comment,
-                            ConnType = _configModel.ConnType,
-                            ConnHost = _configModel.ConnHost,
-                            ConnPort = _configModel.ConnPort,
-                            MsgType = _configModel.MsgType
+                            ConnectionTitle = _configModel.ConnectionTitle,
+                            ConnectionType = _configModel.ConnectionType,
+                            ConnectionHost = _configModel.ConnectionHost,
+                            ConnectionPort = _configModel.ConnectionPort,
+                            MessageType = _configModel.MessageType
                         };
                         if (IsRepeatBoxChecked)
                         {

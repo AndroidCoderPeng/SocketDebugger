@@ -7,18 +7,39 @@ namespace SocketDebugger.Model
     {
         [PrimaryKey, Unique, NotNull] public string Uuid { get; set; }
 
-        public string Comment { get; set; }
+        /// <summary>
+        /// 连接配置描述
+        /// </summary>
+        public string ConnectionTitle { get; set; }
 
-        public string ConnType { get; set; }
+        /// <summary>
+        /// 连接类型，Tcp、Udp、WebSocket
+        /// </summary>
+        public string ConnectionType { get; set; }
 
-        public string ConnHost { get; set; }
+        /// <summary>
+        /// 连接IP
+        /// </summary>
+        public string ConnectionHost { get; set; }
 
-        public string ConnPort { get; set; }
+        /// <summary>
+        /// 连接端口
+        /// </summary>
+        public string ConnectionPort { get; set; }
 
-        public string MsgType { get; set; }
+        /// <summary>
+        /// 消息类型，文本、Hex
+        /// </summary>
+        public string MessageType { get; set; }
 
+        /// <summary>
+        /// 消息内容
+        /// </summary>
         public string Message { get; set; }
 
+        /// <summary>
+        /// 连发消息间隔
+        /// </summary>
         public string TimePeriod { get; set; }
     }
 }

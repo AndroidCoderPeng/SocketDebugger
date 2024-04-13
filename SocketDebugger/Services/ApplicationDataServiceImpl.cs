@@ -29,7 +29,7 @@ namespace SocketDebugger.Services
             {
                 var queryResult = manager
                     .Table<ConnectionConfigModel>()
-                    .Where(config => config.ConnType == MemoryCacheManager.SelectedMainMenu)
+                    .Where(config => config.ConnectionType == MemoryCacheManager.SelectedMainMenu)
                     .ToList();
                 return ListConvert<ConnectionConfigModel>.ToObservableCollection(queryResult);
             }

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Windows;
 using System.Windows.Controls;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -7,7 +6,6 @@ using Prism.Regions;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
-using SocketDebugger.Views;
 
 namespace SocketDebugger.ViewModels
 {
@@ -17,8 +15,6 @@ namespace SocketDebugger.ViewModels
 
         #region DelegateCommand
 
-        public DelegateCommand<MainWindow> CloseWindowCommand { set; get; }
-        public DelegateCommand<MainWindow> MiniSizeWindowCommand { set; get; }
         public DelegateCommand<ListView> MenuSelectedCommand { set; get; }
 
         #endregion
@@ -26,12 +22,6 @@ namespace SocketDebugger.ViewModels
         public MainWindowViewModel(IApplicationDataService dataService, IRegionManager regionManager)
         {
             MainMenuModels = dataService.GetMainMenu();
-
-            CloseWindowCommand = new DelegateCommand<MainWindow>(delegate(MainWindow window) { window.Close(); });
-            MiniSizeWindowCommand = new DelegateCommand<MainWindow>(delegate(MainWindow window)
-            {
-                window.WindowState = WindowState.Minimized;
-            });
 
             MenuSelectedCommand = new DelegateCommand<ListView>(delegate(ListView view)
             {

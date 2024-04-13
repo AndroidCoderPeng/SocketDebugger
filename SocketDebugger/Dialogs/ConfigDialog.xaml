@@ -54,7 +54,7 @@
                     Grid.Column="1"
                     VerticalContentAlignment="Center"
                     FontSize="16"
-                    Text="{Binding ConfigModel.Comment}" />
+                    Text="{Binding ConfigModel.ConnectionTitle}" />
             </Grid>
 
             <Grid Grid.Row="1" VerticalAlignment="Center">
@@ -71,7 +71,7 @@
                 <Label
                     Grid.Column="1"
                     Margin="-3,0,0,0"
-                    Content="{Binding ConfigModel.ConnType}"
+                    Content="{Binding ConfigModel.ConnectionType}"
                     FontSize="16" />
             </Grid>
 
@@ -90,7 +90,7 @@
                     Grid.Column="1"
                     VerticalContentAlignment="Center"
                     FontSize="16"
-                    Text="{Binding ConfigModel.ConnHost}" />
+                    Text="{Binding ConfigModel.ConnectionHost}" />
             </Grid>
 
             <Grid Grid.Row="3" VerticalAlignment="Center">
@@ -108,7 +108,7 @@
                     Grid.Column="1"
                     VerticalContentAlignment="Center"
                     FontSize="16"
-                    Text="{Binding ConfigModel.ConnPort}" />
+                    Text="{Binding ConfigModel.ConnectionPort}" />
             </Grid>
 
             <Grid Grid.Row="4" VerticalAlignment="Center">
@@ -127,7 +127,7 @@
                     Grid.Column="1"
                     FontSize="16"
                     ItemsSource="{Binding DataTypeArray}"
-                    SelectedItem="{Binding ConfigModel.MsgType}">
+                    SelectedItem="{Binding ConfigModel.MessageType}">
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
                             <b:InvokeCommandAction Command="{Binding DataTypeSelectedCommand}" CommandParameter="{Binding ElementName=DataTypeComboBox}" />
