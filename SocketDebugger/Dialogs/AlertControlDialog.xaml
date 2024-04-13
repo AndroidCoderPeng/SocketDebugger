@@ -9,7 +9,7 @@
     Width="350"
     Height="200"
     d:DataContext="{d:DesignInstance Type=vm:AlertControlDialogViewModel}"
-    Background="White"
+    Background="#F5F5F5"
     mc:Ignorable="d">
 
     <prism:Dialog.WindowStyle>

@@ -104,11 +104,21 @@
 
             <Grid Grid.Row="1" Background="LightGray" />
 
-            <UniformGrid Grid.Row="2" Columns="2">
-                <Button Command="{Binding AddConfigCommand}" Foreground="White">
+            <UniformGrid
+                Grid.Row="2"
+                Margin="1"
+                Columns="2">
+                <Button
+                    Command="{Binding AddConfigCommand}"
+                    Foreground="White"
+                    Style="{StaticResource MaterialDesignFlatMidBgButton}">
                     <materialDesign:PackIcon Kind="Plus" />
                 </Button>
-                <Button Command="{Binding DeleteConfigCommand}" Foreground="White">
+                <Button
+                    Margin="1,0"
+                    Command="{Binding DeleteConfigCommand}"
+                    Foreground="White"
+                    Style="{StaticResource MaterialDesignFlatMidBgButton}">
                     <materialDesign:PackIcon Kind="Minus" />
                 </Button>
             </UniformGrid>
@@ -213,7 +223,6 @@
             <!--  对话显示区域  -->
             <ListBox
                 Grid.Row="2"
-                Background="Transparent"
                 BorderThickness="0"
                 ItemsSource="{Binding ChatMessages}"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -235,7 +244,7 @@
 
             <Grid Grid.Row="3" Background="LightGray" />
 
-            <Grid Grid.Row="4" Background="Transparent">
+            <Grid Grid.Row="4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />

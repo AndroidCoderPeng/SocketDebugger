@@ -4,13 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     Width="400"
-    Height="480"
+    Height="450"
     d:DataContext="{d:DesignInstance Type=vm:ConfigDialogViewModel}"
+    Background="White"
     mc:Ignorable="d">
 
     <prism:Dialog.WindowStyle>
@@ -18,225 +18,197 @@
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
             <Setter Property="ShowInTaskbar" Value="False" />
             <Setter Property="SizeToContent" Value="WidthAndHeight" />
-            <Setter Property="WindowStyle" Value="None" />
-            <Setter Property="AllowsTransparency" Value="True" />
-            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="ResizeMode" Value="NoResize" />
         </Style>
     </prism:Dialog.WindowStyle>
 
-    <Border
-        Margin="3"
-        BorderBrush="{StaticResource DividerLineBrush}"
-        BorderThickness="1"
-        CornerRadius="10">
-        <Border.Background>
-            <LinearGradientBrush>
-                <GradientStop Offset="0" Color="{StaticResource PrimaryColor}" />
-                <GradientStop Offset="1" Color="{StaticResource AuxiliaryColor}" />
-            </LinearGradientBrush>
-        </Border.Background>
-        <Border.Effect>
-            <DropShadowEffect
-                BlurRadius="5"
-                Direction="0"
-                Opacity="0.5"
-                ShadowDepth="0"
-                Color="{StaticResource PrimaryColor}" />
-        </Border.Effect>
-        <Grid>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition />
-                <RowDefinition Height="Auto" />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Button
-                Grid.Row="0"
-                Width="15"
-                Height="15"
-                Margin="10,10,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Command="{Binding CloseWindowCommand}"
-                ToolTip="关闭">
-                <Button.Template>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border
-                            Name="PART_Background"
-                            Background="Red"
-                            BorderBrush="{TemplateBinding Control.BorderBrush}"
-                            BorderThickness="0"
-                            CornerRadius="7.5">
-                            <ContentPresenter
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Content="{TemplateBinding ContentControl.Content}" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="UIElement.IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.5" />
-                            </Trigger>
-                            <Trigger Property="ButtonBase.IsPressed" Value="True">
-                                <Setter Property="Opacity" Value="0.5" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
+            <Grid Grid.Row="0" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
 
-                <TextBlock
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontFamily="/SocketDebugger;component/IconFont/#iconfont"
-                    FontSize="12"
-                    Foreground="White"
-                    RenderTransformOrigin="0.5,0.5"
-                    Text="&#xe604;">
-                    <TextBlock.RenderTransform>
-                        <TransformGroup>
-                            <RotateTransform Angle="45" />
-                        </TransformGroup>
-                    </TextBlock.RenderTransform>
-                </TextBlock>
-            </Button>
+                <Label
+                    Grid.Column="0"
+                    Content="备注"
+                    FontSize="16" />
 
-            <Border Grid.Row="0" CornerRadius="10">
-                <StackPanel Orientation="Vertical">
-                    <DockPanel Margin="20,30">
-                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="备注" />
+                <TextBox
+                    Grid.Column="1"
+                    VerticalContentAlignment="Center"
+                    FontSize="16"
+                    Text="{Binding ConfigModel.Comment}" />
+            </Grid>
 
-                        <hc:TextBox
-                            Width="255"
-                            Padding="7"
-                            HorizontalAlignment="Left"
-                            VerticalContentAlignment="Center"
-                            hc:InfoElement.Placeholder="请输入备注"
-                            hc:InfoElement.ShowClearButton="True"
-                            Background="White"
-                            FontSize="16"
-                            Foreground="Black"
-                            Text="{Binding ConfigModel.Comment}" />
-                    </DockPanel>
+            <Grid Grid.Row="1" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
 
-                    <DockPanel Margin="20,0">
-                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="类型" />
+                <Label
+                    Grid.Column="0"
+                    Content="类型"
+                    FontSize="16" />
 
-                        <TextBlock
-                            Width="255"
-                            HorizontalAlignment="Left"
-                            FontWeight="Normal"
-                            Style="{StaticResource TextBlockStyle}"
-                            Text="{Binding ConfigModel.ConnType}"
-                            TextAlignment="Left" />
-                    </DockPanel>
+                <Label
+                    Grid.Column="1"
+                    Margin="-3,0,0,0"
+                    Content="{Binding ConfigModel.ConnType}"
+                    FontSize="16" />
+            </Grid>
 
-                    <DockPanel Margin="20">
-                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="主机地址" />
+            <Grid Grid.Row="2" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
 
-                        <hc:TextBox
-                            Width="255"
-                            Padding="7"
-                            HorizontalAlignment="Left"
-                            VerticalContentAlignment="Center"
-                            hc:InfoElement.Placeholder="如：127.0.0.1"
-                            hc:InfoElement.ShowClearButton="True"
-                            Background="White"
-                            FontSize="16"
-                            Foreground="Black"
-                            Text="{Binding ConfigModel.ConnHost}" />
-                    </DockPanel>
+                <Label
+                    Grid.Column="0"
+                    Content="主机地址"
+                    FontSize="16" />
 
-                    <DockPanel Margin="20,0">
-                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="端口" />
+                <TextBox
+                    Grid.Column="1"
+                    VerticalContentAlignment="Center"
+                    FontSize="16"
+                    Text="{Binding ConfigModel.ConnHost}" />
+            </Grid>
 
-                        <hc:TextBox
-                            Width="255"
-                            Padding="7"
-                            HorizontalAlignment="Left"
-                            VerticalContentAlignment="Center"
-                            hc:InfoElement.Placeholder="如：8080"
-                            hc:InfoElement.ShowClearButton="True"
-                            Background="White"
-                            FontSize="16"
-                            Foreground="Black"
-                            Text="{Binding ConfigModel.ConnPort}" />
-                    </DockPanel>
+            <Grid Grid.Row="3" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
 
-                    <DockPanel Margin="20">
-                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="数据类型" />
+                <Label
+                    Grid.Column="0"
+                    Content="端口"
+                    FontSize="16" />
 
-                        <ComboBox
-                            x:Name="DataTypeComboBox"
-                            Width="255"
-                            Padding="7"
-                            HorizontalAlignment="Left"
-                            Background="White"
-                            FontSize="16"
-                            ItemsSource="{Binding DataTypeArray}"
-                            SelectedItem="{Binding ConfigModel.MsgType}">
-                            <b:Interaction.Triggers>
-                                <b:EventTrigger EventName="SelectionChanged">
-                                    <b:InvokeCommandAction Command="{Binding DataTypeSelectedCommand}" CommandParameter="{Binding ElementName=DataTypeComboBox}" />
-                                </b:EventTrigger>
-                            </b:Interaction.Triggers>
-                        </ComboBox>
-                    </DockPanel>
+                <TextBox
+                    Grid.Column="1"
+                    VerticalContentAlignment="Center"
+                    FontSize="16"
+                    Text="{Binding ConfigModel.ConnPort}" />
+            </Grid>
 
-                    <DockPanel Margin="20,0">
-                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="重复发送" />
+            <Grid Grid.Row="4" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
 
-                        <hc:TextBox
-                            Width="225"
-                            Padding="7"
-                            HorizontalAlignment="Left"
-                            VerticalContentAlignment="Center"
-                            hc:InfoElement.Placeholder="如：1000（单位：毫秒）"
-                            hc:InfoElement.ShowClearButton="True"
-                            Background="White"
-                            FontSize="16"
-                            IsEnabled="{Binding ElementName=RepeatSendCheckBox, Path=IsChecked}"
-                            Text="{Binding ConfigModel.Message}" />
+                <Label
+                    Grid.Column="0"
+                    Content="数据类型"
+                    FontSize="16" />
 
-                        <CheckBox
-                            x:Name="RepeatSendCheckBox"
-                            Margin="10,0"
-                            VerticalContentAlignment="Center"
-                            FontSize="16"
-                            IsChecked="{Binding IsRepeatBoxChecked}" />
-                    </DockPanel>
+                <ComboBox
+                    x:Name="DataTypeComboBox"
+                    Grid.Column="1"
+                    FontSize="16"
+                    ItemsSource="{Binding DataTypeArray}"
+                    SelectedItem="{Binding ConfigModel.MsgType}">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="SelectionChanged">
+                            <b:InvokeCommandAction Command="{Binding DataTypeSelectedCommand}" CommandParameter="{Binding ElementName=DataTypeComboBox}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                </ComboBox>
+            </Grid>
 
-                    <DockPanel Margin="20">
-                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="时间间隔" />
+            <Grid Grid.Row="5" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
 
-                        <hc:TextBox
-                            Width="255"
-                            Padding="7"
-                            HorizontalAlignment="Left"
-                            VerticalContentAlignment="Center"
-                            hc:InfoElement.Placeholder="重复发送内容"
-                            hc:InfoElement.ShowClearButton="True"
-                            Background="White"
-                            FontSize="16"
-                            IsEnabled="{Binding ElementName=RepeatSendCheckBox, Path=IsChecked}"
-                            Text="{Binding ConfigModel.TimePeriod}" />
-                    </DockPanel>
-                </StackPanel>
-            </Border>
+                <Label
+                    Grid.Column="0"
+                    Content="重复发送"
+                    FontSize="16" />
 
-            <Button
-                Grid.Row="1"
-                Width="240"
-                Height="35"
-                Margin="20"
-                BorderThickness="0"
-                Command="{Binding SaveConfigCommand}"
-                Content="保存配置"
-                Style="{StaticResource ButtonPrimary}">
-                <Button.Background>
-                    <LinearGradientBrush>
-                        <GradientStop Offset="0" Color="{StaticResource ListPrimaryColor}" />
-                        <GradientStop Offset="1" Color="{StaticResource ListAuxiliaryColor}" />
-                    </LinearGradientBrush>
-                </Button.Background>
-            </Button>
+                <Grid Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox
+                        Grid.Column="0"
+                        FontSize="16"
+                        IsEnabled="{Binding ElementName=RepeatSendCheckBox, Path=IsChecked}"
+                        Text="{Binding ConfigModel.Message}" />
+
+                    <CheckBox
+                        x:Name="RepeatSendCheckBox"
+                        Grid.Column="1"
+                        Margin="10,0,0,0"
+                        VerticalContentAlignment="Center"
+                        FontSize="16"
+                        IsChecked="{Binding IsRepeatBoxChecked}" />
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Row="6" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
+
+                <Label
+                    Grid.Column="0"
+                    Content="间隔"
+                    FontSize="16" />
+
+                <Grid Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox
+                        Grid.Column="0"
+                        FontSize="16"
+                        IsEnabled="{Binding ElementName=RepeatSendCheckBox, Path=IsChecked}"
+                        Text="{Binding ConfigModel.TimePeriod}" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="10,0,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Text="ms" />
+                </Grid>
+            </Grid>
         </Grid>
-    </Border>
+
+        <Button
+            Grid.Row="1"
+            Width="200"
+            Margin="20"
+            Command="{Binding SaveConfigCommand}"
+            Content="保存配置"
+            Foreground="White" />
+    </Grid>
 </UserControl>

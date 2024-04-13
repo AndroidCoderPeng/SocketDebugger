@@ -328,7 +328,6 @@ namespace SocketDebugger.ViewModels
                         _webSocketClient.Closed -= WebSocketClosed;
 
                         _webSocketClient.Close();
-                        _webSocketClient = null;
                     }
                 }
                 catch (SocketException e)

@@ -1,9 +1,0 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Color x:Key="PrimaryColor">#404263</Color>
-    <Color x:Key="AuxiliaryColor">#3C525F</Color>
-
-    <Color x:Key="DividerLineColor">#98A6C5</Color>
-
-    <Color x:Key="ListPrimaryColor">#2B90CC</Color>
-    <Color x:Key="ListAuxiliaryColor">#5FCBCC</Color>
-</ResourceDictionary>
