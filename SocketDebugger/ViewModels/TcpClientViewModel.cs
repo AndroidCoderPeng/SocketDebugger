@@ -339,7 +339,7 @@ namespace SocketDebugger.ViewModels
 
             ClearMessageCommand = new DelegateCommand(delegate { ChatMessages.Clear(); });
 
-            SendMessageCommand = new DelegateCommand(delegate { SendMessage(_userInputText); });
+            SendMessageCommand = new DelegateCommand(SendMessage);
 
             //周期发送CheckBox选中、取消选中事件
             CycleCheckedCommand = new DelegateCommand(delegate
@@ -372,7 +372,7 @@ namespace SocketDebugger.ViewModels
                 }
             });
             //自动发消息
-            _timer.Tick += delegate { SendMessage(_userInputText); };
+            _timer.Tick += delegate { SendMessage(); };
             
             //TODO Test
             // ChatMessages.Add(new ChatMessageModel
@@ -456,9 +456,9 @@ namespace SocketDebugger.ViewModels
         /// <summary>
         /// 发送消息
         /// </summary>
-        private void SendMessage(string message)
+        private void SendMessage()
         {
-            if (string.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(_userInputText))
             {
                 "不能发送空消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 return;
@@ -472,18 +472,18 @@ namespace SocketDebugger.ViewModels
                     return;
                 }
 
-                _tcpClient.Send(message);
+                _tcpClient.Send(_userInputText);
 
                 ChatMessages.Add(new ChatMessageModel
                 {
                     MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                    Message = message,
+                    Message = _userInputText,
                     IsSend = true
                 });
             }
             else
             {
-                if (message.IsHex())
+                if (_userInputText.IsHex())
                 {
                     if (ConnectState == "未连接")
                     {
@@ -491,14 +491,14 @@ namespace SocketDebugger.ViewModels
                         return;
                     }
 
-                    var buffer = Encoding.UTF8.GetBytes(message);
+                    var buffer = Encoding.UTF8.GetBytes(_userInputText);
                     //以UTF-8的编码同步发送字符串
                     _tcpClient.Send(buffer);
 
                     ChatMessages.Add(new ChatMessageModel
                     {
                         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = message,
+                        Message = _userInputText,
                         IsSend = true
                     });
                 }

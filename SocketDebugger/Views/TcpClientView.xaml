@@ -301,7 +301,7 @@
 
                     <CheckBox
                         Grid.Column="0"
-                        Content="周期发送"
+                        Content="循环发送"
                         FontSize="14"
                         IsChecked="{Binding IsCycleChecked}">
                         <b:Interaction.Triggers>
