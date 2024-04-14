@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Windows.Controls;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
@@ -19,7 +18,7 @@ namespace SocketDebugger.ViewModels
 
         private ConnectionConfigModel _configModel;
 
-        public ConnectionConfigModel ConfigModel
+        public ConnectionConfigModel SelectedConfigModel
         {
             get => _configModel;
             set
@@ -35,18 +34,18 @@ namespace SocketDebugger.ViewModels
 
         #region DelegateCommand
 
-        public DelegateCommand<ComboBox> DataTypeSelectedCommand { set; get; }
+        public DelegateCommand<string> DataTypeSelectedCommand { set; get; }
         public DelegateCommand SaveConfigCommand { get; set; }
 
         #endregion
 
-        public ConfigDialogViewModel(IApplicationDataService dataService, IDialogService dialogService)
+        public ConfigDialogViewModel(IApplicationDataService dataService)
         {
             DataTypeArray = dataService.GetDataType();
 
-            DataTypeSelectedCommand = new DelegateCommand<ComboBox>(delegate(ComboBox box)
+            DataTypeSelectedCommand = new DelegateCommand<string>(delegate(string dataType)
             {
-                ConfigModel.MessageType = box.SelectedItem.ToString();
+                SelectedConfigModel.MessageType = dataType;
             });
 
             SaveConfigCommand = new DelegateCommand(delegate
@@ -81,7 +80,7 @@ namespace SocketDebugger.ViewModels
 
                 RequestClose?.Invoke(new DialogResult(ButtonResult.OK, new DialogParameters
                     {
-                        { "ConfigModel", _configModel }
+                        { "SelectedConfigModel", _configModel }
                     }
                 ));
             });
@@ -99,7 +98,7 @@ namespace SocketDebugger.ViewModels
         public void OnDialogOpened(IDialogParameters parameters)
         {
             Title = parameters.GetValue<string>("Title");
-            ConfigModel = parameters.GetValue<ConnectionConfigModel>("ConfigModel");
+            SelectedConfigModel = parameters.GetValue<ConnectionConfigModel>("SelectedConfigModel");
         }
     }
 }
