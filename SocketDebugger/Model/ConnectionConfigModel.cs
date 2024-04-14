@@ -31,15 +31,5 @@ namespace SocketDebugger.Model
         /// 消息类型，文本、Hex
         /// </summary>
         public string MessageType { get; set; }
-
-        /// <summary>
-        /// 消息内容
-        /// </summary>
-        public string Message { get; set; }
-
-        /// <summary>
-        /// 连发消息间隔
-        /// </summary>
-        public string TimePeriod { get; set; }
     }
 }

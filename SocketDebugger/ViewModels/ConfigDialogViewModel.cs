@@ -7,7 +7,6 @@ using Prism.Services.Dialogs;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
-using TouchSocket.Core;
 
 namespace SocketDebugger.ViewModels
 {
@@ -31,18 +30,6 @@ namespace SocketDebugger.ViewModels
         }
 
         public List<string> DataTypeArray { get; }
-
-        private bool _isRepeatBoxChecked;
-
-        public bool IsRepeatBoxChecked
-        {
-            get => _isRepeatBoxChecked;
-            set
-            {
-                _isRepeatBoxChecked = value;
-                RaisePropertyChanged();
-            }
-        }
 
         #endregion
 
@@ -83,33 +70,11 @@ namespace SocketDebugger.ViewModels
                             ConnectionPort = _configModel.ConnectionPort,
                             MessageType = _configModel.MessageType
                         };
-                        if (IsRepeatBoxChecked)
-                        {
-                            if (_configModel.Message.IsNullOrEmpty() || _configModel.TimePeriod.IsNullOrEmpty())
-                            {
-                                dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                                    {
-                                        { "AlertType", AlertType.Warning }, { "Message", "请完善需要连续发送的信息" }
-                                    },
-                                    delegate { }
-                                );
-                                return;
-                            }
-
-                            configModel.Message = _configModel.Message;
-                            configModel.TimePeriod = _configModel.TimePeriod;
-                        }
 
                         manager.Insert(configModel);
                     }
                     else
                     {
-                        if (!IsRepeatBoxChecked)
-                        {
-                            _configModel.Message = null;
-                            _configModel.TimePeriod = null;
-                        }
-
                         manager.Update(_configModel);
                     }
                 }
@@ -135,14 +100,6 @@ namespace SocketDebugger.ViewModels
         {
             Title = parameters.GetValue<string>("Title");
             ConfigModel = parameters.GetValue<ConnectionConfigModel>("ConfigModel");
-            if (ConfigModel.Message != null || ConfigModel.TimePeriod != null)
-            {
-                IsRepeatBoxChecked = true;
-            }
-            else
-            {
-                IsRepeatBoxChecked = false;
-            }
         }
     }
 }

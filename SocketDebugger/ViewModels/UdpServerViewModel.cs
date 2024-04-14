@@ -257,13 +257,13 @@ namespace SocketDebugger.ViewModels
                                 _timer.Stop();
                             }
 
-                            if (ConfigModel.TimePeriod == null)
-                            {
-                                return;
-                            }
-
-                            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                            _timer.Start();
+                            // if (ConfigModel.TimePeriod == null)
+                            // {
+                            //     return;
+                            // }
+                            //
+                            // _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                            // _timer.Start();
                         }
                     }
                 );
@@ -336,13 +336,13 @@ namespace SocketDebugger.ViewModels
                                     _timer.Stop();
                                 }
 
-                                if (ConfigModel.TimePeriod == null)
-                                {
-                                    return;
-                                }
-
-                                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                                _timer.Start();
+                                // if (ConfigModel.TimePeriod == null)
+                                // {
+                                //     return;
+                                // }
+                                //
+                                // _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+                                // _timer.Start();
                             }
                         }
                     );
@@ -404,7 +404,7 @@ namespace SocketDebugger.ViewModels
             SendMessageCommand = new DelegateCommand(delegate { SendMessage(_userInputText); });
 
             //自动发消息
-            _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
+            // _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
         }
 
         /// <summary>

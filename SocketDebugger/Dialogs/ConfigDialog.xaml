@@ -9,7 +9,7 @@
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     Width="400"
-    Height="450"
+    Height="400"
     d:DataContext="{d:DesignInstance Type=vm:ConfigDialogViewModel}"
     Background="White"
     mc:Ignorable="d">
@@ -31,8 +31,6 @@
 
         <Grid Grid.Row="0" Margin="20">
             <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
@@ -141,74 +139,6 @@
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
                 </ComboBox>
-            </Grid>
-
-            <Grid Grid.Row="5" VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="3*" />
-                </Grid.ColumnDefinitions>
-
-                <Label
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    Content="重复发送"
-                    FontSize="16" />
-
-                <Grid Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <TextBox
-                        Grid.Column="0"
-                        FontSize="16"
-                        IsEnabled="{Binding ElementName=RepeatSendCheckBox, Path=IsChecked}"
-                        Text="{Binding ConfigModel.Message}" />
-
-                    <CheckBox
-                        x:Name="RepeatSendCheckBox"
-                        Grid.Column="1"
-                        Margin="10,0,0,0"
-                        VerticalContentAlignment="Center"
-                        FontSize="16"
-                        IsChecked="{Binding IsRepeatBoxChecked}" />
-                </Grid>
-            </Grid>
-
-            <Grid Grid.Row="6" VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="3*" />
-                </Grid.ColumnDefinitions>
-
-                <Label
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    Content="间隔"
-                    FontSize="16" />
-
-                <Grid Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <TextBox
-                        Grid.Column="0"
-                        FontSize="16"
-                        IsEnabled="{Binding ElementName=RepeatSendCheckBox, Path=IsChecked}"
-                        Text="{Binding ConfigModel.TimePeriod}" />
-
-                    <TextBlock
-                        Grid.Column="1"
-                        Margin="10,0,0,0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        Text="ms" />
-                </Grid>
             </Grid>
         </Grid>
 
