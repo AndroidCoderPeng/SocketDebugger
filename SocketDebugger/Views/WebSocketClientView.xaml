@@ -5,8 +5,8 @@
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:cvt="clr-namespace:SocketDebugger.Converts"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:ut="clr-namespace:SocketDebugger.Utils"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:WebSocketClientViewModel}"
@@ -112,14 +112,14 @@
                     Command="{Binding AddConfigCommand}"
                     Foreground="White"
                     Style="{StaticResource MaterialDesignFlatMidBgButton}">
-                    <materialDesign:PackIcon Kind="Plus" />
+                    <md:PackIcon Kind="Plus" />
                 </Button>
                 <Button
                     Margin="1,0"
                     Command="{Binding DeleteConfigCommand}"
                     Foreground="White"
                     Style="{StaticResource MaterialDesignFlatMidBgButton}">
-                    <materialDesign:PackIcon Kind="Minus" />
+                    <md:PackIcon Kind="Minus" />
                 </Button>
             </UniformGrid>
         </Grid>
@@ -287,11 +287,12 @@
 
                     <TextBox
                         Grid.Column="1"
-                        Width="60"
+                        Width="80"
                         Height="25"
                         Margin="10,0"
                         Padding="3,0"
                         VerticalContentAlignment="Center"
+                        md:TextFieldAssist.HasClearButton="True"
                         FontSize="14"
                         Style="{StaticResource MaterialDesignOutlinedTextBox}" />
 
