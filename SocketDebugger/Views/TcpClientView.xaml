@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:ut="clr-namespace:SocketDebugger.Utils"
+    xmlns:util="clr-namespace:SocketDebugger.Utils"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:TcpClientViewModel}"
     d:DesignHeight="600"
@@ -17,8 +17,10 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <cvt:ViewVisibilityConvert x:Key="ViewConvert" />
-            <cvt:EmptyVisibilityConvert x:Key="EmptyConvert" />
+            <cvt:ViewVisibilityConvert x:Key="ViewVisibilityConvertKey" />
+            <cvt:EmptyVisibilityConvert x:Key="EmptyVisibilityConvertKey" />
+
+            <util:ChatBubbleSelector x:Key="ChatBubbleSelectorKey" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -41,7 +43,7 @@
                 <StackPanel
                     VerticalAlignment="Center"
                     Orientation="Vertical"
-                    Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyConvert}}">
+                    Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyVisibilityConvertKey}}">
                     <Image Source="/SocketDebugger;component/Images/empty.png" />
 
                     <TextBlock
@@ -63,7 +65,7 @@
                     BorderThickness="0"
                     ItemsSource="{Binding ConfigModels}"
                     SelectedIndex="{Binding Index}"
-                    Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewConvert}}">
+                    Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewVisibilityConvertKey}}">
 
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
@@ -126,7 +128,7 @@
 
         <Grid Grid.Column="1" Background="LightGray" />
 
-        <Grid Grid.Column="2" Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewConvert}}">
+        <Grid Grid.Column="2" Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewVisibilityConvertKey}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="1" />
@@ -223,26 +225,43 @@
             <Grid Grid.Row="1" Background="LightGray" />
 
             <!--  对话显示区域  -->
-            <ListBox
+            <ListView
                 Grid.Row="2"
                 BorderThickness="0"
+                ItemTemplateSelector="{StaticResource ChatBubbleSelectorKey}"
                 ItemsSource="{Binding ChatMessages}"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListBoxItem}" />
-                </ListBox.ItemContainerStyle>
-
-                <!--  接收、发送消息数据选择器  -->
-                <ListBox.ItemTemplateSelector>
-                    <ut:ChatBubbleSelector />
-                </ListBox.ItemTemplateSelector>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                    <Border
+                                        Name="ItemBorder"
+                                        Padding="{TemplateBinding Padding}"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        SnapsToDevicePixels="true">
+                                        <ContentPresenter
+                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    </Style>
+                </ListView.ItemContainerStyle>
 
                 <!--  绑定自定义行为  -->
                 <b:Interaction.Behaviors>
-                    <ut:AutoScrollBehavior />
+                    <util:AutoScrollBehavior />
                 </b:Interaction.Behaviors>
-            </ListBox>
+            </ListView>
 
             <Grid Grid.Row="3" Background="LightGray" />
 
@@ -330,7 +349,7 @@
             Grid.Column="2"
             VerticalAlignment="Center"
             Orientation="Vertical"
-            Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyConvert}}">
+            Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyVisibilityConvertKey}}">
             <Image Source="/SocketDebugger;component/Images/empty.png" />
         </StackPanel>
     </Grid>

@@ -279,6 +279,7 @@
     <Page Include="Dialogs\AlertControlDialog.xaml" />
     <Page Include="Dialogs\AlertMessageDialog.xaml" />
     <Page Include="Dialogs\ConfigDialog.xaml" />
+    <Page Include="Styles\ChatMessageDataTemplate.xaml" />
     <Page Include="Views\SerialPortView.xaml">
       <SubType>Designer</SubType>
     </Page>

@@ -12,10 +12,10 @@ namespace SocketDebugger.Utils
             var message = (ChatMessageModel)item;
             if (message != null && message.IsSend)
             {
-                return element.FindResource("ChatSendTemplate") as DataTemplate;
+                return element.FindResource("ChatSendDataTemplateKey") as DataTemplate;
             }
 
-            return element.FindResource("ChatReceiveTemplate") as DataTemplate;
+            return element.FindResource("ChatReceiveDataTemplateKey") as DataTemplate;
         }
     }
 }

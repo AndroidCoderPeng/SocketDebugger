@@ -285,59 +285,51 @@ namespace SocketDebugger.ViewModels
 
             ConnectServerCommand = new DelegateCommand(delegate
             {
-                if (SelectedConfigModel == null)
-                {
-                    "无配置项，无法连接服务端".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
-                }
-                else
-                {
-                    //声明配置
-                    var config = new TouchSocketConfig();
-                    config.SetRemoteIPHost(new IPHost(
-                        SelectedConfigModel.ConnectionHost + ":" + SelectedConfigModel.ConnectionPort)
-                    ).UsePlugin().ConfigurePlugins(
-                        manager => { manager.UseReconnection(5, true, 3000); }
-                    );
+                //声明配置
+                var config = new TouchSocketConfig();
+                config.SetRemoteIPHost(new IPHost(
+                    _selectedConfigModel.ConnectionHost + ":" + _selectedConfigModel.ConnectionPort)
+                ).UsePlugin().ConfigurePlugins(
+                    manager => { manager.UseReconnection(5, true, 3000); }
+                );
 
-                    //载入配置
-                    _tcpClient.Setup(config);
-                    try
+                //载入配置
+                _tcpClient.Setup(config);
+                try
+                {
+                    if (_connectButtonState == "连接")
                     {
-                        if (_connectButtonState == "连接")
-                        {
-                            _tcpClient.Connect();
-                        }
-                        else
-                        {
-                            _tcpClient.Close();
-                        }
+                        _tcpClient.Connect();
                     }
-                    catch (SocketException e)
+                    else
                     {
-                        e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                        _tcpClient.Close();
                     }
+                }
+                catch (SocketException e)
+                {
+                    e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             });
 
             ClearMessageCommand = new DelegateCommand(delegate { ChatMessages.Clear(); });
 
             SendMessageCommand = new DelegateCommand(delegate { SendMessage(_userInputText); });
-
-            //自动发消息
-            // _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
-
-            // if (_timer.IsEnabled)
+            
+            //TODO Test
+            // ChatMessages.Add(new ChatMessageModel
             // {
-            //     _timer.Stop();
-            // }
+            //     MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+            //     Message = "发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息",
+            //     IsSend = true
+            // });
             //
-            // if (ConfigModel.TimePeriod == null)
+            // ChatMessages.Add(new ChatMessageModel
             // {
-            //     return;
-            // }
-            //
-            // _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-            // _timer.Start();
+            //     MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+            //     Message = "接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息",
+            //     IsSend = false
+            // });
         }
 
         private void InitMessageType(int index)
