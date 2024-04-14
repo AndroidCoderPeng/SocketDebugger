@@ -62,12 +62,12 @@
                     x:Name="ConfigListView"
                     BorderThickness="0"
                     ItemsSource="{Binding ConfigModels}"
-                    SelectedIndex="0"
+                    SelectedIndex="{Binding Index}"
                     Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewConvert}}">
 
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
-                            <b:InvokeCommandAction Command="{Binding ConfigItemSelectedCommand}" CommandParameter="{Binding ElementName=ConfigListView}" />
+                            <b:InvokeCommandAction Command="{Binding ConfigItemSelectedCommand}" CommandParameter="{Binding ElementName=ConfigListView, Path=SelectedItem}" />
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
 
@@ -155,7 +155,7 @@
                         Margin="10,0"
                         VerticalAlignment="Center"
                         FontSize="16"
-                        Text="{Binding ConfigModel.ConnectionTitle}" />
+                        Text="{Binding SelectedConfigModel.ConnectionTitle}" />
 
                     <TextBlock
                         Grid.Row="1"
@@ -164,8 +164,8 @@
                         <!--  多重绑定  -->
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0}:{1}">
-                                <Binding Path="ConfigModel.ConnectionHost" />
-                                <Binding Path="ConfigModel.ConnectionPort" />
+                                <Binding Path="SelectedConfigModel.ConnectionHost" />
+                                <Binding Path="SelectedConfigModel.ConnectionPort" />
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>

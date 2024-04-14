@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Threading;
 using Prism.Commands;
 using Prism.Events;
@@ -36,14 +35,26 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private ConnectionConfigModel _configModel;
+        private ConnectionConfigModel _selectedConfigModel;
 
-        public ConnectionConfigModel ConfigModel
+        public ConnectionConfigModel SelectedConfigModel
         {
-            get => _configModel;
+            get => _selectedConfigModel;
             private set
             {
-                _configModel = value;
+                _selectedConfigModel = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private int _index;
+
+        public int Index
+        {
+            get => _index;
+            set
+            {
+                _index = value;
                 RaisePropertyChanged();
             }
         }
@@ -136,7 +147,7 @@ namespace SocketDebugger.ViewModels
 
         #region DelegateCommand
 
-        public DelegateCommand<ListView> ConfigItemSelectedCommand { get; set; }
+        public DelegateCommand<ConnectionConfigModel> ConfigItemSelectedCommand { get; set; }
         public DelegateCommand AddConfigCommand { get; set; }
         public DelegateCommand DeleteConfigCommand { get; set; }
         public DelegateCommand EditConfigCommand { get; set; }
@@ -148,6 +159,7 @@ namespace SocketDebugger.ViewModels
 
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
+        private readonly IEventAggregator _eventAggregator;
         private readonly TcpClient _tcpClient = new TcpClient();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
 
@@ -156,48 +168,14 @@ namespace SocketDebugger.ViewModels
         {
             _dataService = dataService;
             _dialogService = dialogService;
+            _eventAggregator = eventAggregator;
 
             InitMessageType(0);
-            eventAggregator.GetEvent<MainMenuSelectedEvent>().Subscribe(InitMessageType);
 
-            _tcpClient.Connected += delegate
-            {
-                ConnectColorBrush = "LimeGreen";
-                ConnectState = "已连接";
-                ConnectButtonState = "断开";
-            };
-            _tcpClient.Disconnected += delegate
-            {
-                ConnectColorBrush = "DarkGray";
-                ConnectState = "未连接";
-                ConnectButtonState = "连接";
+            InitDelegate();
 
-                if (_timer.IsEnabled)
-                {
-                    _timer.Stop();
-                }
-            };
-            _tcpClient.Received += delegate(TcpClient client, ByteBlock block, IRequestInfo info)
-            {
-                var message = _isTextChecked
-                    ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
-                    : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
-
-                Application.Current.Dispatcher.Invoke(delegate
-                {
-                    ChatMessages.Add(new ChatMessageModel
-                    {
-                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = message,
-                        IsSend = false
-                    });
-                });
-            };
-
-            ConfigItemSelectedCommand = new DelegateCommand<ListView>(delegate(ListView view)
-            {
-                ConfigModel = view.SelectedItem as ConnectionConfigModel;
-            });
+            ConfigItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(
+                delegate(ConnectionConfigModel configModel) { SelectedConfigModel = configModel; });
 
             AddConfigCommand = new DelegateCommand(delegate
             {
@@ -211,7 +189,7 @@ namespace SocketDebugger.ViewModels
 
                 _dialogService.ShowDialog("ConfigDialog", new DialogParameters
                     {
-                        { "Title", "添加配置" }, { "ConfigModel", configModel }
+                        { "Title", "添加配置" }, { "SelectedConfigModel", configModel }
                     },
                     delegate(IDialogResult result)
                     {
@@ -220,9 +198,13 @@ namespace SocketDebugger.ViewModels
                             //更新列表
                             ConfigModels = dataService.GetConfigModels();
 
-                            ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
+                            //选中最新添加的数据
+                            Index = ConfigModels.Count - 1;
 
-                            if (ConfigModel.MessageType == "文本")
+                            //更新最右侧面板
+                            SelectedConfigModel =
+                                result.Parameters.GetValue<ConnectionConfigModel>("SelectedConfigModel");
+                            if (SelectedConfigModel.MessageType == "文本")
                             {
                                 IsTextChecked = true;
                             }
@@ -230,19 +212,6 @@ namespace SocketDebugger.ViewModels
                             {
                                 IsHexChecked = true;
                             }
-
-                            // if (_timer.IsEnabled)
-                            // {
-                            //     _timer.Stop();
-                            // }
-                            //
-                            // if (ConfigModel.TimePeriod == null)
-                            // {
-                            //     return;
-                            // }
-                            //
-                            // _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                            // _timer.Start();
                         }
                     }
                 );
@@ -262,13 +231,15 @@ namespace SocketDebugger.ViewModels
                             {
                                 using (var manager = new DataBaseManager())
                                 {
-                                    manager.Delete(ConfigModel);
+                                    manager.Delete(ConfigModels[_index]);
                                 }
 
                                 ConfigModels = dataService.GetConfigModels();
                                 if (ConfigModels.Any())
                                 {
-                                    ConfigModel = ConfigModels[0];
+                                    SelectedConfigModel = ConfigModels[0];
+                                    //选中第一条
+                                    Index = 0;
                                 }
                             }
                         }
@@ -282,55 +253,39 @@ namespace SocketDebugger.ViewModels
 
             EditConfigCommand = new DelegateCommand(delegate
             {
-                if (ConfigModel == null)
-                {
-                    "无配置项，无法编辑".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
-                }
-                else
-                {
-                    _dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                var tempIndex = _index;
+                _dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                    {
+                        { "Title", "编辑配置" }, { "SelectedConfigModel", _selectedConfigModel }
+                    },
+                    delegate(IDialogResult result)
+                    {
+                        if (result.Result == ButtonResult.OK)
                         {
-                            { "Title", "编辑配置" }, { "ConfigModel", _configModel }
-                        },
-                        delegate(IDialogResult result)
-                        {
-                            if (result.Result == ButtonResult.OK)
+                            //更新列表
+                            ConfigModels = dataService.GetConfigModels();
+
+                            //Index保持不变
+                            Index = tempIndex;
+
+                            SelectedConfigModel =
+                                result.Parameters.GetValue<ConnectionConfigModel>("SelectedConfigModel");
+                            if (SelectedConfigModel.MessageType == "文本")
                             {
-                                //更新列表
-                                ConfigModels = dataService.GetConfigModels();
-
-                                ConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConfigModel");
-
-                                if (ConfigModel.MessageType == "文本")
-                                {
-                                    IsTextChecked = true;
-                                }
-                                else
-                                {
-                                    IsHexChecked = true;
-                                }
-
-                                if (_timer.IsEnabled)
-                                {
-                                    _timer.Stop();
-                                }
-
-                                // if (ConfigModel.TimePeriod == null)
-                                // {
-                                //     return;
-                                // }
-                                //
-                                // _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
-                                // _timer.Start();
+                                IsTextChecked = true;
+                            }
+                            else
+                            {
+                                IsHexChecked = true;
                             }
                         }
-                    );
-                }
+                    }
+                );
             });
 
             ConnectServerCommand = new DelegateCommand(delegate
             {
-                if (ConfigModel == null)
+                if (SelectedConfigModel == null)
                 {
                     "无配置项，无法连接服务端".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
                 }
@@ -338,9 +293,11 @@ namespace SocketDebugger.ViewModels
                 {
                     //声明配置
                     var config = new TouchSocketConfig();
-                    config.SetRemoteIPHost(new IPHost(ConfigModel.ConnectionHost + ":" + ConfigModel.ConnectionPort))
-                        .UsePlugin()
-                        .ConfigurePlugins(manager => { manager.UseReconnection(5, true, 3000); });
+                    config.SetRemoteIPHost(new IPHost(
+                        SelectedConfigModel.ConnectionHost + ":" + SelectedConfigModel.ConnectionPort)
+                    ).UsePlugin().ConfigurePlugins(
+                        manager => { manager.UseReconnection(5, true, 3000); }
+                    );
 
                     //载入配置
                     _tcpClient.Setup(config);
@@ -368,6 +325,19 @@ namespace SocketDebugger.ViewModels
 
             //自动发消息
             // _timer.Tick += delegate { SendMessage(ConfigModel.Message); };
+
+            // if (_timer.IsEnabled)
+            // {
+            //     _timer.Stop();
+            // }
+            //
+            // if (ConfigModel.TimePeriod == null)
+            // {
+            //     return;
+            // }
+            //
+            // _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(ConfigModel.TimePeriod));
+            // _timer.Start();
         }
 
         private void InitMessageType(int index)
@@ -375,8 +345,11 @@ namespace SocketDebugger.ViewModels
             ConfigModels = _dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
-                ConfigModel = ConfigModels[index];
-                if (ConfigModel.MessageType == "文本")
+                //选中第一条
+                Index = 0;
+
+                SelectedConfigModel = ConfigModels[index];
+                if (SelectedConfigModel.MessageType == "文本")
                 {
                     IsTextChecked = true;
                     IsHexChecked = false;
@@ -387,6 +360,47 @@ namespace SocketDebugger.ViewModels
                     IsHexChecked = true;
                 }
             }
+        }
+
+        private void InitDelegate()
+        {
+            _eventAggregator.GetEvent<MainMenuSelectedEvent>().Subscribe(InitMessageType);
+
+            _tcpClient.Connected += delegate
+            {
+                ConnectColorBrush = "LimeGreen";
+                ConnectState = "已连接";
+                ConnectButtonState = "断开";
+            };
+
+            _tcpClient.Disconnected += delegate
+            {
+                ConnectColorBrush = "DarkGray";
+                ConnectState = "未连接";
+                ConnectButtonState = "连接";
+
+                if (_timer.IsEnabled)
+                {
+                    _timer.Stop();
+                }
+            };
+
+            _tcpClient.Received += delegate(TcpClient client, ByteBlock block, IRequestInfo info)
+            {
+                var message = _isTextChecked
+                    ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
+                    : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
+
+                Application.Current.Dispatcher.Invoke(delegate
+                {
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = message,
+                        IsSend = false
+                    });
+                });
+            };
         }
 
         /// <summary>

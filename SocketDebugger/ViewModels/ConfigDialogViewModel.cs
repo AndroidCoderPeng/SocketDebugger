@@ -63,7 +63,7 @@ namespace SocketDebugger.ViewModels
                         var configModel = new ConnectionConfigModel
                         {
                             Uuid = Guid.NewGuid().ToString("N"),
-                            ConnectionTitle = _configModel.ConnectionTitle,
+                            ConnectionTitle = _configModel.ConnectionTitle.Trim(),
                             ConnectionType = _configModel.ConnectionType,
                             ConnectionHost = _configModel.ConnectionHost,
                             ConnectionPort = _configModel.ConnectionPort,
