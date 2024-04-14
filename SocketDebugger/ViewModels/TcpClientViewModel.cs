@@ -143,6 +143,29 @@ namespace SocketDebugger.ViewModels
             }
         }
 
+        private string _messageCycleTime = string.Empty;
+
+        public string MessageCycleTime
+        {
+            get => _messageCycleTime;
+            set
+            {
+                _messageCycleTime = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _isCycleChecked;
+
+        public bool IsCycleChecked
+        {
+            get => _isCycleChecked;
+            set
+            {
+                _isCycleChecked = value;
+                RaisePropertyChanged();
+            }
+        }
         #endregion
 
         #region DelegateCommand
@@ -154,6 +177,8 @@ namespace SocketDebugger.ViewModels
         public DelegateCommand ConnectServerCommand { get; set; }
         public DelegateCommand ClearMessageCommand { get; set; }
         public DelegateCommand SendMessageCommand { get; set; }
+        public DelegateCommand CycleCheckedCommand { get; set; }
+        public DelegateCommand CycleUncheckedCommand { get; set; }
 
         #endregion
 
@@ -315,6 +340,39 @@ namespace SocketDebugger.ViewModels
             ClearMessageCommand = new DelegateCommand(delegate { ChatMessages.Clear(); });
 
             SendMessageCommand = new DelegateCommand(delegate { SendMessage(_userInputText); });
+
+            //周期发送CheckBox选中、取消选中事件
+            CycleCheckedCommand = new DelegateCommand(delegate
+            {
+                //判断周期时间是否为空
+                if (_messageCycleTime.IsNullOrWhiteSpace())
+                {
+                    "请先设置周期发送的时间间隔".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    IsCycleChecked = false;
+                    return;
+                }
+
+                //判断周期时间是否是数字
+                if (!_messageCycleTime.IsNumber())
+                {
+                    "时间间隔只能是数字".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    IsCycleChecked = false;
+                    return;
+                }
+
+                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(_messageCycleTime));
+                _timer.Start();
+            });
+            CycleUncheckedCommand = new DelegateCommand(delegate
+            {
+                //停止timer
+                if (_timer.IsEnabled)
+                {
+                    _timer.Stop();
+                }
+            });
+            //自动发消息
+            _timer.Tick += delegate { SendMessage(_userInputText); };
             
             //TODO Test
             // ChatMessages.Add(new ChatMessageModel

@@ -12,6 +12,11 @@ namespace SocketDebugger.Utils
         {
             return new Regex(@"[A-Fa-f0-9]+$").IsMatch(s);
         }
+        
+        public static bool IsNumber(this string s)
+        {
+            return new Regex(@"^\d+$").IsMatch(s);
+        }
 
         /// <summary>
         /// 显示普通提示对话框
