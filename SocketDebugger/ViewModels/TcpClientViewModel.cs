@@ -166,6 +166,7 @@ namespace SocketDebugger.ViewModels
                 RaisePropertyChanged();
             }
         }
+
         #endregion
 
         #region DelegateCommand
@@ -373,21 +374,6 @@ namespace SocketDebugger.ViewModels
             });
             //自动发消息
             _timer.Tick += delegate { SendMessage(); };
-            
-            //TODO Test
-            // ChatMessages.Add(new ChatMessageModel
-            // {
-            //     MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-            //     Message = "发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息发送的消息",
-            //     IsSend = true
-            // });
-            //
-            // ChatMessages.Add(new ChatMessageModel
-            // {
-            //     MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-            //     Message = "接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息接收的消息",
-            //     IsSend = false
-            // });
         }
 
         private void InitMessageType(int index)
@@ -491,9 +477,18 @@ namespace SocketDebugger.ViewModels
                         return;
                     }
 
-                    var buffer = Encoding.UTF8.GetBytes(_userInputText);
+                    if (_userInputText.Contains(" "))
+                    {
+                        _userInputText = _userInputText.Replace(" ", "");
+                    }
+                    else if (_userInputText.Contains("-"))
+                    {
+                        _userInputText = _userInputText.Replace("-", "");
+                    }
+
                     //以UTF-8的编码同步发送字符串
-                    _tcpClient.Send(buffer);
+                    var bytes = Encoding.UTF8.GetBytes(_userInputText);
+                    _tcpClient.Send(bytes);
 
                     ChatMessages.Add(new ChatMessageModel
                     {
