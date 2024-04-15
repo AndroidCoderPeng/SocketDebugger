@@ -188,6 +188,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converts\ListConvert.cs" />
+    <Compile Include="Converts\SendMessageButtonStateConvert.cs" />
     <Compile Include="Converts\ViewVisibilityConvert.cs" />
     <Compile Include="Converts\EmptyVisibilityConvert.cs" />
     <Compile Include="Dialogs\AlertControlDialog.xaml.cs">

@@ -15,6 +15,12 @@
     Background="White"
     mc:Ignorable="d">
 
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
@@ -134,7 +140,7 @@
                         Width="20"
                         Height="20"
                         Margin="0,0,15,0"
-                        Fill="Lime" />
+                        Fill="LimeGreen" />
 
                     <Button
                         Grid.Column="1"
@@ -268,7 +274,8 @@
                     Margin="5,0"
                     Command="{Binding SendMessageCommand}"
                     Content="发送"
-                    Foreground="White" />
+                    Foreground="White"
+                    IsEnabled="{Binding IsCycleChecked, Converter={StaticResource SendMessageButtonStateConvertKey}}" />
             </Grid>
 
             <Grid Grid.Row="5" Background="LightGray" />

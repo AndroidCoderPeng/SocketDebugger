@@ -17,8 +17,9 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <cvt:ViewVisibilityConvert x:Key="ViewConvert" />
-            <cvt:EmptyVisibilityConvert x:Key="EmptyConvert" />
+            <cvt:ViewVisibilityConvert x:Key="ViewVisibilityConvertKey" />
+            <cvt:EmptyVisibilityConvert x:Key="EmptyVisibilityConvertKey" />
+            <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -41,7 +42,7 @@
                 <StackPanel
                     VerticalAlignment="Center"
                     Orientation="Vertical"
-                    Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyConvert}}">
+                    Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyVisibilityConvertKey}}">
                     <Image Source="/SocketDebugger;component/Images/empty.png" />
 
                     <TextBlock
@@ -63,7 +64,7 @@
                     BorderThickness="0"
                     ItemsSource="{Binding ConfigModels}"
                     SelectedIndex="0"
-                    Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewConvert}}">
+                    Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewVisibilityConvertKey}}">
 
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
@@ -126,7 +127,7 @@
 
         <Grid Grid.Column="1" Background="LightGray" />
 
-        <Grid Grid.Column="2" Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewConvert}}">
+        <Grid Grid.Column="2" Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewVisibilityConvertKey}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="1" />
@@ -302,7 +303,8 @@
                     Margin="5,0"
                     Command="{Binding SendMessageCommand}"
                     Content="发送"
-                    Foreground="White" />
+                    Foreground="White"
+                    IsEnabled="{Binding IsCycleChecked, Converter={StaticResource SendMessageButtonStateConvertKey}}" />
             </Grid>
 
             <Grid Grid.Row="5" Background="LightGray" />
@@ -323,7 +325,7 @@
             Grid.Column="2"
             VerticalAlignment="Center"
             Orientation="Vertical"
-            Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyConvert}}">
+            Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyVisibilityConvertKey}}">
             <Image Source="/SocketDebugger;component/Images/empty.png" />
         </StackPanel>
     </Grid>

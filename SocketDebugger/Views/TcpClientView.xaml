@@ -19,6 +19,7 @@
         <ResourceDictionary>
             <cvt:ViewVisibilityConvert x:Key="ViewVisibilityConvertKey" />
             <cvt:EmptyVisibilityConvert x:Key="EmptyVisibilityConvertKey" />
+            <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
 
             <util:ChatBubbleSelector x:Key="ChatBubbleSelectorKey" />
         </ResourceDictionary>
@@ -340,7 +341,8 @@
                     Margin="5,0"
                     Command="{Binding SendMessageCommand}"
                     Content="发送"
-                    Foreground="White" />
+                    Foreground="White"
+                    IsEnabled="{Binding IsCycleChecked, Converter={StaticResource SendMessageButtonStateConvertKey}}" />
             </Grid>
 
             <Grid Grid.Row="5" Background="LightGray" />
