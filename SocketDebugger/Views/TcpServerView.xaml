@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:ut="clr-namespace:SocketDebugger.Utils"
+    xmlns:util="clr-namespace:SocketDebugger.Utils"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:TcpServerViewModel}"
     d:DesignHeight="600"
@@ -20,6 +20,8 @@
             <cvt:ViewVisibilityConvert x:Key="ViewVisibilityConvertKey" />
             <cvt:EmptyVisibilityConvert x:Key="EmptyVisibilityConvertKey" />
             <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
+
+            <util:ChatBubbleSelector x:Key="ChatBubbleSelectorKey" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -63,12 +65,12 @@
                     x:Name="ConfigListView"
                     BorderThickness="0"
                     ItemsSource="{Binding ConfigModels}"
-                    SelectedIndex="0"
+                    SelectedIndex="{Binding Index}"
                     Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewVisibilityConvertKey}}">
 
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
-                            <b:InvokeCommandAction Command="{Binding ConfigItemSelectedCommand}" CommandParameter="{Binding ElementName=ConfigListView}" />
+                            <b:InvokeCommandAction Command="{Binding ConfigItemSelectedCommand}" CommandParameter="{Binding ElementName=ConfigListView, Path=SelectedItem}" />
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
 
@@ -156,7 +158,7 @@
                         Margin="10,0"
                         VerticalAlignment="Center"
                         FontSize="16"
-                        Text="{Binding ConfigModel.ConnectionTitle}" />
+                        Text="{Binding SelectedConfigModel.ConnectionTitle}" />
 
                     <TextBlock
                         Grid.Row="1"
@@ -165,8 +167,8 @@
                         <!--  多重绑定  -->
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0}:{1}">
-                                <Binding Path="ConfigModel.ConnectionHost" />
-                                <Binding Path="ConfigModel.ConnectionPort" />
+                                <Binding Path="SelectedConfigModel.ConnectionHost" />
+                                <Binding Path="SelectedConfigModel.ConnectionPort" />
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>
@@ -231,26 +233,43 @@
                     <ColumnDefinition Width="160" />
                 </Grid.ColumnDefinitions>
 
-                <ListBox
+                <ListView
                     Grid.Column="0"
                     BorderThickness="0"
+                    ItemTemplateSelector="{StaticResource ChatBubbleSelectorKey}"
                     ItemsSource="{Binding ChatMessages}"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListBoxItem}" />
-                    </ListBox.ItemContainerStyle>
-
-                    <!--  接收、发送消息数据选择器  -->
-                    <ListBox.ItemTemplateSelector>
-                        <ut:ChatBubbleSelector />
-                    </ListBox.ItemTemplateSelector>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <Border
+                                            Name="ItemBorder"
+                                            Padding="{TemplateBinding Padding}"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            SnapsToDevicePixels="true">
+                                            <ContentPresenter
+                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
 
                     <!--  绑定自定义行为  -->
                     <b:Interaction.Behaviors>
-                        <ut:AutoScrollBehavior />
+                        <util:AutoScrollBehavior />
                     </b:Interaction.Behaviors>
-                </ListBox>
+                </ListView>
 
                 <Grid Grid.Column="1" Background="LightGray" />
 
@@ -334,7 +353,18 @@
                     <CheckBox
                         Grid.Column="0"
                         Content="循环发送"
-                        FontSize="14" />
+                        FontSize="14"
+                        IsChecked="{Binding IsCycleChecked}">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Checked">
+                                <b:InvokeCommandAction Command="{Binding CycleCheckedCommand}" />
+                            </b:EventTrigger>
+
+                            <b:EventTrigger EventName="Unchecked">
+                                <b:InvokeCommandAction Command="{Binding CycleUncheckedCommand}" />
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </CheckBox>
 
                     <TextBox
                         Grid.Column="1"
@@ -371,6 +401,7 @@
                 Grid.Row="6"
                 Padding="2"
                 VerticalContentAlignment="Top"
+                md:TextFieldAssist.HasClearButton="True"
                 AcceptsReturn="True"
                 FontSize="14"
                 Text="{Binding UserInputText}"

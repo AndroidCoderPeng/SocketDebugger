@@ -38,7 +38,6 @@ namespace SocketDebugger.ViewModels
                 {
                     case 0:
                         region.RequestNavigate("TcpClientView");
-                        eventAggregator.GetEvent<MainMenuSelectedEvent>().Publish(selectedIndex);
                         break;
                     case 1:
                         region.RequestNavigate("TcpServerView");
@@ -59,6 +58,7 @@ namespace SocketDebugger.ViewModels
                         region.RequestNavigate("SerialPortView");
                         break;
                 }
+                eventAggregator.GetEvent<MainMenuSelectedEvent>().Publish(0);
             });
         }
     }
