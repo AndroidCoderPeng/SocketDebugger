@@ -196,7 +196,7 @@ namespace SocketDebugger.ViewModels
             _dialogService = dialogService;
             _eventAggregator = eventAggregator;
 
-            InitMessageType(0);
+            InitMessageType();
 
             InitDelegate();
 
@@ -376,7 +376,7 @@ namespace SocketDebugger.ViewModels
             _timer.Tick += delegate { SendMessage(); };
         }
 
-        private void InitMessageType(int index)
+        private void InitMessageType()
         {
             ConfigModels = _dataService.GetConfigModels();
             if (ConfigModels.Any())
@@ -384,7 +384,7 @@ namespace SocketDebugger.ViewModels
                 //选中第一条
                 Index = 0;
 
-                SelectedConfigModel = ConfigModels[index];
+                SelectedConfigModel = ConfigModels.First();
                 if (SelectedConfigModel.MessageType == "文本")
                 {
                     IsTextChecked = true;

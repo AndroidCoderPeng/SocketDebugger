@@ -31,7 +31,9 @@ namespace SocketDebugger.ViewModels
             {
                 var mainMenuModel = view.SelectedItem as MainMenuModel;
                 MemoryCacheManager.SelectedMainMenu = mainMenuModel?.MainMenuName;
-
+                //通知子界面刷新默认选中项
+                eventAggregator.GetEvent<MainMenuSelectedEvent>().Publish();
+                
                 var region = regionManager.Regions["ContentRegion"];
                 var selectedIndex = view.SelectedIndex;
                 switch (selectedIndex)
@@ -58,7 +60,6 @@ namespace SocketDebugger.ViewModels
                         region.RequestNavigate("SerialPortView");
                         break;
                 }
-                eventAggregator.GetEvent<MainMenuSelectedEvent>().Publish(0);
             });
         }
     }
