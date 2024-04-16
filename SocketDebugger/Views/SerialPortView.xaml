@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:ut="clr-namespace:SocketDebugger.Utils"
+    xmlns:util="clr-namespace:SocketDebugger.Utils"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:SerialPortViewModel}"
     d:DesignHeight="600"
@@ -18,6 +18,8 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
+
+            <util:ClientChatBubbleSelector x:Key="ClientChatBubbleSelectorKey" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -39,137 +41,166 @@
                 Grid.Row="0"
                 Margin="15"
                 Orientation="Vertical">
-                <DockPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
                     <TextBlock
+                        Grid.Column="0"
                         VerticalAlignment="Center"
                         FontSize="16"
                         Text="串口号：" />
 
                     <ComboBox
+                        x:Name="PortNameComboBox"
+                        Grid.Column="1"
                         Height="30"
-                        ItemsSource="{Binding PortArray}"
+                        ItemsSource="{Binding PortNameArray}"
                         SelectedItem="{Binding PortName}">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="SelectionChanged">
-                                <b:InvokeCommandAction Command="{Binding PortItemSelectedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}}" />
+                                <b:InvokeCommandAction Command="{Binding PortItemSelectedCommand}" CommandParameter="{Binding ElementName=PortNameComboBox, Path=SelectedItem}" />
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </ComboBox>
-                </DockPanel>
+                </Grid>
 
-                <DockPanel Margin="0,15">
+                <Grid Margin="0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
                     <TextBlock
+                        Grid.Column="0"
                         VerticalAlignment="Center"
                         FontSize="16"
                         Text="波特率：" />
 
                     <ComboBox
+                        x:Name="BaudRateComboBox"
+                        Grid.Column="1"
                         Height="30"
-                        ItemsSource="{Binding BaudRateList}"
+                        ItemsSource="{Binding BaudRateArray}"
                         SelectedItem="{Binding BaudRate}">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="SelectionChanged">
-                                <b:InvokeCommandAction Command="{Binding BaudRateItemSelectedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}}" />
+                                <b:InvokeCommandAction Command="{Binding BaudRateItemSelectedCommand}" CommandParameter="{Binding ElementName=BaudRateComboBox, Path=SelectedItem}" />
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </ComboBox>
-                </DockPanel>
+                </Grid>
 
-                <DockPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
                     <TextBlock
-                        VerticalAlignment="Center"
-                        FontSize="16"
-                        Text="校验位：" />
-
-                    <ComboBox
-                        Height="30"
-                        ItemsSource="{Binding DataBitList}"
-                        SelectedItem="{Binding DataBit}">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="SelectionChanged">
-                                <b:InvokeCommandAction Command="{Binding DataBitItemSelectedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}}" />
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </ComboBox>
-                </DockPanel>
-
-                <DockPanel Margin="0,15">
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontSize="16"
-                        Text="停止位：" />
-
-                    <ComboBox
-                        Height="30"
-                        ItemsSource="{Binding ParityList}"
-                        SelectedItem="{Binding Parity}">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="SelectionChanged">
-                                <b:InvokeCommandAction Command="{Binding CheckModeItemSelectedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}}" />
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </ComboBox>
-                </DockPanel>
-
-                <DockPanel>
-                    <TextBlock
+                        Grid.Column="0"
                         VerticalAlignment="Center"
                         FontSize="16"
                         Text="数据位：" />
 
                     <ComboBox
+                        x:Name="DataBitComboBox"
+                        Grid.Column="1"
                         Height="30"
-                        ItemsSource="{Binding StopBitList}"
-                        SelectedItem="{Binding StopBit}">
+                        ItemsSource="{Binding DataBitArray}"
+                        SelectedItem="{Binding DataBit}">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="SelectionChanged">
-                                <b:InvokeCommandAction Command="{Binding StopBitItemSelectedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}}" />
+                                <b:InvokeCommandAction Command="{Binding DataBitItemSelectedCommand}" CommandParameter="{Binding ElementName=DataBitComboBox, Path=SelectedItem}" />
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </ComboBox>
-                </DockPanel>
+                </Grid>
 
-                <Grid Margin="0,15,0,0">
+                <Grid Margin="0,15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Ellipse
+                    <TextBlock
                         Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="16"
+                        Text="校验位：" />
+
+                    <ComboBox
+                        x:Name="ParityComboBox"
+                        Grid.Column="1"
+                        Height="30"
+                        ItemsSource="{Binding ParityArray}"
+                        SelectedItem="{Binding ParityValue}">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="SelectionChanged">
+                                <b:InvokeCommandAction Command="{Binding ParityItemSelectedCommand}" CommandParameter="{Binding ElementName=ParityComboBox, Path=SelectedItem}" />
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </ComboBox>
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="16"
+                        Text="停止位：" />
+
+                    <ComboBox
+                        x:Name="StopBitComboBox"
+                        Grid.Column="1"
+                        Height="30"
+                        ItemsSource="{Binding StopBitArray}"
+                        SelectedItem="{Binding StopBit}">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="SelectionChanged">
+                                <b:InvokeCommandAction Command="{Binding StopBitItemSelectedCommand}" CommandParameter="{Binding ElementName=StopBitComboBox, Path=SelectedItem}" />
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </ComboBox>
+                </Grid>
+
+                <Grid Margin="0,15" HorizontalAlignment="Left">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="16"
+                        Text="串口状态：" />
+
+                    <Ellipse
+                        Grid.Column="1"
                         Width="20"
                         Height="20"
                         Margin="0,0,15,0"
-                        Fill="LimeGreen" />
-
-                    <Button
-                        Grid.Column="1"
-                        Margin="0"
-                        Command="{Binding OpenSerialPortCommand}"
-                        Content="打开串口"
-                        Foreground="White" />
+                        Fill="{Binding ConnectColorBrush}" />
                 </Grid>
-            </StackPanel>
 
-            <Grid Grid.Row="1" Background="LightGray" />
+                <Button
+                    Command="{Binding OpenSerialPortCommand}"
+                    Content="打开串口"
+                    Foreground="White" />
 
-            <StackPanel
-                Grid.Row="2"
-                Margin="15"
-                Orientation="Vertical">
-                <DockPanel LastChildFill="True">
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontSize="16"
-                        Text="发送记录" />
-
-                    <Button
-                        HorizontalAlignment="Right"
-                        Content="清空"
-                        Foreground="White" />
-                </DockPanel>
-
-                <ListView Margin="0,15,0,0" />
+                <Button
+                    Margin="0,15"
+                    Command="{Binding ClearSerialPortCommand}"
+                    Content="清空数据"
+                    Style="{StaticResource MaterialDesignOutlinedButton}" />
             </StackPanel>
         </Grid>
 
@@ -177,41 +208,53 @@
 
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="0.5" />
                 <RowDefinition Height="4*" />
-                <RowDefinition Height="0.5" />
+                <RowDefinition Height="1" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="0.5" />
+                <RowDefinition Height="1" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" Background="LightGray" />
-
-            <Grid Grid.Row="1" Background="LightGray" />
-
-            <ListBox
-                Grid.Row="2"
+            <ListView
+                Grid.Row="0"
                 BorderThickness="0"
+                ItemTemplateSelector="{StaticResource ClientChatBubbleSelectorKey}"
                 ItemsSource="{Binding ChatMessages}"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListBoxItem}" />
-                </ListBox.ItemContainerStyle>
-
-                <ListBox.ItemTemplateSelector>
-                    <ut:ClientChatBubbleSelector />
-                </ListBox.ItemTemplateSelector>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                    <Border
+                                        Name="ItemBorder"
+                                        Padding="{TemplateBinding Padding}"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        SnapsToDevicePixels="true">
+                                        <ContentPresenter
+                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    </Style>
+                </ListView.ItemContainerStyle>
 
                 <b:Interaction.Behaviors>
-                    <ut:AutoScrollBehavior />
+                    <util:AutoScrollBehavior />
                 </b:Interaction.Behaviors>
-            </ListBox>
+            </ListView>
 
-            <Grid Grid.Row="3" Background="LightGray" />
+            <Grid Grid.Row="1" Background="LightGray" />
 
-            <Grid Grid.Row="4">
+            <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -247,8 +290,19 @@
 
                     <CheckBox
                         Grid.Column="0"
-                        Content="周期发送"
-                        FontSize="14" />
+                        Content="循环发送"
+                        FontSize="14"
+                        IsChecked="{Binding IsCycleChecked}">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Checked">
+                                <b:InvokeCommandAction Command="{Binding CycleCheckedCommand}" />
+                            </b:EventTrigger>
+
+                            <b:EventTrigger EventName="Unchecked">
+                                <b:InvokeCommandAction Command="{Binding CycleUncheckedCommand}" />
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </CheckBox>
 
                     <TextBox
                         Grid.Column="1"
@@ -259,7 +313,8 @@
                         VerticalContentAlignment="Center"
                         md:TextFieldAssist.HasClearButton="True"
                         FontSize="14"
-                        Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        Text="{Binding MessageCycleTime}" />
 
                     <TextBlock
                         Grid.Column="2"
@@ -278,12 +333,13 @@
                     IsEnabled="{Binding IsCycleChecked, Converter={StaticResource SendMessageButtonStateConvertKey}}" />
             </Grid>
 
-            <Grid Grid.Row="5" Background="LightGray" />
+            <Grid Grid.Row="3" Background="LightGray" />
 
             <TextBox
-                Grid.Row="6"
+                Grid.Row="4"
                 Padding="2"
                 VerticalContentAlignment="Top"
+                md:TextFieldAssist.HasClearButton="True"
                 AcceptsReturn="True"
                 FontSize="14"
                 Text="{Binding UserInputText}"

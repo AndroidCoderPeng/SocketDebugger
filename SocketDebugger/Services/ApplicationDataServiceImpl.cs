@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO.Ports;
 using System.Net;
 using SocketDebugger.Converts;
 using SocketDebugger.Model;
@@ -53,6 +54,31 @@ namespace SocketDebugger.Services
             }
 
             return host;
+        }
+
+        public string[] GetSerialPorts()
+        {
+            return SerialPort.GetPortNames();
+        }
+
+        public List<int> GetBaudRateArray()
+        {
+            return new List<int> { 9600, 14400, 19200, 38400, 56000, 57600, 115200, 128000, 230400 };
+        }
+
+        public List<int> GetDataBitArray()
+        {
+            return new List<int> { 5, 6, 7, 8 };
+        }
+
+        public List<Parity> GetParityArray()
+        {
+            return new List<Parity> { Parity.None, Parity.Odd, Parity.Even, Parity.Mark, Parity.Space };
+        }
+
+        public List<int> GetStopBitArray()
+        {
+            return new List<int> { 1, 2 };
         }
     }
 }

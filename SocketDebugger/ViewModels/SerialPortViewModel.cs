@@ -1,9 +1,376 @@
-﻿using Prism.Mvvm;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO.Ports;
+using System.Windows.Threading;
+using Prism.Commands;
+using Prism.Events;
+using Prism.Mvvm;
+using Prism.Services.Dialogs;
+using SocketDebugger.Model;
+using SocketDebugger.Services;
+using SocketDebugger.Utils;
+using TouchSocket.Core;
 
 namespace SocketDebugger.ViewModels
 {
-    public class SerialPortViewModel: BindableBase
+    public class SerialPortViewModel : BindableBase
     {
-        
+        #region VM
+
+        private string[] _portNameArray;
+
+        public string[] PortNameArray
+        {
+            get => _portNameArray;
+            set
+            {
+                _portNameArray = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _portName;
+
+        public string PortName
+        {
+            get => _portName;
+            set
+            {
+                _portName = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private List<int> _baudRateArray;
+
+        public List<int> BaudRateArray
+        {
+            get => _baudRateArray;
+            set
+            {
+                _baudRateArray = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private int _baudRate;
+
+        public int BaudRate
+        {
+            get => _baudRate;
+            set
+            {
+                _baudRate = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private List<int> _dataBitArray;
+
+        public List<int> DataBitArray
+        {
+            get => _dataBitArray;
+            set
+            {
+                _dataBitArray = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private int _dataBit;
+
+        public int DataBit
+        {
+            get => _dataBit;
+            set
+            {
+                _dataBit = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private List<Parity> _parityArray;
+
+        public List<Parity> ParityArray
+        {
+            get => _parityArray;
+            set
+            {
+                _parityArray = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private Parity _parityValue;
+
+        public Parity ParityValue
+        {
+            get => _parityValue;
+            set
+            {
+                _parityValue = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private List<int> _stopBitArray;
+
+        public List<int> StopBitArray
+        {
+            get => _stopBitArray;
+            set
+            {
+                _stopBitArray = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private int _stopBit;
+
+        public int StopBit
+        {
+            get => _stopBit;
+            set
+            {
+                _stopBit = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _connectColorBrush = "DarkGray";
+
+        public string ConnectColorBrush
+        {
+            get => _connectColorBrush;
+            private set
+            {
+                _connectColorBrush = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private ObservableCollection<ChatMessageModel> _chatMessages = new ObservableCollection<ChatMessageModel>();
+
+        public ObservableCollection<ChatMessageModel> ChatMessages
+        {
+            get => _chatMessages;
+            set
+            {
+                _chatMessages = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _isTextChecked = true;
+
+        public bool IsTextChecked
+        {
+            get => _isTextChecked;
+            set
+            {
+                _isTextChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _isHexChecked = true;
+
+        public bool IsHexChecked
+        {
+            get => _isHexChecked;
+            set
+            {
+                _isHexChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _messageCycleTime = string.Empty;
+
+        public string MessageCycleTime
+        {
+            get => _messageCycleTime;
+            set
+            {
+                _messageCycleTime = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _isCycleChecked;
+
+        public bool IsCycleChecked
+        {
+            get => _isCycleChecked;
+            set
+            {
+                _isCycleChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _userInputText;
+
+        public string UserInputText
+        {
+            get => _userInputText;
+            set
+            {
+                _userInputText = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        #endregion
+
+        #region DelegateCommand
+
+        public DelegateCommand<string> PortItemSelectedCommand { get; set; }
+        public DelegateCommand<int> BaudRateItemSelectedCommand { get; set; }
+        public DelegateCommand<int> DataBitItemSelectedCommand { get; set; }
+        public DelegateCommand<Parity> ParityItemSelectedCommand { get; set; }
+        public DelegateCommand<int> StopBitItemSelectedCommand { get; set; }
+        public DelegateCommand OpenSerialPortCommand { get; set; }
+        public DelegateCommand ClearSerialPortCommand { get; set; }
+        public DelegateCommand SendMessageCommand { get; set; }
+        public DelegateCommand CycleCheckedCommand { get; set; }
+        public DelegateCommand CycleUncheckedCommand { get; set; }
+
+        #endregion
+
+        private readonly IApplicationDataService _dataService;
+        private readonly IDialogService _dialogService;
+        private readonly IEventAggregator _eventAggregator;
+        private readonly DispatcherTimer _timer = new DispatcherTimer();
+
+        public SerialPortViewModel(IApplicationDataService dataService, IDialogService dialogService,
+            IEventAggregator eventAggregator)
+        {
+            _dataService = dataService;
+            _dialogService = dialogService;
+            _eventAggregator = eventAggregator;
+
+            InitMessageType();
+
+            // PortItemSelectedCommand = new DelegateCommand<string>(delegate(string value) { PortName = value; });
+            // BaudRateItemSelectedCommand = new DelegateCommand<int>(delegate(int value) { BaudRate = value; });
+            // DataBitItemSelectedCommand = new DelegateCommand<int>(delegate(int value) { DataBit = value; });
+            // ParityItemSelectedCommand = new DelegateCommand<Parity>(delegate(Parity value) { ParityValue = value; });
+            // StopBitItemSelectedCommand = new DelegateCommand<int>(delegate(int value) { StopBit = value; });
+
+            OpenSerialPortCommand = new DelegateCommand(delegate { });
+
+            ClearSerialPortCommand = new DelegateCommand(delegate { ChatMessages.Clear(); });
+
+            SendMessageCommand = new DelegateCommand(SendMessage);
+
+            //周期发送CheckBox选中、取消选中事件
+            CycleCheckedCommand = new DelegateCommand(delegate
+            {
+                //判断周期时间是否为空
+                if (_messageCycleTime.IsNullOrWhiteSpace())
+                {
+                    "请先设置周期发送的时间间隔".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    IsCycleChecked = false;
+                    return;
+                }
+
+                //判断周期时间是否是数字
+                if (!_messageCycleTime.IsNumber())
+                {
+                    "时间间隔只能是数字".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    IsCycleChecked = false;
+                    return;
+                }
+
+                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(_messageCycleTime));
+                _timer.Start();
+            });
+            CycleUncheckedCommand = new DelegateCommand(delegate
+            {
+                //停止timer
+                if (_timer.IsEnabled)
+                {
+                    _timer.Stop();
+                }
+            });
+            //自动发消息
+            _timer.Tick += delegate { SendMessage(); };
+        }
+
+        private void InitMessageType()
+        {
+            PortNameArray = _dataService.GetSerialPorts();
+            BaudRateArray = _dataService.GetBaudRateArray();
+            DataBitArray = _dataService.GetDataBitArray();
+            ParityArray = _dataService.GetParityArray();
+            StopBitArray = _dataService.GetStopBitArray();
+        }
+
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        private void SendMessage()
+        {
+            if (string.IsNullOrEmpty(_userInputText))
+            {
+                "不能发送空消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                return;
+            }
+
+            if (_isTextChecked)
+            {
+                // if (ConnectState == "未连接")
+                // {
+                //     "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                //     return;
+                // }
+                //
+                // _tcpClient.Send(_userInputText);
+
+                ChatMessages.Add(new ChatMessageModel
+                {
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                    Message = _userInputText,
+                    IsSend = true
+                });
+            }
+            else
+            {
+                if (_userInputText.IsHex())
+                {
+                    // if (ConnectState == "未连接")
+                    // {
+                    //     "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
+                    //     return;
+                    // }
+
+                    if (_userInputText.Contains(" "))
+                    {
+                        _userInputText = _userInputText.Replace(" ", "");
+                    }
+                    else if (_userInputText.Contains("-"))
+                    {
+                        _userInputText = _userInputText.Replace("-", "");
+                    }
+
+                    //以UTF-8的编码同步发送字符串
+                    // var bytes = Encoding.UTF8.GetBytes(_userInputText);
+                    // _tcpClient.Send(bytes);
+
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = _userInputText,
+                        IsSend = true
+                    });
+                }
+                else
+                {
+                    "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO.Ports;
 using SocketDebugger.Model;
 
 namespace SocketDebugger.Services
@@ -13,5 +14,15 @@ namespace SocketDebugger.Services
         List<string> GetDataType();
         
         string GetHostAddress();
+
+        string[] GetSerialPorts();
+
+        List<int> GetBaudRateArray();
+
+        List<int> GetDataBitArray();
+
+        List<Parity> GetParityArray();
+
+        List<int> GetStopBitArray();
     }
 }
