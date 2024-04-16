@@ -209,10 +209,11 @@
     <Compile Include="Services\ApplicationDataServiceImpl.cs" />
     <Compile Include="Utils\AlertType.cs" />
     <Compile Include="Utils\AutoScrollBehavior.cs" />
-    <Compile Include="Utils\ChatBubbleSelector.cs" />
+    <Compile Include="Utils\ClientChatBubbleSelector.cs" />
     <Compile Include="Utils\DataBaseManager.cs" />
     <Compile Include="Utils\MemoryCacheManager.cs" />
     <Compile Include="Utils\MethodExtensions.cs" />
+    <Compile Include="Utils\ServerChatBubbleSelector.cs" />
     <Compile Include="Utils\SystemHelper.cs" />
     <Compile Include="ViewModels\AlertControlDialogViewModel.cs" />
     <Compile Include="ViewModels\AlertMessageDialogViewModel.cs" />
@@ -280,7 +281,8 @@
     <Page Include="Dialogs\AlertControlDialog.xaml" />
     <Page Include="Dialogs\AlertMessageDialog.xaml" />
     <Page Include="Dialogs\ConfigDialog.xaml" />
-    <Page Include="Styles\ChatMessageDataTemplate.xaml" />
+    <Page Include="Styles\ClientMessageDataTemplate.xaml" />
+    <Page Include="Styles\ServerMessageDataTemplate.xaml" />
     <Page Include="Views\SerialPortView.xaml">
       <SubType>Designer</SubType>
     </Page>

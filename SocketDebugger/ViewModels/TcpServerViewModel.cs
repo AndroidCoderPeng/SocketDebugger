@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Threading;
 using Prism.Commands;
 using Prism.Events;
@@ -55,6 +54,18 @@ namespace SocketDebugger.ViewModels
             set
             {
                 _index = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private int _clientIndex;
+
+        public int ClientIndex
+        {
+            get => _clientIndex;
+            set
+            {
+                _clientIndex = value;
                 RaisePropertyChanged();
             }
         }
@@ -190,8 +201,8 @@ namespace SocketDebugger.ViewModels
         public DelegateCommand EditConfigCommand { get; set; }
         public DelegateCommand StartListenCommand { get; set; }
         public DelegateCommand ClearMessageCommand { get; set; }
-        public DelegateCommand<ListView> ClientItemSelectedCommand { get; }
-        public DelegateCommand SendMessageCommand { get; }
+        public DelegateCommand<ConnectedClientModel> ClientItemSelectedCommand { get; set; }
+        public DelegateCommand SendMessageCommand { get; set; }
         public DelegateCommand CycleCheckedCommand { get; set; }
         public DelegateCommand CycleUncheckedCommand { get; set; }
 
@@ -357,15 +368,8 @@ namespace SocketDebugger.ViewModels
 
             ClearMessageCommand = new DelegateCommand(delegate { ChatMessages.Clear(); });
 
-            ClientItemSelectedCommand = new DelegateCommand<ListView>(it =>
-            {
-                if (it.SelectedIndex == -1)
-                {
-                    return;
-                }
-
-                _selectedClientModel = (ConnectedClientModel)it.SelectedItem;
-            });
+            ClientItemSelectedCommand = new DelegateCommand<ConnectedClientModel>(
+                delegate(ConnectedClientModel clientModel) { _selectedClientModel = clientModel; });
 
             SendMessageCommand = new DelegateCommand(SendMessage);
 
@@ -439,6 +443,8 @@ namespace SocketDebugger.ViewModels
                         ClientConnectColorBrush = "LimeGreen",
                         ClientHostAddress = client.IP + ":" + client.Port
                     });
+
+                    ClientIndex = ConnectedClients.Count - 1;
                 });
             };
 

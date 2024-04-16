@@ -4,7 +4,7 @@ using SocketDebugger.Model;
 
 namespace SocketDebugger.Utils
 {
-    public class ChatBubbleSelector : DataTemplateSelector
+    public class ServerChatBubbleSelector : DataTemplateSelector
     {
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -12,10 +12,10 @@ namespace SocketDebugger.Utils
             var message = (ChatMessageModel)item;
             if (message != null && message.IsSend)
             {
-                return element.FindResource("ChatSendDataTemplateKey") as DataTemplate;
+                return element.FindResource("ServerSendDataTemplateKey") as DataTemplate;
             }
 
-            return element.FindResource("ChatReceiveDataTemplateKey") as DataTemplate;
+            return element.FindResource("ServerReceiveDataTemplateKey") as DataTemplate;
         }
     }
 }

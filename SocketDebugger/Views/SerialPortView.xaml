@@ -201,7 +201,7 @@
                 </ListBox.ItemContainerStyle>
 
                 <ListBox.ItemTemplateSelector>
-                    <ut:ChatBubbleSelector />
+                    <ut:ClientChatBubbleSelector />
                 </ListBox.ItemTemplateSelector>
 
                 <b:Interaction.Behaviors>

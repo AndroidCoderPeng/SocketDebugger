@@ -13,7 +13,8 @@
                     SecondaryColor="LightGreen" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
 
-                <ResourceDictionary Source="Styles/ChatMessageDataTemplate.xaml" />
+                <ResourceDictionary Source="Styles/ClientMessageDataTemplate.xaml" />
+                <ResourceDictionary Source="Styles/ServerMessageDataTemplate.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

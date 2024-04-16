@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:ut="clr-namespace:SocketDebugger.Utils"
+    xmlns:util="clr-namespace:SocketDebugger.Utils"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:UdpClientViewModel}"
     d:DesignHeight="600"
@@ -20,6 +20,8 @@
             <cvt:ViewVisibilityConvert x:Key="ViewVisibilityConvertKey" />
             <cvt:EmptyVisibilityConvert x:Key="EmptyVisibilityConvertKey" />
             <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
+
+            <util:ClientChatBubbleSelector x:Key="ClientChatBubbleSelectorKey" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -220,6 +222,7 @@
             <ListBox
                 Grid.Row="2"
                 BorderThickness="0"
+                ItemTemplateSelector="{StaticResource ClientChatBubbleSelectorKey}"
                 ItemsSource="{Binding ChatMessages}"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
@@ -227,14 +230,9 @@
                     <Style TargetType="{x:Type ListBoxItem}" />
                 </ListBox.ItemContainerStyle>
 
-                <!--  接收、发送消息数据选择器  -->
-                <ListBox.ItemTemplateSelector>
-                    <ut:ChatBubbleSelector />
-                </ListBox.ItemTemplateSelector>
-
                 <!--  绑定自定义行为  -->
                 <b:Interaction.Behaviors>
-                    <ut:AutoScrollBehavior />
+                    <util:AutoScrollBehavior />
                 </b:Interaction.Behaviors>
             </ListBox>
 

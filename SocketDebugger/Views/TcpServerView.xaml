@@ -21,7 +21,7 @@
             <cvt:EmptyVisibilityConvert x:Key="EmptyVisibilityConvertKey" />
             <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
 
-            <util:ChatBubbleSelector x:Key="ChatBubbleSelectorKey" />
+            <util:ServerChatBubbleSelector x:Key="ServerChatBubbleSelectorKey" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -230,13 +230,13 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="1" />
-                    <ColumnDefinition Width="160" />
+                    <ColumnDefinition Width="180" />
                 </Grid.ColumnDefinitions>
 
                 <ListView
                     Grid.Column="0"
                     BorderThickness="0"
-                    ItemTemplateSelector="{StaticResource ChatBubbleSelectorKey}"
+                    ItemTemplateSelector="{StaticResource ServerChatBubbleSelectorKey}"
                     ItemsSource="{Binding ChatMessages}"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
@@ -286,10 +286,11 @@
                         x:Name="ClientListView"
                         BorderThickness="0"
                         ItemsSource="{Binding ConnectedClients}"
-                        ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                        ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                        SelectedIndex="{Binding ClientIndex}">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="SelectionChanged">
-                                <b:InvokeCommandAction Command="{Binding ClientItemSelectedCommand}" CommandParameter="{Binding ElementName=ClientListView}" />
+                                <b:InvokeCommandAction Command="{Binding ClientItemSelectedCommand}" CommandParameter="{Binding ElementName=ClientListView, Path=SelectedItem}" />
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
 
@@ -299,7 +300,6 @@
                                     <Ellipse
                                         Width="10"
                                         Height="10"
-                                        Margin="5,0,0,0"
                                         Fill="{Binding ClientConnectColorBrush}" />
 
                                     <TextBlock
@@ -375,7 +375,8 @@
                         VerticalContentAlignment="Center"
                         md:TextFieldAssist.HasClearButton="True"
                         FontSize="14"
-                        Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        Text="{Binding MessageCycleTime}" />
 
                     <TextBlock
                         Grid.Column="2"

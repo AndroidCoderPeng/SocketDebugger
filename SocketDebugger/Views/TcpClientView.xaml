@@ -21,7 +21,7 @@
             <cvt:EmptyVisibilityConvert x:Key="EmptyVisibilityConvertKey" />
             <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
 
-            <util:ChatBubbleSelector x:Key="ChatBubbleSelectorKey" />
+            <util:ClientChatBubbleSelector x:Key="ClientChatBubbleSelectorKey" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -229,7 +229,7 @@
             <ListView
                 Grid.Row="2"
                 BorderThickness="0"
-                ItemTemplateSelector="{StaticResource ChatBubbleSelectorKey}"
+                ItemTemplateSelector="{StaticResource ClientChatBubbleSelectorKey}"
                 ItemsSource="{Binding ChatMessages}"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
