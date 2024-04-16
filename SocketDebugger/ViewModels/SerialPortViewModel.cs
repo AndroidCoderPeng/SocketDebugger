@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
 using System.Linq;
+using System.Text;
 using System.Windows.Threading;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -335,13 +336,13 @@ namespace SocketDebugger.ViewModels
 
             if (_isTextChecked)
             {
-                // if (ConnectState == "未连接")
-                // {
-                //     "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                //     return;
-                // }
-                //
-                // _tcpClient.Send(_userInputText);
+                if (!_serialPort.IsOpen)
+                {
+                    "串口未打开，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    return;
+                }
+
+                _serialPort.Write(_userInputText);
 
                 ChatMessages.Add(new ChatMessageModel
                 {
@@ -354,11 +355,11 @@ namespace SocketDebugger.ViewModels
             {
                 if (_userInputText.IsHex())
                 {
-                    // if (ConnectState == "未连接")
-                    // {
-                    //     "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
-                    //     return;
-                    // }
+                    if (!_serialPort.IsOpen)
+                    {
+                        "串口未打开，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
+                        return;
+                    }
 
                     if (_userInputText.Contains(" "))
                     {
@@ -369,9 +370,8 @@ namespace SocketDebugger.ViewModels
                         _userInputText = _userInputText.Replace("-", "");
                     }
 
-                    //以UTF-8的编码同步发送字符串
-                    // var bytes = Encoding.UTF8.GetBytes(_userInputText);
-                    // _tcpClient.Send(bytes);
+                    var bytes = Encoding.UTF8.GetBytes(_userInputText);
+                    _serialPort.Write(bytes, 0, bytes.Length);
 
                     ChatMessages.Add(new ChatMessageModel
                     {
