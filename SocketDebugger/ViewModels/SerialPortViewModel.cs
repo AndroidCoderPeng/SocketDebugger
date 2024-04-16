@@ -5,7 +5,6 @@ using System.IO.Ports;
 using System.Linq;
 using System.Windows.Threading;
 using Prism.Commands;
-using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using SocketDebugger.Model;
@@ -67,9 +66,9 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private List<int> _stopBitArray;
+        private List<StopBits> _stopBitArray;
 
-        public List<int> StopBitArray
+        public List<StopBits> StopBitArray
         {
             get => _stopBitArray;
             set
@@ -87,6 +86,30 @@ namespace SocketDebugger.ViewModels
             private set
             {
                 _connectColorBrush = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _serialPortState = "打开串口";
+
+        public string SerialPortState
+        {
+            get => _serialPortState;
+            private set
+            {
+                _serialPortState = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _isPortOpen = false;
+
+        public bool IsPortOpen
+        {
+            get => _isPortOpen;
+            private set
+            {
+                _isPortOpen = value;
                 RaisePropertyChanged();
             }
         }
@@ -182,20 +205,18 @@ namespace SocketDebugger.ViewModels
 
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
-        private readonly IEventAggregator _eventAggregator;
+        private readonly SerialPort _serialPort = new SerialPort();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
         private string _portName;
         private int _baudRate;
         private int _dataBit;
         private Parity _parityValue;
-        private int _stopBit;
+        private StopBits _stopBit;
 
-        public SerialPortViewModel(IApplicationDataService dataService, IDialogService dialogService,
-            IEventAggregator eventAggregator)
+        public SerialPortViewModel(IApplicationDataService dataService, IDialogService dialogService)
         {
             _dataService = dataService;
             _dialogService = dialogService;
-            _eventAggregator = eventAggregator;
 
             InitMessageType();
 
@@ -216,12 +237,35 @@ namespace SocketDebugger.ViewModels
             );
 
             StopBitItemSelectedCommand = new DelegateCommand<object>(
-                delegate(object value) { _stopBit = (int)value; }
+                delegate(object value) { _stopBit = (StopBits)value; }
             );
 
             OpenSerialPortCommand = new DelegateCommand(delegate
             {
-                Console.WriteLine($@"{_portName},{_baudRate},{_dataBit},{_parityValue},{_stopBit}");
+                if (!_serialPort.IsOpen)
+                {
+                    _serialPort.PortName = _portName;
+                    _serialPort.BaudRate = _baudRate;
+                    _serialPort.Parity = _parityValue;
+                    _serialPort.DataBits = _dataBit;
+                    _serialPort.StopBits = _stopBit;
+
+                    _serialPort.Open();
+                    SerialPortState = "关闭串口";
+                    ConnectColorBrush = "LimeGreen";
+                    IsPortOpen = true;
+                    //注册事件
+                    _serialPort.DataReceived += SerialPort_DataReceived;
+                }
+                else
+                {
+                    //解注册事件
+                    _serialPort.DataReceived -= SerialPort_DataReceived;
+                    _serialPort.Close();
+                    SerialPortState = "打开串口";
+                    ConnectColorBrush = "DarkGray";
+                    IsPortOpen = false;
+                }
             });
 
             ClearSerialPortCommand = new DelegateCommand(delegate { ChatMessages.Clear(); });
@@ -269,7 +313,7 @@ namespace SocketDebugger.ViewModels
             DataBitArray = _dataService.GetDataBitArray();
             ParityArray = _dataService.GetParityArray();
             StopBitArray = _dataService.GetStopBitArray();
-            
+
             //默认值
             _portName = PortNameArray.First();
             _baudRate = BaudRateArray.First();
@@ -341,6 +385,15 @@ namespace SocketDebugger.ViewModels
                     "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             }
+        }
+
+        /// <summary>
+        /// 数据接收
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
         }
     }
 }

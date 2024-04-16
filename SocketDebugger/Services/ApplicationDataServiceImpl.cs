@@ -76,9 +76,9 @@ namespace SocketDebugger.Services
             return new List<Parity> { Parity.None, Parity.Odd, Parity.Even, Parity.Mark, Parity.Space };
         }
 
-        public List<int> GetStopBitArray()
+        public List<StopBits> GetStopBitArray()
         {
-            return new List<int> { 1, 2 };
+            return new List<StopBits> { StopBits.None, StopBits.One, StopBits.Two };
         }
     }
 }

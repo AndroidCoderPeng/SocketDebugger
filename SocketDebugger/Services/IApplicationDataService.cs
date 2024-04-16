@@ -23,6 +23,6 @@ namespace SocketDebugger.Services
 
         List<Parity> GetParityArray();
 
-        List<int> GetStopBitArray();
+        List<StopBits> GetStopBitArray();
     }
 }
