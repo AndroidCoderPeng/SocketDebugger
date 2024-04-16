@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
+using System.Linq;
 using System.Windows.Threading;
 using Prism.Commands;
 using Prism.Events;
@@ -30,18 +31,6 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private string _portName;
-
-        public string PortName
-        {
-            get => _portName;
-            set
-            {
-                _portName = value;
-                RaisePropertyChanged();
-            }
-        }
-
         private List<int> _baudRateArray;
 
         public List<int> BaudRateArray
@@ -50,18 +39,6 @@ namespace SocketDebugger.ViewModels
             set
             {
                 _baudRateArray = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        private int _baudRate;
-
-        public int BaudRate
-        {
-            get => _baudRate;
-            set
-            {
-                _baudRate = value;
                 RaisePropertyChanged();
             }
         }
@@ -78,18 +55,6 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private int _dataBit;
-
-        public int DataBit
-        {
-            get => _dataBit;
-            set
-            {
-                _dataBit = value;
-                RaisePropertyChanged();
-            }
-        }
-
         private List<Parity> _parityArray;
 
         public List<Parity> ParityArray
@@ -102,18 +67,6 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private Parity _parityValue;
-
-        public Parity ParityValue
-        {
-            get => _parityValue;
-            set
-            {
-                _parityValue = value;
-                RaisePropertyChanged();
-            }
-        }
-
         private List<int> _stopBitArray;
 
         public List<int> StopBitArray
@@ -122,18 +75,6 @@ namespace SocketDebugger.ViewModels
             set
             {
                 _stopBitArray = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        private int _stopBit;
-
-        public int StopBit
-        {
-            get => _stopBit;
-            set
-            {
-                _stopBit = value;
                 RaisePropertyChanged();
             }
         }
@@ -227,10 +168,10 @@ namespace SocketDebugger.ViewModels
         #region DelegateCommand
 
         public DelegateCommand<string> PortItemSelectedCommand { get; set; }
-        public DelegateCommand<int> BaudRateItemSelectedCommand { get; set; }
-        public DelegateCommand<int> DataBitItemSelectedCommand { get; set; }
-        public DelegateCommand<Parity> ParityItemSelectedCommand { get; set; }
-        public DelegateCommand<int> StopBitItemSelectedCommand { get; set; }
+        public DelegateCommand<object> BaudRateItemSelectedCommand { get; set; }
+        public DelegateCommand<object> DataBitItemSelectedCommand { get; set; }
+        public DelegateCommand<object> ParityItemSelectedCommand { get; set; }
+        public DelegateCommand<object> StopBitItemSelectedCommand { get; set; }
         public DelegateCommand OpenSerialPortCommand { get; set; }
         public DelegateCommand ClearSerialPortCommand { get; set; }
         public DelegateCommand SendMessageCommand { get; set; }
@@ -243,6 +184,11 @@ namespace SocketDebugger.ViewModels
         private readonly IDialogService _dialogService;
         private readonly IEventAggregator _eventAggregator;
         private readonly DispatcherTimer _timer = new DispatcherTimer();
+        private string _portName;
+        private int _baudRate;
+        private int _dataBit;
+        private Parity _parityValue;
+        private int _stopBit;
 
         public SerialPortViewModel(IApplicationDataService dataService, IDialogService dialogService,
             IEventAggregator eventAggregator)
@@ -253,13 +199,30 @@ namespace SocketDebugger.ViewModels
 
             InitMessageType();
 
-            // PortItemSelectedCommand = new DelegateCommand<string>(delegate(string value) { PortName = value; });
-            // BaudRateItemSelectedCommand = new DelegateCommand<int>(delegate(int value) { BaudRate = value; });
-            // DataBitItemSelectedCommand = new DelegateCommand<int>(delegate(int value) { DataBit = value; });
-            // ParityItemSelectedCommand = new DelegateCommand<Parity>(delegate(Parity value) { ParityValue = value; });
-            // StopBitItemSelectedCommand = new DelegateCommand<int>(delegate(int value) { StopBit = value; });
+            PortItemSelectedCommand = new DelegateCommand<string>(
+                delegate(string value) { _portName = value; }
+            );
 
-            OpenSerialPortCommand = new DelegateCommand(delegate { });
+            BaudRateItemSelectedCommand = new DelegateCommand<object>(
+                delegate(object value) { _baudRate = (int)value; }
+            );
+
+            DataBitItemSelectedCommand = new DelegateCommand<object>(
+                delegate(object value) { _dataBit = (int)value; }
+            );
+
+            ParityItemSelectedCommand = new DelegateCommand<object>(
+                delegate(object value) { _parityValue = (Parity)value; }
+            );
+
+            StopBitItemSelectedCommand = new DelegateCommand<object>(
+                delegate(object value) { _stopBit = (int)value; }
+            );
+
+            OpenSerialPortCommand = new DelegateCommand(delegate
+            {
+                Console.WriteLine($@"{_portName},{_baudRate},{_dataBit},{_parityValue},{_stopBit}");
+            });
 
             ClearSerialPortCommand = new DelegateCommand(delegate { ChatMessages.Clear(); });
 
@@ -306,6 +269,13 @@ namespace SocketDebugger.ViewModels
             DataBitArray = _dataService.GetDataBitArray();
             ParityArray = _dataService.GetParityArray();
             StopBitArray = _dataService.GetStopBitArray();
+            
+            //默认值
+            _portName = PortNameArray.First();
+            _baudRate = BaudRateArray.First();
+            _dataBit = DataBitArray.First();
+            _parityValue = ParityArray.First();
+            _stopBit = StopBitArray.First();
         }
 
         /// <summary>
