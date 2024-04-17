@@ -450,16 +450,16 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
+            if (ConnectState == "未连接")
+            {
+                "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                return;
+            }
+            
             if (_isTextChecked)
             {
-                if (ConnectState == "未连接")
-                {
-                    "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                    return;
-                }
-
                 _tcpClient.Send(_userInputText);
-
+                
                 ChatMessages.Add(new ChatMessageModel
                 {
                     MessageTime = DateTime.Now.ToString("HH:mm:ss"),
@@ -471,25 +471,11 @@ namespace SocketDebugger.ViewModels
             {
                 if (_userInputText.IsHex())
                 {
-                    if (ConnectState == "未连接")
-                    {
-                        "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
-                        return;
-                    }
-
-                    if (_userInputText.Contains(" "))
-                    {
-                        _userInputText = _userInputText.Replace(" ", "");
-                    }
-                    else if (_userInputText.Contains("-"))
-                    {
-                        _userInputText = _userInputText.Replace("-", "");
-                    }
-
                     //以UTF-8的编码同步发送字符串
-                    var bytes = Encoding.UTF8.GetBytes(_userInputText);
+                    var bytes = _userInputText.GetBytesWithUtf8();
                     _tcpClient.Send(bytes);
 
+                    //TODO 将发送的数据格式化为每两个字符为一个整体
                     ChatMessages.Add(new ChatMessageModel
                     {
                         MessageTime = DateTime.Now.ToString("HH:mm:ss"),

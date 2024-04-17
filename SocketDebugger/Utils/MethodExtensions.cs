@@ -12,7 +12,7 @@ namespace SocketDebugger.Utils
         {
             return new Regex(@"[A-Fa-f0-9]+$").IsMatch(s);
         }
-        
+
         public static bool IsNumber(this string s)
         {
             return new Regex(@"^\d+$").IsMatch(s);
@@ -29,6 +29,26 @@ namespace SocketDebugger.Utils
                 },
                 delegate { }
             );
+        }
+
+        /// <summary>
+        /// 将需要发送的Hex序列化为byte[]
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static byte[] GetBytesWithUtf8(this string message)
+        {
+            if (message.Contains(" "))
+            {
+                message = message.Replace(" ", "");
+            }
+            else if (message.Contains("-"))
+            {
+                message = message.Replace("-", "");
+            }
+
+            //以UTF-8的编码同步发送字符串
+            return Encoding.UTF8.GetBytes(message);
         }
 
         public static string ToJson(this object obj)

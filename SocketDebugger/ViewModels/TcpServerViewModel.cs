@@ -501,9 +501,22 @@ namespace SocketDebugger.ViewModels
                 {
                     if (_isTextChecked)
                     {
-                        try
+                        _tcpService.Send(_selectedClientModel.ClientId, _userInputText);
+
+                        ChatMessages.Add(new ChatMessageModel
                         {
-                            _tcpService.Send(_selectedClientModel.ClientId, _userInputText);
+                            MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                            Message = _userInputText,
+                            IsSend = true
+                        });
+                    }
+                    else
+                    {
+                        if (_userInputText.IsHex())
+                        {
+                            //以UTF-8的编码同步发送字符串
+                            var bytes = _userInputText.GetBytesWithUtf8();
+                            _tcpService.Send(_selectedClientModel.ClientId, bytes);
 
                             ChatMessages.Add(new ChatMessageModel
                             {
@@ -512,54 +525,19 @@ namespace SocketDebugger.ViewModels
                                 IsSend = true
                             });
                         }
-                        catch (ClientNotFindException e)
-                        {
-                            e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                        }
-                    }
-                    else
-                    {
-                        if (_userInputText.IsHex())
-                        {
-                            try
-                            {
-                                if (_userInputText.Contains(" "))
-                                {
-                                    _userInputText = _userInputText.Replace(" ", "");
-                                }
-                                else if (_userInputText.Contains("-"))
-                                {
-                                    _userInputText = _userInputText.Replace("-", "");
-                                }
-
-                                //以UTF-8的编码同步发送字符串
-                                var bytes = Encoding.UTF8.GetBytes(_userInputText);
-                                _tcpService.Send(_selectedClientModel.ClientId, bytes);
-
-                                ChatMessages.Add(new ChatMessageModel
-                                {
-                                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                                    Message = _userInputText,
-                                    IsSend = true
-                                });
-                            }
-                            catch (ClientNotFindException e)
-                            {
-                                e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                            }
-                        }
                         else
                         {
                             "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                         }
                     }
                 }
-                catch (NotConnectedException e)
+                catch (ClientNotFindException e)
                 {
                     e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             }
             else
+
             {
                 "请指定接收消息的客户端".ShowAlertMessageDialog(_dialogService, AlertType.Error);
             }

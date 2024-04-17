@@ -140,7 +140,7 @@ namespace SocketDebugger.ViewModels
                 RaisePropertyChanged();
             }
         }
-        
+
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -164,7 +164,7 @@ namespace SocketDebugger.ViewModels
                 RaisePropertyChanged();
             }
         }
-        
+
         #endregion
 
         #region DelegateCommand
@@ -185,7 +185,7 @@ namespace SocketDebugger.ViewModels
         private readonly IDialogService _dialogService;
         private readonly DispatcherTimer _timer = new DispatcherTimer();
         private WebSocket _webSocketClient;
-        
+
         public WebSocketClientViewModel(IApplicationDataService dataService, IDialogService dialogService,
             IEventAggregator eventAggregator)
         {
@@ -208,7 +208,7 @@ namespace SocketDebugger.ViewModels
                     ConnectionHost = SystemHelper.GetHostAddress(),
                     ConnectionPort = "8080"
                 };
-                
+
                 dialogService.ShowDialog("ConfigDialog", new DialogParameters
                     {
                         { "Title", "添加配置" }, { "SelectedConfigModel", configModel }
@@ -309,7 +309,8 @@ namespace SocketDebugger.ViewModels
             {
                 if (_webSocketClient == null)
                 {
-                    _webSocketClient = new WebSocket("ws://" + _selectedConfigModel.ConnectionHost + ":" + _selectedConfigModel.ConnectionPort);
+                    _webSocketClient = new WebSocket("ws://" + _selectedConfigModel.ConnectionHost + ":" +
+                                                     _selectedConfigModel.ConnectionPort);
                 }
 
                 _webSocketClient.Opened += WebSocketOpened;
@@ -396,9 +397,8 @@ namespace SocketDebugger.ViewModels
                 }
             }
         }
-        
-        
-        
+
+
         /// <summary>
         /// 发送消息
         /// </summary>
@@ -416,16 +416,39 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            _webSocketClient?.Send(_userInputText);
-
-            ChatMessages.Add(new ChatMessageModel
+            if (_isTextChecked)
             {
-                MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                Message = _userInputText,
-                IsSend = true
-            });
+                _webSocketClient?.Send(_userInputText);
+
+                ChatMessages.Add(new ChatMessageModel
+                {
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                    Message = _userInputText,
+                    IsSend = true
+                });
+            }
+            else
+            {
+                if (_userInputText.IsHex())
+                {
+                    //以UTF-8的编码同步发送字符串
+                    var bytes = _userInputText.GetBytesWithUtf8();
+                    _webSocketClient?.Send(bytes, 0, bytes.Length);
+
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = _userInputText,
+                        IsSend = true
+                    });
+                }
+                else
+                {
+                    "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                }
+            }
         }
-        
+
         private void WebSocketOpened(object sender, EventArgs e)
         {
             ConnectColorBrush = "LimeGreen";

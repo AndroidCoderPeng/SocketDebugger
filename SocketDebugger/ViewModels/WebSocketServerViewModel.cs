@@ -440,7 +440,7 @@ namespace SocketDebugger.ViewModels
                 }
             }
         }
-        
+
         /// <summary>
         /// 发送消息
         /// </summary>
@@ -456,14 +456,34 @@ namespace SocketDebugger.ViewModels
             {
                 try
                 {
-                    _webSocketService.GetSessionByID(_selectedClientModel.ClientId).Send(_userInputText);
-
-                    ChatMessages.Add(new ChatMessageModel
+                    var socketSession = _webSocketService.GetSessionByID(_selectedClientModel.ClientId);
+                    if (_isTextChecked)
                     {
-                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = _userInputText,
-                        IsSend = true
-                    });
+                        socketSession.Send(_userInputText);
+
+                        ChatMessages.Add(new ChatMessageModel
+                        {
+                            MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                            Message = _userInputText,
+                            IsSend = true
+                        });
+                    }
+                    else
+                    {
+                        if (_userInputText.IsHex())
+                        {
+                            //以UTF-8的编码同步发送字符串
+                            var bytes = _userInputText.GetBytesWithUtf8();
+                            socketSession.Send(bytes, 0, bytes.Length);
+
+                            ChatMessages.Add(new ChatMessageModel
+                            {
+                                MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                                Message = _userInputText,
+                                IsSend = true
+                            });
+                        }
+                    }
                 }
                 catch (ClientNotFindException e)
                 {

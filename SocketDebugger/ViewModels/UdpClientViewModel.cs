@@ -376,11 +376,24 @@ namespace SocketDebugger.ViewModels
             _udpSession.Setup(config).Start();
             var endPoint = host.EndPoint;
 
-            try
+            if (_isTextChecked)
             {
-                if (_isTextChecked)
+                _udpSession.Send(endPoint, _userInputText);
+
+                ChatMessages.Add(new ChatMessageModel
                 {
-                    _udpSession.Send(endPoint, _userInputText);
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                    Message = _userInputText,
+                    IsSend = true
+                });
+            }
+            else
+            {
+                if (_userInputText.IsHex())
+                {
+                    //以UTF-8的编码同步发送字符串
+                    var bytes = _userInputText.GetBytesWithUtf8();
+                    _udpSession.Send(endPoint, bytes);
 
                     ChatMessages.Add(new ChatMessageModel
                     {
@@ -391,37 +404,8 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    if (_userInputText.IsHex())
-                    {
-                        if (_userInputText.Contains(" "))
-                        {
-                            _userInputText = _userInputText.Replace(" ", "");
-                        }
-                        else if (_userInputText.Contains("-"))
-                        {
-                            _userInputText = _userInputText.Replace("-", "");
-                        }
-
-                        //以UTF-8的编码同步发送字符串
-                        var bytes = Encoding.UTF8.GetBytes(_userInputText);
-                        _udpSession.Send(endPoint, bytes);
-
-                        ChatMessages.Add(new ChatMessageModel
-                        {
-                            MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                            Message = _userInputText,
-                            IsSend = true
-                        });
-                    }
-                    else
-                    {
-                        "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                    }
+                    "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
-            }
-            catch (NotConnectedException e)
-            {
-                e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
             }
         }
     }
