@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
 using System.Windows.Threading;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -371,22 +370,13 @@ namespace SocketDebugger.ViewModels
                         return;
                     }
 
-                    if (_userInputText.Contains(" "))
-                    {
-                        _userInputText = _userInputText.Replace(" ", "");
-                    }
-                    else if (_userInputText.Contains("-"))
-                    {
-                        _userInputText = _userInputText.Replace("-", "");
-                    }
-
-                    var bytes = Encoding.UTF8.GetBytes(_userInputText);
-                    _serialPort.Write(bytes, 0, bytes.Length);
+                    var result = _userInputText.GetBytesWithUtf8();
+                    _serialPort.Write(result.Item2, 0, result.Item2.Length);
 
                     ChatMessages.Add(new ChatMessageModel
                     {
                         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = _userInputText,
+                        Message = result.Item1.FormatHexString(),
                         IsSend = true
                     });
                 }

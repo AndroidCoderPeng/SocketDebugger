@@ -289,7 +289,7 @@ namespace SocketDebugger.ViewModels
                                 ConfigModels = dataService.GetConfigModels();
                                 if (ConfigModels.Any())
                                 {
-                                    SelectedConfigModel = ConfigModels[0];
+                                    SelectedConfigModel = ConfigModels.First();
                                     //选中第一条
                                     Index = 0;
                                 }
@@ -493,14 +493,14 @@ namespace SocketDebugger.ViewModels
                     if (_userInputText.IsHex())
                     {
                         //以UTF-8的编码同步发送字符串
-                        var bytes = _userInputText.GetBytesWithUtf8();
+                        var result = _userInputText.GetBytesWithUtf8();
                         var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
-                        _udpSession.Send(endPoint, bytes);
+                        _udpSession.Send(endPoint, result.Item2);
 
                         ChatMessages.Add(new ChatMessageModel
                         {
                             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                            Message = _userInputText,
+                            Message = result.Item1.FormatHexString(),
                             IsSend = true
                         });
                     }

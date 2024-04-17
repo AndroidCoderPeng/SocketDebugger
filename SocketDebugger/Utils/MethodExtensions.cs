@@ -8,9 +8,9 @@ namespace SocketDebugger.Utils
 {
     public static class MethodExtensions
     {
-        public static bool IsHex(this string s)
+        public static bool IsHex(this string command)
         {
-            return new Regex(@"[A-Fa-f0-9]+$").IsMatch(s);
+            return new Regex(@"[A-Fa-f0-9]+$").IsMatch(command);
         }
 
         public static bool IsNumber(this string s)
@@ -36,7 +36,7 @@ namespace SocketDebugger.Utils
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static byte[] GetBytesWithUtf8(this string message)
+        public static (string, byte[]) GetBytesWithUtf8(this string message)
         {
             if (message.Contains(" "))
             {
@@ -48,7 +48,30 @@ namespace SocketDebugger.Utils
             }
 
             //以UTF-8的编码同步发送字符串
-            return Encoding.UTF8.GetBytes(message);
+            return (message, Encoding.UTF8.GetBytes(message));
+        }
+
+        /// <summary>
+        /// 格式化Hex字符串
+        /// </summary>
+        /// <returns></returns>
+        public static string FormatHexString(this string command)
+        {
+            var builder = new StringBuilder();
+            for (var i = 0; i < command.Length; i += 2)
+            {
+                var hex = command.Substring(i, 2);
+                if (i == command.Length - 2)
+                {
+                    builder.Append(hex);
+                }
+                else
+                {
+                    builder.Append(hex).Append(" ");
+                }
+            }
+
+            return builder.ToString();
         }
 
         public static string ToJson(this object obj)

@@ -263,7 +263,7 @@ namespace SocketDebugger.ViewModels
                                 ConfigModels = dataService.GetConfigModels();
                                 if (ConfigModels.Any())
                                 {
-                                    SelectedConfigModel = ConfigModels[0];
+                                    SelectedConfigModel = ConfigModels.First();
                                     //选中第一条
                                     Index = 0;
                                 }
@@ -455,11 +455,11 @@ namespace SocketDebugger.ViewModels
                 "未连接成功，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 return;
             }
-            
+
             if (_isTextChecked)
             {
                 _tcpClient.Send(_userInputText);
-                
+
                 ChatMessages.Add(new ChatMessageModel
                 {
                     MessageTime = DateTime.Now.ToString("HH:mm:ss"),
@@ -472,14 +472,14 @@ namespace SocketDebugger.ViewModels
                 if (_userInputText.IsHex())
                 {
                     //以UTF-8的编码同步发送字符串
-                    var bytes = _userInputText.GetBytesWithUtf8();
-                    _tcpClient.Send(bytes);
+                    var result = _userInputText.GetBytesWithUtf8();
+                    _tcpClient.Send(result.Item2);
 
-                    //TODO 将发送的数据格式化为每两个字符为一个整体
+                    //将发送的数据格式化为每两个字符为一个整体
                     ChatMessages.Add(new ChatMessageModel
                     {
                         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = _userInputText,
+                        Message = result.Item1.FormatHexString(),
                         IsSend = true
                     });
                 }
