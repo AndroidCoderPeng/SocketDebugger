@@ -208,7 +208,7 @@ namespace SocketDebugger.ViewModels
         private readonly IDialogService _dialogService;
         private readonly SerialPort _serialPort = new SerialPort();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
-        private string _portName;
+        private string _portName = string.Empty;
         private int _baudRate;
         private int _dataBit;
         private Parity _parityValue;
@@ -243,6 +243,12 @@ namespace SocketDebugger.ViewModels
 
             OpenSerialPortCommand = new DelegateCommand(delegate
             {
+                if (string.IsNullOrEmpty(_portName))
+                {
+                    "串口号未设置，无法打开串口".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
+                    return;
+                }
+
                 if (!_serialPort.IsOpen)
                 {
                     _serialPort.PortName = _portName;
@@ -316,7 +322,11 @@ namespace SocketDebugger.ViewModels
             StopBitArray = _dataService.GetStopBitArray();
 
             //默认值
-            _portName = PortNameArray.First();
+            if (PortNameArray.Any())
+            {
+                _portName = PortNameArray.First();
+            }
+
             _baudRate = BaudRateArray.First();
             _dataBit = DataBitArray.First();
             _parityValue = ParityArray.First();
