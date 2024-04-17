@@ -230,7 +230,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="1" />
-                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="160" />
                 </Grid.ColumnDefinitions>
 
                 <ListView
