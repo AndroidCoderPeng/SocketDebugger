@@ -12,17 +12,18 @@
             <Border
                 x:Name="SendMessageBorder"
                 Grid.Row="0"
-                Width="400"
+                MaxWidth="400"
+                Padding="10"
                 HorizontalAlignment="Right"
                 Background="#95EC69"
                 CornerRadius="3">
                 <TextBox
                     x:Name="MessageTextView"
-                    Padding="10"
                     Background="Transparent"
                     BorderThickness="0"
                     FontSize="12"
                     IsReadOnly="True"
+                    Style="{x:Null}"
                     Text="{Binding Message}"
                     TextWrapping="Wrap" />
             </Border>
@@ -52,16 +53,17 @@
             <Border
                 x:Name="ReceiveMessageBorder"
                 Grid.Row="0"
-                Width="400"
+                MaxWidth="400"
+                Padding="10"
                 Background="#EFEFEF"
                 CornerRadius="3">
                 <TextBox
                     x:Name="MessageTextView"
-                    Padding="10"
                     Background="Transparent"
                     BorderThickness="0"
                     FontSize="12"
                     IsReadOnly="True"
+                    Style="{x:Null}"
                     Text="{Binding Message}"
                     TextWrapping="Wrap" />
             </Border>

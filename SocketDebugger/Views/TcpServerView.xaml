@@ -230,7 +230,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="1" />
-                    <ColumnDefinition Width="160" />
+                    <ColumnDefinition Width="165" />
                 </Grid.ColumnDefinitions>
 
                 <ListView
@@ -305,7 +305,6 @@
                                     <TextBlock
                                         Margin="5,0"
                                         VerticalAlignment="Center"
-                                        FontSize="14"
                                         Text="{Binding ClientHostAddress}" />
                                 </StackPanel>
                             </DataTemplate>

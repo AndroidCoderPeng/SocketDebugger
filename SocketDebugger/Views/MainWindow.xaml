@@ -9,11 +9,12 @@
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     x:Name="TargetWindow"
     Title="SocketDebugger"
-    Width="1000"
-    Height="680"
+    Width="900"
+    Height="600"
+    MinWidth="900"
+    MinHeight="600"
     d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
     Background="White"
-    ResizeMode="CanMinimize"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
