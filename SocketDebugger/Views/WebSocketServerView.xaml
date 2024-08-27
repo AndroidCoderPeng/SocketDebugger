@@ -5,6 +5,7 @@
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:cvt="clr-namespace:SocketDebugger.Converts"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:util="clr-namespace:SocketDebugger.Utils"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
@@ -16,8 +17,6 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <cvt:ViewVisibilityConvert x:Key="ViewVisibilityConvertKey" />
-            <cvt:EmptyVisibilityConvert x:Key="EmptyVisibilityConvertKey" />
             <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
 
             <util:ServerChatBubbleSelector x:Key="ServerChatBubbleSelectorKey" />
@@ -25,393 +24,252 @@
     </UserControl.Resources>
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" />
-            <ColumnDefinition Width="1" />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="1" />
+            <RowDefinition Height="4*" />
+            <RowDefinition Height="1" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="1" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition Height="1" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-            <!--  中间用户连接配置  -->
-            <Grid Grid.Row="0">
-                <StackPanel
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Margin="10,0"
                     VerticalAlignment="Center"
-                    Orientation="Vertical"
-                    Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyVisibilityConvertKey}}">
-                    <Image Source="/SocketDebugger;component/Images/empty.png" />
+                    FontSize="14"
+                    Text="{Binding SelectedConfigModel.ConnectionTitle}" />
 
-                    <TextBlock
-                        Margin="0,10"
-                        FontSize="14"
-                        Foreground="White"
-                        Text="还未添加任何连接配置"
-                        TextAlignment="Center" />
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="10,0"
+                    Foreground="Gray">
+                    <!--  多重绑定  -->
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0}:{1}">
+                            <Binding Path="SelectedConfigModel.ConnectionHost" />
+                            <Binding Path="SelectedConfigModel.ConnectionPort" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
 
-                    <TextBlock
-                        FontSize="14"
-                        Foreground="White"
-                        Text="点击下方'+'添加"
-                        TextAlignment="Center" />
+                <StackPanel
+                    Grid.Row="2"
+                    Margin="10,0"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <Ellipse
+                        Width="15"
+                        Height="15"
+                        Fill="{Binding ConnectColorBrush}" />
+
+                    <TextBlock Margin="5,0,0,0" Text="{Binding ConnectState}" />
                 </StackPanel>
+            </Grid>
 
-                <ListView
-                    x:Name="ConfigListView"
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Button
+                    Grid.Row="0"
+                    Margin="10,10,10,0"
+                    HorizontalAlignment="Right"
+                    Command="{Binding EditConfigCommand}"
+                    Content="编辑" />
+
+                <Button
+                    Grid.Row="1"
+                    Margin="10"
+                    Command="{Binding StartListenCommand}"
+                    Content="{Binding ConnectButtonState}" />
+
+                <Button
+                    Grid.Row="2"
+                    Margin="10,0,10,10"
+                    Command="{Binding ClearMessageCommand}"
+                    Content="清空消息" />
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="1" Background="LightGray" />
+
+        <!--  对话显示区域  -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="1" />
+                <ColumnDefinition Width="165" />
+            </Grid.ColumnDefinitions>
+
+            <ListBox
+                Grid.Column="0"
+                BorderThickness="0"
+                ItemTemplateSelector="{StaticResource ServerChatBubbleSelectorKey}"
+                ItemsSource="{Binding ChatMessages}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                    <Border Name="ItemContainerBorder">
+                                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+
+                <!--  绑定自定义行为  -->
+                <b:Interaction.Behaviors>
+                    <util:AutoScrollBehavior />
+                </b:Interaction.Behaviors>
+            </ListBox>
+
+            <Grid Grid.Column="1" Background="LightGray" />
+
+            <StackPanel Grid.Column="2" Orientation="Vertical">
+                <TextBlock
+                    Padding="0,7"
+                    HorizontalAlignment="Center"
+                    Text="客户端" />
+
+                <Grid Height="1" Background="LightGray" />
+
+                <ListBox
+                    x:Name="ClientListView"
                     BorderThickness="0"
-                    ItemsSource="{Binding ConfigModels}"
-                    SelectedIndex="{Binding Index}"
-                    Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewVisibilityConvertKey}}">
-
+                    ItemsSource="{Binding ConnectedClients}"
+                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                    SelectedIndex="{Binding ClientIndex}">
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
-                            <b:InvokeCommandAction Command="{Binding ConfigItemSelectedCommand}" CommandParameter="{Binding ElementName=ConfigListView, Path=SelectedItem}" />
+                            <b:InvokeCommandAction Command="{Binding ClientItemSelectedCommand}" CommandParameter="{Binding ElementName=ClientListView, Path=SelectedItem}" />
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
 
-                    <ListView.ItemTemplate>
+                    <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Grid Width="180" Height="50">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse
+                                    Width="10"
+                                    Height="10"
+                                    Fill="{Binding ClientConnectColorBrush}" />
 
                                 <TextBlock
-                                    Grid.Row="0"
-                                    Margin="3"
-                                    FontSize="16"
-                                    Text="{Binding ConnectionTitle}" />
-
-                                <TextBlock
-                                    Grid.Row="1"
-                                    Margin="3"
-                                    Foreground="Gray">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}ws://{0}:{1}/">
-                                            <Binding Path="ConnectionHost" />
-                                            <Binding Path="ConnectionPort" />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </Grid>
+                                    Margin="5,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding ClientHostAddress}" />
+                            </StackPanel>
                         </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </Grid>
-
-            <Grid Grid.Row="1" Background="LightGray" />
-
-            <UniformGrid
-                Grid.Row="2"
-                Margin="1"
-                Columns="2">
-                <Button
-                    Command="{Binding AddConfigCommand}"
-                    Foreground="White"
-                    >
-                    <!-- <md:PackIcon Kind="Plus" /> -->
-                </Button>
-                <Button
-                    Margin="1,0"
-                    Command="{Binding DeleteConfigCommand}"
-                    Foreground="White"
-                    >
-                    <!-- <md:PackIcon Kind="Minus" /> -->
-                </Button>
-            </UniformGrid>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
         </Grid>
 
-        <Grid Grid.Column="1" Background="LightGray" />
+        <Grid Grid.Row="3" Background="LightGray" />
 
-        <Grid Grid.Column="2" Visibility="{Binding ConfigModels.Count, Converter={StaticResource ViewVisibilityConvertKey}}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="1" />
-                <RowDefinition Height="4*" />
-                <RowDefinition Height="1" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="1" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-            <Grid Grid.Row="0">
+            <RadioButton
+                Grid.Column="0"
+                Margin="10"
+                Content="文本"
+                GroupName="ModeGroup"
+                IsChecked="{Binding IsTextChecked}" />
+
+            <RadioButton
+                Grid.Column="1"
+                Content="16进制"
+                GroupName="ModeGroup"
+                IsChecked="{Binding IsHexChecked}" />
+
+            <Grid
+                Grid.Column="2"
+                Margin="10,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Grid Grid.Column="0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-
-                    <TextBlock
-                        Grid.Row="0"
-                        Margin="10,0"
-                        VerticalAlignment="Center"
-                        FontSize="16"
-                        Text="{Binding SelectedConfigModel.ConnectionTitle}" />
-
-                    <TextBlock
-                        Grid.Row="1"
-                        Margin="10,0"
-                        Foreground="Gray">
-                        <!--  多重绑定  -->
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0}:{1}">
-                                <Binding Path="SelectedConfigModel.ConnectionHost" />
-                                <Binding Path="SelectedConfigModel.ConnectionPort" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-
-                    <StackPanel
-                        Grid.Row="2"
-                        Margin="10,0"
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal">
-                        <Ellipse
-                            Width="15"
-                            Height="15"
-                            Fill="{Binding ConnectColorBrush}" />
-
-                        <TextBlock
-                            Margin="5,0,0,0"
-                            FontSize="14"
-                            Text="{Binding ConnectState}" />
-                    </StackPanel>
-                </Grid>
-
-                <Grid Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-
-                    <Button
-                        Grid.Row="0"
-                        Height="30"
-                        Margin="10,10,10,0"
-                        Command="{Binding EditConfigCommand}"
-                        Content="编辑"
-                        Foreground="White" />
-
-                    <Button
-                        Grid.Row="1"
-                        Height="30"
-                        Margin="10"
-                        Command="{Binding StartListenCommand}"
-                        Content="{Binding ConnectButtonState}"
-                        Foreground="White" />
-
-                    <Button
-                        Grid.Row="2"
-                        Height="30"
-                        Margin="10,0,10,10"
-                        Command="{Binding ClearMessageCommand}"
-                        Content="清空消息"
-                        Foreground="White" />
-                </Grid>
-            </Grid>
-
-            <Grid Grid.Row="1" Background="LightGray" />
-
-            <!--  对话显示区域  -->
-            <Grid Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="1" />
-                    <ColumnDefinition Width="165" />
-                </Grid.ColumnDefinitions>
-
-                <ListView
+                <CheckBox
                     Grid.Column="0"
-                    ItemTemplateSelector="{StaticResource ServerChatBubbleSelectorKey}"
-                    ItemsSource="{Binding ChatMessages}"
-                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    Content="循环发送"
+                    IsChecked="{Binding IsCycleChecked}">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="Checked">
+                            <b:InvokeCommandAction Command="{Binding CycleCheckedCommand}" />
+                        </b:EventTrigger>
 
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                        <Border
-                                            Name="ItemBorder"
-                                            Padding="{TemplateBinding Padding}"
-                                            Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                            SnapsToDevicePixels="true">
-                                            <ContentPresenter
-                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                        </Style>
-                    </ListView.ItemContainerStyle>
+                        <b:EventTrigger EventName="Unchecked">
+                            <b:InvokeCommandAction Command="{Binding CycleUncheckedCommand}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                </CheckBox>
 
-                    <!--  绑定自定义行为  -->
-                    <b:Interaction.Behaviors>
-                        <util:AutoScrollBehavior />
-                    </b:Interaction.Behaviors>
-                </ListView>
-
-                <Grid Grid.Column="1" Background="LightGray" />
-
-                <StackPanel Grid.Column="2" Orientation="Vertical">
-                    <TextBlock
-                        Padding="0,7"
-                        HorizontalAlignment="Center"
-                        FontSize="14"
-                        Text="客户端" />
-
-                    <Grid Height="1" Background="LightGray" />
-
-                    <ListView
-                        x:Name="ClientListView"
-                        BorderThickness="0"
-                        ItemsSource="{Binding ConnectedClients}"
-                        ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                        SelectedIndex="{Binding ClientIndex}">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="SelectionChanged">
-                                <b:InvokeCommandAction Command="{Binding ClientItemSelectedCommand}" CommandParameter="{Binding ElementName=ClientListView, Path=SelectedItem}" />
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Ellipse
-                                        Width="10"
-                                        Height="10"
-                                        Fill="{Binding ClientConnectColorBrush}" />
-
-                                    <TextBlock
-                                        Margin="5,0"
-                                        VerticalAlignment="Center"
-                                        Text="{Binding ClientHostAddress}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </StackPanel>
-            </Grid>
-
-            <Grid Grid.Row="3" Background="LightGray" />
-
-            <Grid Grid.Row="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <RadioButton
-                    Grid.Column="0"
-                    Margin="10"
-                    Content="文本"
-                    FontSize="14"
-                    GroupName="ModeGroup"
-                    IsChecked="{Binding IsTextChecked}" />
-
-                <RadioButton
+                <TextBox
                     Grid.Column="1"
-                    Content="16进制"
-                    FontSize="14"
-                    GroupName="ModeGroup"
-                    IsChecked="{Binding IsHexChecked}" />
-
-                <Grid
-                    Grid.Column="2"
+                    Width="60"
                     Margin="10,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                    VerticalContentAlignment="Center"
+                    Text="{Binding MessageCycleTime}" />
 
-                    <CheckBox
-                        Grid.Column="0"
-                        Content="循环发送"
-                        FontSize="14"
-                        IsChecked="{Binding IsCycleChecked}">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Checked">
-                                <b:InvokeCommandAction Command="{Binding CycleCheckedCommand}" />
-                            </b:EventTrigger>
-
-                            <b:EventTrigger EventName="Unchecked">
-                                <b:InvokeCommandAction Command="{Binding CycleUncheckedCommand}" />
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </CheckBox>
-
-                    <TextBox
-                        Grid.Column="1"
-                        Width="80"
-                        Height="25"
-                        Margin="10,0"
-                        Padding="3,0"
-                        VerticalContentAlignment="Center"
-                        
-                        FontSize="14"
-                        Text="{Binding MessageCycleTime}" />
-
-                    <TextBlock
-                        Grid.Column="2"
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        Text="ms" />
-                </Grid>
-
-                <Button
-                    Grid.Column="3"
-                    Height="30"
-                    Margin="5,0"
-                    Command="{Binding SendMessageCommand}"
-                    Content="发送"
-                    Foreground="White"
-                    IsEnabled="{Binding IsCycleChecked, Converter={StaticResource SendMessageButtonStateConvertKey}}" />
+                <TextBlock
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    Text="ms" />
             </Grid>
 
-            <Grid Grid.Row="5" Background="LightGray" />
-
-            <!--  输入显示区域  -->
-            <TextBox
-                Grid.Row="6"
-                Padding="2"
-                VerticalContentAlignment="Top"
-                
-                AcceptsReturn="True"
-                FontSize="14"
-                Text="{Binding UserInputText}"
-                TextWrapping="Wrap"
-                VerticalScrollBarVisibility="Auto" />
+            <Button
+                Grid.Column="3"
+                Margin="5,0"
+                Command="{Binding SendMessageCommand}"
+                Content="发送"
+                IsEnabled="{Binding IsCycleChecked, Converter={StaticResource SendMessageButtonStateConvertKey}}"
+                Style="{StaticResource ButtonSuccess}" />
         </Grid>
 
-        <StackPanel
-            Grid.Column="2"
-            VerticalAlignment="Center"
-            Orientation="Vertical"
-            Visibility="{Binding Path=Visibility, ElementName=ConfigListView, Converter={StaticResource EmptyVisibilityConvertKey}}">
-            <Image Source="/SocketDebugger;component/Images/empty.png" />
-        </StackPanel>
+        <Grid Grid.Row="5" Background="LightGray" />
+
+        <!--  输入显示区域  -->
+        <TextBox
+            Grid.Row="6"
+            Padding="4,2"
+            VerticalContentAlignment="Top"
+            hc:InfoElement.ShowClearButton="True"
+            AcceptsReturn="True"
+            BorderThickness="0"
+            Text="{Binding UserInputText}"
+            TextWrapping="Wrap"
+            VerticalScrollBarVisibility="Auto" />
     </Grid>
 </UserControl>
