@@ -192,7 +192,6 @@
     <Compile Include="Dialogs\ConfigDialog.xaml.cs">
       <DependentUpon>ConfigDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Events\MainMenuSelectedEvent.cs" />
     <Compile Include="Events\UpdateConnectionDetailEvent.cs" />
     <Compile Include="Model\ChatMessageModel.cs" />
     <Compile Include="Model\ConnectedClientModel.cs" />
@@ -206,7 +205,6 @@
     <Compile Include="Utils\MemoryCacheManager.cs" />
     <Compile Include="Utils\MethodExtensions.cs" />
     <Compile Include="Utils\ServerChatBubbleSelector.cs" />
-    <Compile Include="Utils\SystemHelper.cs" />
     <Compile Include="ViewModels\ConfigDialogViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\SerialPortViewModel.cs" />

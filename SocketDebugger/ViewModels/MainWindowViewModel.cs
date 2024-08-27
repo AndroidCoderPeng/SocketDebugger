@@ -172,22 +172,22 @@ namespace SocketDebugger.ViewModels
         private void UpdateConnectionView(string type, bool isAdd)
         {
             ConnectionObservableCollection = _dataService.GetConnectionCollection(type);
-            if (isAdd)
+            if (_connectionObservableCollection.Any())
             {
-                //选中最新添加的数据
-                CurrentIndex = ConnectionObservableCollection.Count - 1;
-            }
-            else
-            {
-                if (ConnectionObservableCollection.Any())
+                if (isAdd)
+                {
+                    //选中最新添加的数据
+                    CurrentIndex = _connectionObservableCollection.Count - 1;
+                }
+                else
                 {
                     //删除或者切换类别选中第一个
                     CurrentIndex = 0;
                 }
-            }
 
-            //设置最右侧默认面板
-            MemoryCacheManager.SelectedConfigModel = _connectionObservableCollection[_currentIndex];
+                //设置最右侧默认面板
+                MemoryCacheManager.SelectedConfigModel = _connectionObservableCollection[_currentIndex];
+            }
         }
     }
 }

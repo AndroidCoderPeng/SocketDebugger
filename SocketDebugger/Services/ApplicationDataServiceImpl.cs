@@ -20,8 +20,7 @@ namespace SocketDebugger.Services
                 new MainMenuModel { MainMenuIcon = "\ue8a9", MainMenuName = "UDP客户端" },
                 new MainMenuModel { MainMenuIcon = "\ue8a9", MainMenuName = "UDP服务端" },
                 new MainMenuModel { MainMenuIcon = "\ue8b2", MainMenuName = "WebSocket客户端" },
-                new MainMenuModel { MainMenuIcon = "\ue8b2", MainMenuName = "WebSocket服务端" },
-                new MainMenuModel { MainMenuIcon = "\ue8a7", MainMenuName = "串口通信" }
+                new MainMenuModel { MainMenuIcon = "\ue8b2", MainMenuName = "WebSocket服务端" }
             };
         }
 
