@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:model="clr-namespace:SocketDebugger.Model">
     <DataTemplate x:Key="ClientSendDataTemplateKey" DataType="{x:Type model:ChatMessageModel}">
-        <Grid>
+        <Grid Margin="0,0,5,0">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition Height="Auto" />
@@ -12,7 +12,7 @@
             <Border
                 x:Name="SendMessageBorder"
                 Grid.Row="0"
-                MaxWidth="400"
+                Margin="100,0,0,0"
                 Padding="10"
                 HorizontalAlignment="Right"
                 Background="#95EC69"
@@ -21,7 +21,6 @@
                     x:Name="MessageTextView"
                     Background="Transparent"
                     BorderThickness="0"
-                    FontSize="12"
                     IsReadOnly="True"
                     Style="{x:Null}"
                     Text="{Binding Message}"
@@ -30,9 +29,8 @@
 
             <TextBlock
                 Grid.Row="1"
-                Margin="0,0,10,0"
                 HorizontalAlignment="Right"
-                FontSize="12"
+                Foreground="DarkGray"
                 Text="{Binding MessageTime}" />
         </Grid>
 
@@ -44,7 +42,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="ClientReceiveDataTemplateKey" DataType="{x:Type model:ChatMessageModel}">
-        <Grid HorizontalAlignment="Left">
+        <Grid Margin="5,0,0,0" HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition Height="Auto" />
@@ -53,7 +51,7 @@
             <Border
                 x:Name="ReceiveMessageBorder"
                 Grid.Row="0"
-                MaxWidth="400"
+                Margin="0,0,100,0"
                 Padding="10"
                 Background="#EFEFEF"
                 CornerRadius="3">
@@ -61,7 +59,6 @@
                     x:Name="MessageTextView"
                     Background="Transparent"
                     BorderThickness="0"
-                    FontSize="12"
                     IsReadOnly="True"
                     Style="{x:Null}"
                     Text="{Binding Message}"
@@ -70,8 +67,7 @@
 
             <TextBlock
                 Grid.Row="1"
-                Margin="10,0,0,0"
-                FontSize="12"
+                Foreground="DarkGray"
                 Text="{Binding MessageTime}" />
         </Grid>
 
