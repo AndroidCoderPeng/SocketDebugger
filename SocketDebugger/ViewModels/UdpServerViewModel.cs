@@ -12,7 +12,6 @@ using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using SocketDebugger.Events;
 using SocketDebugger.Model;
-using SocketDebugger.Services;
 using SocketDebugger.Utils;
 using TouchSocket.Core;
 using TouchSocket.Sockets;
@@ -209,210 +208,50 @@ namespace SocketDebugger.ViewModels
 
         #endregion
         
-        private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
-        private readonly IEventAggregator _eventAggregator;
         private readonly UdpSession _udpSession = new UdpSession();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
         private ConnectedClientModel _selectedClientModel;
         
-        public UdpServerViewModel(IApplicationDataService dataService, IDialogService dialogService,
-            IEventAggregator eventAggregator)
+        public UdpServerViewModel(IDialogService dialogService, IEventAggregator eventAggregator)
         {
-            _dataService = dataService;
             _dialogService = dialogService;
-            _eventAggregator = eventAggregator;
-
-            InitMessageType();
 
             InitDelegate();
 
-            ConfigItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(
-                delegate(ConnectionConfigModel configModel) { SelectedConfigModel = configModel; });
-
-            AddConfigCommand = new DelegateCommand(delegate
-            {
-                var configModel = new ConnectionConfigModel
-                {
-                    ConnectionTitle = "",
-                    ConnectionType = "UDP服务端",
-                    ConnectionHost = SystemHelper.GetHostAddress(),
-                    ConnectionPort = "8080"
-                };
-
-                dialogService.ShowDialog("ConfigDialog", new DialogParameters
-                    {
-                        { "Title", "添加配置" }, { "SelectedConfigModel", configModel }
-                    },
-                    delegate(IDialogResult result)
-                    {
-                        if (result.Result == ButtonResult.OK)
-                        {
-                            //更新列表
-                            // ConfigModels = dataService.GetConfigModels();
-
-                            //选中最新添加的数据
-                            Index = ConfigModels.Count - 1;
-
-                            SelectedConfigModel =
-                                result.Parameters.GetValue<ConnectionConfigModel>("SelectedConfigModel");
-                            if (SelectedConfigModel.MessageType == "文本")
-                            {
-                                IsTextChecked = true;
-                            }
-                            else
-                            {
-                                IsHexChecked = true;
-                            }
-                        }
-                    }
-                );
-            });
-
-            DeleteConfigCommand = new DelegateCommand(delegate
-            {
-                if (ConfigModels.Any())
-                {
-                    // dialogService.ShowDialog("AlertControlDialog", new DialogParameters
-                    //     {
-                    //         { "AlertType", AlertType.Warning }, { "Message", "是否删除当前配置？" }
-                    //     },
-                    //     delegate(IDialogResult dialogResult)
-                    //     {
-                    //         if (dialogResult.Result == ButtonResult.OK)
-                    //         {
-                    //             using (var manager = new DataBaseManager())
-                    //             {
-                    //                 manager.Delete(ConfigModels[_index]);
-                    //             }
-                    //
-                    //             ConfigModels = dataService.GetConfigModels();
-                    //             if (ConfigModels.Any())
-                    //             {
-                    //                 SelectedConfigModel = ConfigModels.First();
-                    //                 //选中第一条
-                    //                 Index = 0;
-                    //             }
-                    //         }
-                    //     }
-                    // );
-                }
-                else
-                {
-                    // "没有配置，无法删除".ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                }
-            });
-
-            EditConfigCommand = new DelegateCommand(delegate
-            {
-                var tempIndex = _index;
-                dialogService.ShowDialog("ConfigDialog", new DialogParameters
-                    {
-                        { "Title", "编辑配置" }, { "SelectedConfigModel", _selectedConfigModel }
-                    },
-                    delegate(IDialogResult result)
-                    {
-                        if (result.Result == ButtonResult.OK)
-                        {
-                            //更新列表
-                            // ConfigModels = dataService.GetConfigModels();
-
-                            //Index保持不变
-                            Index = tempIndex;
-
-                            SelectedConfigModel =
-                                result.Parameters.GetValue<ConnectionConfigModel>("SelectedConfigModel");
-                            if (SelectedConfigModel.MessageType == "文本")
-                            {
-                                IsTextChecked = true;
-                            }
-                            else
-                            {
-                                IsHexChecked = true;
-                            }
-                        }
-                    }
-                );
-            });
-
-            StartListenCommand = new DelegateCommand(delegate
-            {
-                var config = new TouchSocketConfig();
-                config.SetBindIPHost(new IPHost(_selectedConfigModel.ConnectionHost + ":" + _selectedConfigModel.ConnectionPort));
-
-                //载入配置
-                _udpSession.Setup(config);
-                try
-                {
-                    if (_connectButtonState == "开始监听")
-                    {
-                        _udpSession.Start();
-
-                        ConnectColorBrush = "LimeGreen";
-                        ConnectState = "监听中";
-                        ConnectButtonState = "停止监听";
-                    }
-                    else
-                    {
-                        _timer.Stop();
-                        _udpSession.Stop();
-
-                        ConnectColorBrush = "DarkGray";
-                        ConnectState = "未在监听";
-                        ConnectButtonState = "开始监听";
-                    }
-                }
-                catch (SocketException e)
-                {
-                    // e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                }
-            });
-
-            ClearMessageCommand = new DelegateCommand(() => { ChatMessages.Clear(); });
-
-            ClientItemSelectedCommand = new DelegateCommand<ConnectedClientModel>(
-                delegate(ConnectedClientModel clientModel) { _selectedClientModel = clientModel; });
-
+            EditConfigCommand = new DelegateCommand(EditConnectionConfig);
+            StartListenCommand = new DelegateCommand(StartListenPort);
+            ClearMessageCommand = new DelegateCommand(ClearMessage);
+            ClientItemSelectedCommand = new DelegateCommand<ConnectedClientModel>(ClientItemSelected);
             SendMessageCommand = new DelegateCommand(SendMessage);
 
             //周期发送CheckBox选中、取消选中事件
-            CycleCheckedCommand = new DelegateCommand(delegate
-            {
-                //判断周期时间是否为空
-                if (_messageCycleTime.IsNullOrWhiteSpace())
-                {
-                    // "请先设置周期发送的时间间隔".ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                    IsCycleChecked = false;
-                    return;
-                }
-
-                //判断周期时间是否是数字
-                if (!_messageCycleTime.IsNumber())
-                {
-                    // "时间间隔只能是数字".ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                    IsCycleChecked = false;
-                    return;
-                }
-
-                _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(_messageCycleTime));
-                _timer.Start();
-            });
-            CycleUncheckedCommand = new DelegateCommand(delegate
-            {
-                //停止timer
-                if (_timer.IsEnabled)
-                {
-                    _timer.Stop();
-                }
-            });
+            CycleCheckedCommand = new DelegateCommand(CycleSendMessage);
+            CycleUncheckedCommand = new DelegateCommand(StopCycleSendMessage);
+            
             //自动发消息
             _timer.Tick += delegate { SendMessage(); };
+            
+            eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Subscribe(UpdateDetailView);
         }
 
+        private void UpdateDetailView(ConnectionConfigModel configModel)
+        {
+            SelectedConfigModel = configModel;
+            if (configModel.MessageType == "文本")
+            {
+                IsTextChecked = true;
+                IsHexChecked = false;
+            }
+            else
+            {
+                IsTextChecked = false;
+                IsHexChecked = true;
+            }
+        }
+        
         private void InitDelegate()
         {
-            _eventAggregator.GetEvent<MainMenuSelectedEvent>().Subscribe(InitMessageType);
-            
             _udpSession.Received += delegate(EndPoint endpoint, ByteBlock block, IRequestInfo info)
             {
                 var message = _isTextChecked
@@ -441,26 +280,65 @@ namespace SocketDebugger.ViewModels
             };
         }
 
-        private void InitMessageType()
+        private void EditConnectionConfig()
         {
-            // ConfigModels = _dataService.GetConfigModels();
-            if (ConfigModels.Any())
-            {
-                //选中第一条
-                Index = 0;
-
-                SelectedConfigModel = ConfigModels.First();
-                if (SelectedConfigModel.MessageType == "文本")
+            _dialogService.ShowDialog("ConfigDialog", new DialogParameters
                 {
-                    IsTextChecked = true;
-                    IsHexChecked = false;
+                    { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfigModel }
+                },
+                delegate(IDialogResult result)
+                {
+                    if (result.Result == ButtonResult.OK)
+                    {
+                        UpdateDetailView(
+                            result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel")
+                        );
+                    }
+                }
+            );
+        }
+
+        private void StartListenPort()
+        {
+            var config = new TouchSocketConfig();
+            config.SetBindIPHost(new IPHost(_selectedConfigModel.ConnectionHost + ":" + _selectedConfigModel.ConnectionPort));
+
+            //载入配置
+            _udpSession.Setup(config);
+            try
+            {
+                if (_connectButtonState == "开始监听")
+                {
+                    _udpSession.Start();
+
+                    ConnectColorBrush = "LimeGreen";
+                    ConnectState = "监听中";
+                    ConnectButtonState = "停止监听";
                 }
                 else
                 {
-                    IsTextChecked = false;
-                    IsHexChecked = true;
+                    _timer.Stop();
+                    _udpSession.Stop();
+
+                    ConnectColorBrush = "DarkGray";
+                    ConnectState = "未在监听";
+                    ConnectButtonState = "开始监听";
                 }
             }
+            catch (SocketException e)
+            {
+                MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ClearMessage()
+        {
+            ChatMessages.Clear();
+        }
+        
+        private void ClientItemSelected(ConnectedClientModel clientModel)
+        {
+            _selectedClientModel = clientModel;
         }
         
         /// <summary>
@@ -470,7 +348,7 @@ namespace SocketDebugger.ViewModels
         {
             if (string.IsNullOrEmpty(_userInputText))
             {
-                // "不能发送空消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                MessageBox.Show("不能发送空消息", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -506,13 +384,44 @@ namespace SocketDebugger.ViewModels
                     }
                     else
                     {
-                        // "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                        MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
             else
             {
-                // "请指定接收消息的客户端".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                MessageBox.Show("请指定接收消息的客户端", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        private void CycleSendMessage()
+        {
+            //判断周期时间是否为空
+            if (_messageCycleTime.IsNullOrWhiteSpace())
+            {
+                MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsCycleChecked = false;
+                return;
+            }
+
+            //判断周期时间是否是数字
+            if (!_messageCycleTime.IsNumber())
+            {
+                MessageBox.Show("时间间隔只能是数字", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsCycleChecked = false;
+                return;
+            }
+
+            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(_messageCycleTime));
+            _timer.Start();
+        }
+
+        private void StopCycleSendMessage()
+        {
+            //停止timer
+            if (_timer.IsEnabled)
+            {
+                _timer.Stop();
             }
         }
     }

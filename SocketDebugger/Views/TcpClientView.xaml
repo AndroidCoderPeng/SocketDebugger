@@ -51,7 +51,7 @@
                     Grid.Row="0"
                     Margin="10,0"
                     VerticalAlignment="Center"
-                    FontSize="16"
+                    FontSize="14"
                     Text="{Binding SelectedConfigModel.ConnectionTitle}" />
 
                 <TextBlock
@@ -77,10 +77,7 @@
                         Height="15"
                         Fill="{Binding ConnectColorBrush}" />
 
-                    <TextBlock
-                        Margin="5,0,0,0"
-                        FontSize="14"
-                        Text="{Binding ConnectState}" />
+                    <TextBlock Margin="5,0,0,0" Text="{Binding ConnectState}" />
                 </StackPanel>
             </Grid>
 

@@ -327,7 +327,7 @@ namespace SocketDebugger.ViewModels
             }
             catch (SocketException e)
             {
-                // e.Message.ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
