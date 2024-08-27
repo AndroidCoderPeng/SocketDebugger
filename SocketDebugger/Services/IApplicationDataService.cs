@@ -9,8 +9,10 @@ namespace SocketDebugger.Services
     {
         List<MainMenuModel> GetMainMenu();
         
-        ObservableCollection<ConnectionConfigModel> GetConfigModels();
+        ObservableCollection<ConnectionConfigModel> GetConnectionCollection(string type);
 
+        void DeleteConnectionById(string id);
+        
         List<string> GetDataType();
         
         string GetHostAddress();

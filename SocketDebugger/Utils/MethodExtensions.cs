@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using Prism.Services.Dialogs;
 
 namespace SocketDebugger.Utils
 {
@@ -16,19 +15,6 @@ namespace SocketDebugger.Utils
         public static bool IsNumber(this string s)
         {
             return new Regex(@"^\d+$").IsMatch(s);
-        }
-
-        /// <summary>
-        /// 显示普通提示对话框
-        /// </summary>
-        public static void ShowAlertMessageDialog(this string message, IDialogService dialogService, AlertType type)
-        {
-            dialogService.ShowDialog("AlertMessageDialog", new DialogParameters
-                {
-                    { "AlertType", type }, { "Message", message }
-                },
-                delegate { }
-            );
         }
 
         /// <summary>

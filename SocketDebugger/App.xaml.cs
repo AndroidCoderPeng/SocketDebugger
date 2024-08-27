@@ -4,7 +4,6 @@ using Prism.Ioc;
 using Prism.Regions;
 using SocketDebugger.Dialogs;
 using SocketDebugger.Services;
-using SocketDebugger.Utils;
 using SocketDebugger.ViewModels;
 using SocketDebugger.Views;
 
@@ -20,9 +19,6 @@ namespace SocketDebugger
             var mainWindow = Container.Resolve<MainWindow>();
             mainWindow.Loaded += delegate
             {
-                //显示默认View
-                MemoryCacheManager.SelectedMainMenu = "TCP客户端";
-
                 var regionManager = Container.Resolve<IRegionManager>();
                 regionManager.RequestNavigate("ContentRegion", "TcpClientView");
             };
@@ -45,8 +41,6 @@ namespace SocketDebugger
 
             //Dialog or Window
             containerRegistry.RegisterDialog<ConfigDialog, ConfigDialogViewModel>();
-            containerRegistry.RegisterDialog<AlertMessageDialog, AlertMessageDialogViewModel>();
-            containerRegistry.RegisterDialog<AlertControlDialog, AlertControlDialogViewModel>();
         }
     }
 }

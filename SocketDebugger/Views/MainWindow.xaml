@@ -4,14 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     x:Name="TargetWindow"
     Title="SocketDebugger"
-    Width="900"
+    Width="1000"
     Height="600"
-    MinWidth="900"
+    MinWidth="1000"
     MinHeight="600"
     d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
     Background="White"
@@ -28,14 +29,16 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="180" />
+                <ColumnDefinition Width="225" />
+                <ColumnDefinition Width="1" />
+                <ColumnDefinition Width="225" />
                 <ColumnDefinition Width="1" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
             <!--  左边功能列表  -->
-            <ListView
-                x:Name="MainMenuListView"
+            <ListBox
+                x:Name="MainMenuListBox"
                 Grid.Column="0"
                 VerticalAlignment="Top"
                 BorderThickness="0"
@@ -44,13 +47,13 @@
 
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="SelectionChanged">
-                        <b:InvokeCommandAction Command="{Binding MenuSelectedCommand}" CommandParameter="{Binding ElementName=MainMenuListView}" />
+                        <b:InvokeCommandAction Command="{Binding MenuSelectedCommand}" CommandParameter="{Binding ElementName=MainMenuListBox}" />
                     </b:EventTrigger>
                 </b:Interaction.Triggers>
 
-                <ListView.ItemTemplate>
+                <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid Width="160" Height="50">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
@@ -58,7 +61,6 @@
 
                             <TextBlock
                                 Grid.Column="0"
-                                Margin="5,0"
                                 VerticalAlignment="Center"
                                 FontFamily="/SocketDebugger;component/IconFont/#iconfont"
                                 FontSize="30"
@@ -66,20 +68,102 @@
 
                             <TextBlock
                                 Grid.Column="1"
-                                Margin="5,0"
+                                Padding="10,20"
                                 VerticalAlignment="Center"
                                 FontSize="18"
-                                Text="{Binding MainMenuName}"
-                                TextWrapping="Wrap" />
+                                Text="{Binding MainMenuName}" />
                         </Grid>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <Grid Grid.Column="1" Background="LightGray" />
 
+            <!--  中间连接列表  -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="1" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ListBox
+                    x:Name="ConnectionListBox"
+                    Grid.Row="0"
+                    BorderThickness="0"
+                    ItemsSource="{Binding ConnectionObservableCollection}"
+                    SelectedIndex="{Binding CurrentIndex}">
+
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="SelectionChanged">
+                            <b:InvokeCommandAction Command="{Binding ConnectionItemSelectedCommand}" CommandParameter="{Binding ElementName=ConnectionListBox, Path=SelectedItem}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Padding="0,10,0,0"
+                                    FontSize="16"
+                                    Text="{Binding ConnectionTitle}" />
+
+                                <TextBlock Grid.Row="1" Margin="3,7,3,10">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0}:{1}">
+                                            <Binding Path="ConnectionHost" />
+                                            <Binding Path="ConnectionPort" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Grid Grid.Row="1" Background="LightGray" />
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="1" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Button
+                        Grid.Column="0"
+                        HorizontalAlignment="Stretch"
+                        hc:BorderElement.CornerRadius="0"
+                        BorderThickness="0"
+                        Command="{Binding DeleteConnectionConfigCommand}"
+                        CommandParameter="{Binding ElementName=ConnectionListBox, Path=SelectedItem}"
+                        Content="&#xe6ef;"
+                        FontFamily="/SocketDebugger;component/IconFont/#iconfont" />
+
+                    <Grid Grid.Column="1" Background="LightGray" />
+
+                    <Button
+                        Grid.Column="2"
+                        HorizontalAlignment="Stretch"
+                        hc:BorderElement.CornerRadius="0"
+                        BorderThickness="0"
+                        Command="{Binding AddConnectionConfigCommand}"
+                        CommandParameter="{Binding ElementName=MainMenuListBox, Path=SelectedItem}"
+                        Content="&#xe604;"
+                        FontFamily="/SocketDebugger;component/IconFont/#iconfont" />
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Column="3" Background="LightGray" />
+
             <!--  右边连接详细信息  -->
-            <ContentControl Grid.Column="2" prism:RegionManager.RegionName="ContentRegion" />
+            <ContentControl Grid.Column="4" prism:RegionManager.RegionName="ContentRegion" />
         </Grid>
     </Grid>
 </Window>

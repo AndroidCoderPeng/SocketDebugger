@@ -6,7 +6,7 @@
     xmlns:cvt="clr-namespace:SocketDebugger.Converts"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:util="clr-namespace:SocketDebugger.Utils"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:UdpServerViewModel}"
@@ -114,15 +114,15 @@
                 <Button
                     Command="{Binding AddConfigCommand}"
                     Foreground="White"
-                    Style="{StaticResource MaterialDesignFlatMidBgButton}">
-                    <md:PackIcon Kind="Plus" />
+                    >
+                    <!-- <md:PackIcon Kind="Plus" /> -->
                 </Button>
                 <Button
                     Margin="1,0"
                     Command="{Binding DeleteConfigCommand}"
                     Foreground="White"
-                    Style="{StaticResource MaterialDesignFlatMidBgButton}">
-                    <md:PackIcon Kind="Minus" />
+                    >
+                    <!-- <md:PackIcon Kind="Minus" /> -->
                 </Button>
             </UniformGrid>
         </Grid>
@@ -371,9 +371,8 @@
                         Margin="10,0"
                         Padding="3,0"
                         VerticalContentAlignment="Center"
-                        md:TextFieldAssist.HasClearButton="True"
+                        hc:InfoElement.ShowClearButton="True"
                         FontSize="14"
-                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
                         Text="{Binding MessageCycleTime}" />
 
                     <TextBlock
@@ -400,7 +399,7 @@
                 Grid.Row="6"
                 Padding="2"
                 VerticalContentAlignment="Top"
-                md:TextFieldAssist.HasClearButton="True"
+                hc:InfoElement.ShowClearButton="True"
                 AcceptsReturn="True"
                 FontSize="14"
                 Text="{Binding UserInputText}"

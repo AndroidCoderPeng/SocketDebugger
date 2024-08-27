@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
+using System.Linq;
 using System.Net;
 using SocketDebugger.Converts;
 using SocketDebugger.Model;
@@ -24,15 +25,31 @@ namespace SocketDebugger.Services
             };
         }
 
-        public ObservableCollection<ConnectionConfigModel> GetConfigModels()
+        public ObservableCollection<ConnectionConfigModel> GetConnectionCollection(string type)
         {
             using (var manager = new DataBaseManager())
             {
                 var queryResult = manager
                     .Table<ConnectionConfigModel>()
-                    .Where(config => config.ConnectionType == MemoryCacheManager.SelectedMainMenu)
+                    .Where(config => config.ConnectionType == type)
                     .ToList();
                 return ListConvert<ConnectionConfigModel>.ToObservableCollection(queryResult);
+            }
+        }
+
+        public void DeleteConnectionById(string id)
+        {
+            using (var manager = new DataBaseManager())
+            {
+                var queryResult = manager
+                    .Table<ConnectionConfigModel>()
+                    .Where(config => config.Uuid == id)
+                    .ToList();
+                if (!queryResult.Any()) return;
+                foreach (var connectionConfigModel in queryResult)
+                {
+                    manager.Delete(connectionConfigModel);
+                }
             }
         }
 

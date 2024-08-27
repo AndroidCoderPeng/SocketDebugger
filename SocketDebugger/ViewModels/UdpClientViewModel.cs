@@ -184,7 +184,7 @@ namespace SocketDebugger.ViewModels
                         if (result.Result == ButtonResult.OK)
                         {
                             //更新列表
-                            ConfigModels = dataService.GetConfigModels();
+                            // ConfigModels = dataService.GetConfigModels();
 
                             //选中最新添加的数据
                             Index = ConfigModels.Count - 1;
@@ -209,33 +209,33 @@ namespace SocketDebugger.ViewModels
             {
                 if (ConfigModels.Any())
                 {
-                    dialogService.ShowDialog("AlertControlDialog", new DialogParameters
-                        {
-                            { "AlertType", AlertType.Warning }, { "Message", "是否删除当前配置？" }
-                        },
-                        delegate(IDialogResult dialogResult)
-                        {
-                            if (dialogResult.Result == ButtonResult.OK)
-                            {
-                                using (var manager = new DataBaseManager())
-                                {
-                                    manager.Delete(ConfigModels[_index]);
-                                }
-
-                                ConfigModels = dataService.GetConfigModels();
-                                if (ConfigModels.Any())
-                                {
-                                    SelectedConfigModel = ConfigModels.First();
-                                    //选中第一条
-                                    Index = 0;
-                                }
-                            }
-                        }
-                    );
+                    // dialogService.ShowDialog("AlertControlDialog", new DialogParameters
+                    //     {
+                    //         { "AlertType", AlertType.Warning }, { "Message", "是否删除当前配置？" }
+                    //     },
+                    //     delegate(IDialogResult dialogResult)
+                    //     {
+                    //         if (dialogResult.Result == ButtonResult.OK)
+                    //         {
+                    //             using (var manager = new DataBaseManager())
+                    //             {
+                    //                 manager.Delete(ConfigModels[_index]);
+                    //             }
+                    //
+                    //             ConfigModels = dataService.GetConfigModels();
+                    //             if (ConfigModels.Any())
+                    //             {
+                    //                 SelectedConfigModel = ConfigModels.First();
+                    //                 //选中第一条
+                    //                 Index = 0;
+                    //             }
+                    //         }
+                    //     }
+                    // );
                 }
                 else
                 {
-                    "没有配置，无法删除".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    // "没有配置，无法删除".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             });
 
@@ -251,7 +251,7 @@ namespace SocketDebugger.ViewModels
                         if (result.Result == ButtonResult.OK)
                         {
                             //更新列表
-                            ConfigModels = dataService.GetConfigModels();
+                            // ConfigModels = dataService.GetConfigModels();
 
                             //Index保持不变
                             Index = tempIndex;
@@ -281,7 +281,7 @@ namespace SocketDebugger.ViewModels
                 //判断周期时间是否为空
                 if (_messageCycleTime.IsNullOrWhiteSpace())
                 {
-                    "请先设置周期发送的时间间隔".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    // "请先设置周期发送的时间间隔".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                     IsCycleChecked = false;
                     return;
                 }
@@ -289,7 +289,7 @@ namespace SocketDebugger.ViewModels
                 //判断周期时间是否是数字
                 if (!_messageCycleTime.IsNumber())
                 {
-                    "时间间隔只能是数字".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    // "时间间隔只能是数字".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                     IsCycleChecked = false;
                     return;
                 }
@@ -311,7 +311,7 @@ namespace SocketDebugger.ViewModels
 
         private void InitMessageType()
         {
-            ConfigModels = _dataService.GetConfigModels();
+            // ConfigModels = _dataService.GetConfigModels();
             if (ConfigModels.Any())
             {
                 //选中第一条
@@ -360,13 +360,13 @@ namespace SocketDebugger.ViewModels
         {
             if (string.IsNullOrEmpty(_userInputText))
             {
-                "不能发送空消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                // "不能发送空消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 return;
             }
 
             if (_selectedConfigModel == null)
             {
-                "未选择UDP目的服务器，无法发送数据".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                // "未选择UDP目的服务器，无法发送数据".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 return;
             }
 
@@ -404,7 +404,7 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    // "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             }
         }

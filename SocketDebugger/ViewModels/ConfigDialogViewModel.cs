@@ -16,14 +16,14 @@ namespace SocketDebugger.ViewModels
 
         #region VM
 
-        private ConnectionConfigModel _configModel;
+        private ConnectionConfigModel _connectionConfigModel;
 
-        public ConnectionConfigModel SelectedConfigModel
+        public ConnectionConfigModel ConnectionConfigModel
         {
-            get => _configModel;
+            get => _connectionConfigModel;
             set
             {
-                _configModel = value;
+                _connectionConfigModel = value;
                 RaisePropertyChanged();
             }
         }
@@ -45,12 +45,12 @@ namespace SocketDebugger.ViewModels
 
             DataTypeSelectedCommand = new DelegateCommand<string>(delegate(string dataType)
             {
-                SelectedConfigModel.MessageType = dataType;
+                ConnectionConfigModel.MessageType = dataType;
             });
 
             SaveConfigCommand = new DelegateCommand(delegate
             {
-                if (_configModel == null)
+                if (_connectionConfigModel == null)
                 {
                     return;
                 }
@@ -58,29 +58,29 @@ namespace SocketDebugger.ViewModels
                 //保存到库
                 using (var manager = new DataBaseManager())
                 {
-                    if (string.IsNullOrEmpty(_configModel.Uuid))
+                    if (string.IsNullOrEmpty(_connectionConfigModel.Uuid))
                     {
                         var configModel = new ConnectionConfigModel
                         {
                             Uuid = Guid.NewGuid().ToString("N"),
-                            ConnectionTitle = _configModel.ConnectionTitle.Trim(),
-                            ConnectionType = _configModel.ConnectionType,
-                            ConnectionHost = _configModel.ConnectionHost,
-                            ConnectionPort = _configModel.ConnectionPort,
-                            MessageType = _configModel.MessageType
+                            ConnectionTitle = _connectionConfigModel.ConnectionTitle.Trim(),
+                            ConnectionType = _connectionConfigModel.ConnectionType,
+                            ConnectionHost = _connectionConfigModel.ConnectionHost,
+                            ConnectionPort = _connectionConfigModel.ConnectionPort,
+                            MessageType = _connectionConfigModel.MessageType
                         };
 
                         manager.Insert(configModel);
                     }
                     else
                     {
-                        manager.Update(_configModel);
+                        manager.Update(_connectionConfigModel);
                     }
                 }
 
                 RequestClose?.Invoke(new DialogResult(ButtonResult.OK, new DialogParameters
                     {
-                        { "SelectedConfigModel", _configModel }
+                        { "ConnectionConfigModel", _connectionConfigModel }
                     }
                 ));
             });
@@ -98,7 +98,7 @@ namespace SocketDebugger.ViewModels
         public void OnDialogOpened(IDialogParameters parameters)
         {
             Title = parameters.GetValue<string>("Title");
-            SelectedConfigModel = parameters.GetValue<ConnectionConfigModel>("SelectedConfigModel");
+            ConnectionConfigModel = parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
         }
     }
 }

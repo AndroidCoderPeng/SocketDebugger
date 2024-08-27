@@ -242,11 +242,11 @@ namespace SocketDebugger.ViewModels
 
             OpenSerialPortCommand = new DelegateCommand(delegate
             {
-                if (string.IsNullOrEmpty(_portName))
-                {
-                    "串口号未设置，无法打开串口".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
-                    return;
-                }
+                // if (string.IsNullOrEmpty(_portName))
+                // {
+                //     "串口号未设置，无法打开串口".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
+                //     return;
+                // }
 
                 if (!_serialPort.IsOpen)
                 {
@@ -284,7 +284,7 @@ namespace SocketDebugger.ViewModels
                 //判断周期时间是否为空
                 if (_messageCycleTime.IsNullOrWhiteSpace())
                 {
-                    "请先设置周期发送的时间间隔".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    // "请先设置周期发送的时间间隔".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                     IsCycleChecked = false;
                     return;
                 }
@@ -292,7 +292,7 @@ namespace SocketDebugger.ViewModels
                 //判断周期时间是否是数字
                 if (!_messageCycleTime.IsNumber())
                 {
-                    "时间间隔只能是数字".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    // "时间间隔只能是数字".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                     IsCycleChecked = false;
                     return;
                 }
@@ -339,7 +339,7 @@ namespace SocketDebugger.ViewModels
         {
             if (string.IsNullOrEmpty(_userInputText))
             {
-                "不能发送空消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                // "不能发送空消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 return;
             }
 
@@ -347,7 +347,7 @@ namespace SocketDebugger.ViewModels
             {
                 if (!_serialPort.IsOpen)
                 {
-                    "串口未打开，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    // "串口未打开，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                     return;
                 }
 
@@ -366,7 +366,7 @@ namespace SocketDebugger.ViewModels
                 {
                     if (!_serialPort.IsOpen)
                     {
-                        "串口未打开，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
+                        // "串口未打开，无法发送消息".ShowAlertMessageDialog(_dialogService, AlertType.Warning);
                         return;
                     }
 
@@ -382,7 +382,7 @@ namespace SocketDebugger.ViewModels
                 }
                 else
                 {
-                    "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                    // "数据格式错误，无法发送".ShowAlertMessageDialog(_dialogService, AlertType.Error);
                 }
             }
         }

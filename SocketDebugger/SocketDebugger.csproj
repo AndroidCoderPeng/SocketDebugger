@@ -40,14 +40,11 @@
     <Reference Include="DryIoc, Version=4.7.7.0, Culture=neutral, PublicKeyToken=dfbf2bd50fcf7768, processorArchitecture=MSIL">
       <HintPath>..\packages\DryIoc.dll.4.7.7\lib\net45\DryIoc.dll</HintPath>
     </Reference>
+    <Reference Include="HandyControl, Version=3.5.1.0, Culture=neutral, PublicKeyToken=45be8712787a1e5b, processorArchitecture=MSIL">
+      <HintPath>..\packages\HandyControl.3.5.1\lib\net48\HandyControl.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="MaterialDesignColors, Version=3.0.0.0, Culture=neutral, PublicKeyToken=df2a72020bd7962a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MaterialDesignColors.3.0.0\lib\net462\MaterialDesignColors.dll</HintPath>
-    </Reference>
-    <Reference Include="MaterialDesignThemes.Wpf, Version=5.0.0.0, Culture=neutral, PublicKeyToken=df2a72020bd7962a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MaterialDesignThemes.5.0.0\lib\net462\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Windows.Design.Extensibility, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
@@ -192,23 +189,17 @@
     <Compile Include="Converts\SerialPortConfigStateConvert.cs" />
     <Compile Include="Converts\ViewVisibilityConvert.cs" />
     <Compile Include="Converts\EmptyVisibilityConvert.cs" />
-    <Compile Include="Dialogs\AlertControlDialog.xaml.cs">
-      <DependentUpon>AlertControlDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\AlertMessageDialog.xaml.cs">
-      <DependentUpon>AlertMessageDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\ConfigDialog.xaml.cs">
       <DependentUpon>ConfigDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Events\MainMenuSelectedEvent.cs" />
+    <Compile Include="Events\UpdateConnectionDetailEvent.cs" />
     <Compile Include="Model\ChatMessageModel.cs" />
     <Compile Include="Model\ConnectedClientModel.cs" />
     <Compile Include="Model\ConnectionConfigModel.cs" />
     <Compile Include="Model\MainMenuModel.cs" />
     <Compile Include="Services\IApplicationDataService.cs" />
     <Compile Include="Services\ApplicationDataServiceImpl.cs" />
-    <Compile Include="Utils\AlertType.cs" />
     <Compile Include="Utils\AutoScrollBehavior.cs" />
     <Compile Include="Utils\ClientChatBubbleSelector.cs" />
     <Compile Include="Utils\DataBaseManager.cs" />
@@ -216,8 +207,6 @@
     <Compile Include="Utils\MethodExtensions.cs" />
     <Compile Include="Utils\ServerChatBubbleSelector.cs" />
     <Compile Include="Utils\SystemHelper.cs" />
-    <Compile Include="ViewModels\AlertControlDialogViewModel.cs" />
-    <Compile Include="ViewModels\AlertMessageDialogViewModel.cs" />
     <Compile Include="ViewModels\ConfigDialogViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\SerialPortViewModel.cs" />
@@ -279,8 +268,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Dialogs\AlertControlDialog.xaml" />
-    <Page Include="Dialogs\AlertMessageDialog.xaml" />
     <Page Include="Dialogs\ConfigDialog.xaml" />
     <Page Include="Styles\ClientMessageDataTemplate.xaml" />
     <Page Include="Styles\ServerMessageDataTemplate.xaml" />
@@ -317,9 +304,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.2.0.4\build\net461\SQLitePCLRaw.lib.e_sqlite3.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCLRaw.lib.e_sqlite3.2.0.4\build\net461\SQLitePCLRaw.lib.e_sqlite3.targets'))" />
-    <Error Condition="!Exists('..\packages\MaterialDesignThemes.5.0.0\build\MaterialDesignThemes.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MaterialDesignThemes.5.0.0\build\MaterialDesignThemes.targets'))" />
   </Target>
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.2.0.4\build\net461\SQLitePCLRaw.lib.e_sqlite3.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.2.0.4\build\net461\SQLitePCLRaw.lib.e_sqlite3.targets')" />
   <Import Project="..\packages\MaterialDesignThemes.4.8.0\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.4.8.0\build\MaterialDesignThemes.targets')" />
-  <Import Project="..\packages\MaterialDesignThemes.5.0.0\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.5.0.0\build\MaterialDesignThemes.targets')" />
 </Project>
