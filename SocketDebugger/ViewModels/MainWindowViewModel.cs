@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -49,7 +48,7 @@ namespace SocketDebugger.ViewModels
 
         #region DelegateCommand
 
-        public DelegateCommand<ListBox> MenuSelectedCommand { set; get; }
+        public DelegateCommand<object> MenuSelectedCommand { set; get; }
         public DelegateCommand<ConnectionConfigModel> ConnectionItemSelectedCommand { set; get; }
         public DelegateCommand<ConnectionConfigModel> DeleteConnectionConfigCommand { set; get; }
         public DelegateCommand<MainMenuModel> AddConnectionConfigCommand { set; get; }
@@ -72,16 +71,20 @@ namespace SocketDebugger.ViewModels
             MainMenuModels = dataService.GetMainMenu();
             UpdateConnectionView(MainMenuModels[0].MainMenuName, false);
 
-            MenuSelectedCommand = new DelegateCommand<ListBox>(MenuSelected);
+            MenuSelectedCommand = new DelegateCommand<object>(MenuSelected);
             ConnectionItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(ConnectionItemSelected);
             DeleteConnectionConfigCommand = new DelegateCommand<ConnectionConfigModel>(DeleteConnectionConfig);
             AddConnectionConfigCommand = new DelegateCommand<MainMenuModel>(AddConnectionConfig);
         }
 
-        private void MenuSelected(ListBox view)
+        private void MenuSelected(object selectedIndex)
         {
+            if (selectedIndex == null)
+            {
+                return;
+            }
+
             var region = _regionManager.Regions["ContentRegion"];
-            var selectedIndex = view.SelectedIndex;
             switch (selectedIndex)
             {
                 case 0:
@@ -107,7 +110,7 @@ namespace SocketDebugger.ViewModels
                     break;
             }
 
-            var mainMenuModel = view.SelectedItem as MainMenuModel;
+            var mainMenuModel = MainMenuModels[(int)selectedIndex];
             UpdateConnectionView(mainMenuModel?.MainMenuName, false);
         }
 
@@ -117,7 +120,7 @@ namespace SocketDebugger.ViewModels
             {
                 return;
             }
-            
+
             //切换列表时候更新信息
             _eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Publish(configModel);
         }
