@@ -16,8 +16,36 @@
     MinHeight="600"
     d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
     Background="White"
+    Topmost="True"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
+
+    <Window.Resources>
+        <Style x:Key="ListBoxItemStyleKey" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="0,0,0,2" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <Border x:Name="ItemContainerBorder">
+                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemContainerBorder" Property="Background" Value="#F8F8F8" />
+                                <Setter TargetName="ItemContainerBorder" Property="TextBlock.Foreground" Value="{StaticResource PrimaryBrush}" />
+                            </Trigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemContainerBorder" Property="Background" Value="#E7F4FF" />
+                                <Setter TargetName="ItemContainerBorder" Property="TextBlock.Foreground" Value="{StaticResource PrimaryBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -61,6 +89,7 @@
 
                             <TextBlock
                                 Grid.Column="0"
+                                Margin="10,0,0,0"
                                 VerticalAlignment="Center"
                                 FontFamily="/SocketDebugger;component/IconFont/#iconfont"
                                 FontSize="30"
@@ -75,6 +104,10 @@
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
+
+                <ListBox.ItemContainerStyle>
+                    <Style BasedOn="{StaticResource ListBoxItemStyleKey}" TargetType="ListBoxItem" />
+                </ListBox.ItemContainerStyle>
             </ListBox>
 
             <Grid Grid.Column="1" Background="LightGray" />
@@ -110,11 +143,11 @@
 
                                 <TextBlock
                                     Grid.Row="0"
-                                    Padding="0,10,0,0"
+                                    Padding="10,10,0,0"
                                     FontSize="16"
                                     Text="{Binding ConnectionTitle}" />
 
-                                <TextBlock Grid.Row="1" Margin="3,7,3,10">
+                                <TextBlock Grid.Row="1" Margin="10,8">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}{0}:{1}">
                                             <Binding Path="ConnectionHost" />
@@ -125,6 +158,10 @@
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
+
+                    <ListBox.ItemContainerStyle>
+                        <Style BasedOn="{StaticResource ListBoxItemStyleKey}" TargetType="ListBoxItem" />
+                    </ListBox.ItemContainerStyle>
                 </ListBox>
 
                 <Grid Grid.Row="1" Background="LightGray" />

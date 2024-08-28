@@ -99,7 +99,8 @@
                     Grid.Row="1"
                     Margin="10"
                     Command="{Binding StartListenCommand}"
-                    Content="{Binding ConnectButtonState}" />
+                    Content="{Binding ConnectButtonState}"
+                    Style="{StaticResource ButtonPrimary}" />
 
                 <Button
                     Grid.Row="2"
