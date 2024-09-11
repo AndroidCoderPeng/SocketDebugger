@@ -1,14 +1,15 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
-using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using SocketDebugger.Events;
 using SocketDebugger.Model;
+using SocketDebugger.Services;
 using SocketDebugger.Utils;
 
 namespace SocketDebugger.ViewModels
@@ -16,6 +17,30 @@ namespace SocketDebugger.ViewModels
     public class TcpClientViewModel : BindableBase
     {
         #region VM
+
+        private ObservableCollection<ConnectionConfigModel> _connectionConfigCollection;
+
+        public ObservableCollection<ConnectionConfigModel> ConnectionConfigCollection
+        {
+            get => _connectionConfigCollection;
+            set
+            {
+                _connectionConfigCollection = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private int _currentIndex;
+
+        public int CurrentIndex
+        {
+            get => _currentIndex;
+            set
+            {
+                _currentIndex = value;
+                RaisePropertyChanged();
+            }
+        }
 
         private ConnectionConfigModel _selectedConfigModel;
 
@@ -117,6 +142,9 @@ namespace SocketDebugger.ViewModels
 
         #region DelegateCommand
 
+        public DelegateCommand<ConnectionConfigModel> ConnectionItemSelectedCommand { set; get; }
+        public DelegateCommand<ConnectionConfigModel> DeleteConnectionConfigCommand { set; get; }
+        public DelegateCommand<string> AddConnectionConfigCommand { set; get; }
         public DelegateCommand EditConfigCommand { get; set; }
         public DelegateCommand ConnectServerCommand { get; set; }
         public DelegateCommand ClearMessageCommand { get; set; }
@@ -126,17 +154,27 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
+        private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
 
         // private readonly TcpClient _tcpClient = new TcpClient();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
 
-        public TcpClientViewModel(IDialogService dialogService, IEventAggregator eventAggregator)
+        public TcpClientViewModel(IApplicationDataService dataService, IDialogService dialogService,
+            IEventAggregator eventAggregator)
         {
+            _dataService = dataService;
             _dialogService = dialogService;
+
+            InitDefaultConfig();
+
+            eventAggregator.GetEvent<ChangeViewByMainMenuEvent>().Subscribe(ChangeViewByMainMenu);
 
             InitDelegate();
 
+            ConnectionItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(ConnectionItemSelected);
+            DeleteConnectionConfigCommand = new DelegateCommand<ConnectionConfigModel>(DeleteConnectionConfig);
+            AddConnectionConfigCommand = new DelegateCommand<string>(AddConnectionConfig);
             EditConfigCommand = new DelegateCommand(EditConnectionConfig);
             ConnectServerCommand = new DelegateCommand(ConnectTcpServer);
             ClearMessageCommand = new DelegateCommand(ClearMessage);
@@ -148,16 +186,25 @@ namespace SocketDebugger.ViewModels
 
             //自动发消息
             _timer.Tick += delegate { SendMessage(); };
-
-            eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Subscribe(UpdateDetailView);
         }
 
-        private void UpdateDetailView(ConnectionConfigModel configModel)
+        private void InitDefaultConfig()
         {
-            if (configModel.ConnectionType.Equals("TCP客户端"))
+            ConnectionConfigCollection = _dataService.GetConnectionCollection("TCP客户端");
+            if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = configModel;
-                Console.WriteLine("TcpClientViewModel " + JsonConvert.SerializeObject(SelectedConfigModel));
+                SelectedConfigModel = _connectionConfigCollection.First();
+                CurrentIndex = 0;
+            }
+        }
+
+        private void ChangeViewByMainMenu(string type)
+        {
+            ConnectionConfigCollection = _dataService.GetConnectionCollection(type);
+            if (_connectionConfigCollection.Any())
+            {
+                SelectedConfigModel = _connectionConfigCollection.First();
+                CurrentIndex = 0;
             }
         }
 
@@ -200,6 +247,73 @@ namespace SocketDebugger.ViewModels
             // };
         }
 
+        private void ConnectionItemSelected(ConnectionConfigModel configModel)
+        {
+            if (configModel == null)
+            {
+                return;
+            }
+
+            if (configModel.ConnectionType.Equals("TCP客户端"))
+            {
+                SelectedConfigModel = configModel;
+            }
+        }
+
+        private void DeleteConnectionConfig(ConnectionConfigModel configModel)
+        {
+            if (configModel == null)
+            {
+                return;
+            }
+
+            var result = MessageBox.Show("是否删除当前配置？", "温馨提示", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                _dataService.DeleteConnectionById(configModel.Uuid);
+                //更新列表和面板
+                ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
+                if (_connectionConfigCollection.Any())
+                {
+                    SelectedConfigModel = _connectionConfigCollection.First();
+                    CurrentIndex = 0;
+                }
+            }
+        }
+
+        private void AddConnectionConfig(string type)
+        {
+            if (type == null)
+            {
+                return;
+            }
+
+            var configModel = new ConnectionConfigModel
+            {
+                ConnectionTitle = "",
+                ConnectionType = type,
+                ConnectionHost = _dataService.GetHostAddress(),
+                ConnectionPort = "8080",
+                MessageType = "16进制"
+            };
+
+            _dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                {
+                    { "Title", "添加配置" }, { "ConnectionConfigModel", configModel }
+                },
+                delegate(IDialogResult result)
+                {
+                    if (result.Result == ButtonResult.OK)
+                    {
+                        //更新列表和面板
+                        ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
+                        SelectedConfigModel = _connectionConfigCollection.Last();
+                        CurrentIndex = _connectionConfigCollection.Count - 1;
+                    }
+                }
+            );
+        }
+
         private void EditConnectionConfig()
         {
             _dialogService.ShowDialog("ConfigDialog", new DialogParameters
@@ -210,9 +324,7 @@ namespace SocketDebugger.ViewModels
                 {
                     if (result.Result == ButtonResult.OK)
                     {
-                        // UpdateDetailView(
-                        //     result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel")
-                        // );
+                        SelectedConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
                     }
                 }
             );

@@ -211,6 +211,7 @@
         <Compile Include="Dialogs\ConfigDialog.xaml.cs">
             <DependentUpon>ConfigDialog.xaml</DependentUpon>
         </Compile>
+        <Compile Include="Events\ChangeViewByMainMenuEvent.cs" />
         <Compile Include="Events\UpdateConnectionDetailEvent.cs"/>
         <Compile Include="Model\ChatMessageModel.cs"/>
         <Compile Include="Model\ConnectedClientModel.cs"/>
@@ -284,6 +285,7 @@
     <ItemGroup>
         <Page Include="Dialogs\ConfigDialog.xaml"/>
         <Page Include="Styles\ClientMessageDataTemplate.xaml"/>
+        <Page Include="Styles\ConnectionListBoxItemStyle.xaml" />
         <Page Include="Styles\ServerMessageDataTemplate.xaml"/>
         <Page Include="Views\SerialPortView.xaml">
             <SubType>Designer</SubType>

@@ -9,6 +9,7 @@
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
 
+                <ResourceDictionary Source="Styles/ConnectionListBoxItemStyle.xaml" />
                 <ResourceDictionary Source="Styles/ClientMessageDataTemplate.xaml" />
                 <ResourceDictionary Source="Styles/ServerMessageDataTemplate.xaml" />
             </ResourceDictionary.MergedDictionaries>
