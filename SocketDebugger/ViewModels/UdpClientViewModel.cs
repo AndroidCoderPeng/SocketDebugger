@@ -1,7 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Net;
-using System.Text;
 using System.Windows;
 using System.Windows.Threading;
 using Prism.Commands;
@@ -11,8 +9,6 @@ using Prism.Services.Dialogs;
 using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Utils;
-using TouchSocket.Core;
-using TouchSocket.Sockets;
 
 namespace SocketDebugger.ViewModels
 {
@@ -117,14 +113,12 @@ namespace SocketDebugger.ViewModels
         #endregion
 
         private readonly IDialogService _dialogService;
-        private readonly UdpSession _udpSession = new UdpSession();
+        // private readonly UdpSession _udpSession = new UdpSession();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
 
         public UdpClientViewModel(IDialogService dialogService, IEventAggregator eventAggregator)
         {
             _dialogService = dialogService;
-
-            UpdateDetailView(MemoryCacheManager.SelectedConfigModel);
 
             InitDelegate();
 
@@ -145,36 +139,36 @@ namespace SocketDebugger.ViewModels
         private void UpdateDetailView(ConnectionConfigModel configModel)
         {
             SelectedConfigModel = configModel;
-            if (configModel.MessageType == "文本")
-            {
-                IsTextChecked = true;
-                IsHexChecked = false;
-            }
-            else
-            {
-                IsTextChecked = false;
-                IsHexChecked = true;
-            }
+            // if (configModel.MessageType == "文本")
+            // {
+            //     IsTextChecked = true;
+            //     IsHexChecked = false;
+            // }
+            // else
+            // {
+            //     IsTextChecked = false;
+            //     IsHexChecked = true;
+            // }
         }
         
         private void InitDelegate()
         {
-            _udpSession.Received += delegate(EndPoint endpoint, ByteBlock block, IRequestInfo info)
-            {
-                var message = _isTextChecked
-                    ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
-                    : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    ChatMessages.Add(new ChatMessageModel
-                    {
-                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = message,
-                        IsSend = false
-                    });
-                });
-            };
+            // _udpSession.Received += delegate(EndPoint endpoint, ByteBlock block, IRequestInfo info)
+            // {
+            //     var message = _isTextChecked
+            //         ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
+            //         : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
+            //
+            //     Application.Current.Dispatcher.Invoke(() =>
+            //     {
+            //         ChatMessages.Add(new ChatMessageModel
+            //         {
+            //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+            //             Message = message,
+            //             IsSend = false
+            //         });
+            //     });
+            // };
         }
         
         private void EditConnectionConfig()
@@ -217,15 +211,15 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            var config = new TouchSocketConfig();
-            var host = new IPHost(_selectedConfigModel.ConnectionHost + ":" + _selectedConfigModel.ConnectionPort);
-            config.SetBindIPHost(0).SetRemoteIPHost(host);
-            _udpSession.Setup(config).Start();
-            var endPoint = host.EndPoint;
+            // var config = new TouchSocketConfig();
+            // var host = new IPHost(_selectedConfigModel.ConnectionHost + ":" + _selectedConfigModel.ConnectionPort);
+            // config.SetBindIPHost(0).SetRemoteIPHost(host);
+            // _udpSession.Setup(config).Start();
+            // var endPoint = host.EndPoint;
 
             if (_isTextChecked)
             {
-                _udpSession.Send(endPoint, _userInputText);
+                // _udpSession.Send(endPoint, _userInputText);
 
                 ChatMessages.Add(new ChatMessageModel
                 {
@@ -240,7 +234,7 @@ namespace SocketDebugger.ViewModels
                 {
                     //以UTF-8的编码同步发送字符串
                     var result = _userInputText.GetBytesWithUtf8();
-                    _udpSession.Send(endPoint, result.Item2);
+                    // _udpSession.Send(endPoint, result.Item2);
 
                     ChatMessages.Add(new ChatMessageModel
                     {
@@ -259,12 +253,12 @@ namespace SocketDebugger.ViewModels
         private void CycleSendMessage()
         {
             //判断周期时间是否为空
-            if (_messageCycleTime.IsNullOrWhiteSpace())
-            {
-                MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                IsCycleChecked = false;
-                return;
-            }
+            // if (_messageCycleTime.IsNullOrWhiteSpace())
+            // {
+            //     MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            //     IsCycleChecked = false;
+            //     return;
+            // }
 
             //判断周期时间是否是数字
             if (!_messageCycleTime.IsNumber())

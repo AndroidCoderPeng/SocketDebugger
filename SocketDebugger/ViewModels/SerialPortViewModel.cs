@@ -10,7 +10,6 @@ using Prism.Services.Dialogs;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
-using TouchSocket.Core;
 
 namespace SocketDebugger.ViewModels
 {
@@ -282,12 +281,12 @@ namespace SocketDebugger.ViewModels
             CycleCheckedCommand = new DelegateCommand(delegate
             {
                 //判断周期时间是否为空
-                if (_messageCycleTime.IsNullOrWhiteSpace())
-                {
-                    // "请先设置周期发送的时间间隔".ShowAlertMessageDialog(_dialogService, AlertType.Error);
-                    IsCycleChecked = false;
-                    return;
-                }
+                // if (_messageCycleTime.IsNullOrWhiteSpace())
+                // {
+                //     // "请先设置周期发送的时间间隔".ShowAlertMessageDialog(_dialogService, AlertType.Error);
+                //     IsCycleChecked = false;
+                //     return;
+                // }
 
                 //判断周期时间是否是数字
                 if (!_messageCycleTime.IsNumber())

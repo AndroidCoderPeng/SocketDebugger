@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,7 +11,6 @@ using Prism.Services.Dialogs;
 using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
-using SocketDebugger.Utils;
 
 namespace SocketDebugger.ViewModels
 {
@@ -110,7 +110,7 @@ namespace SocketDebugger.ViewModels
                     break;
             }
 
-            var mainMenuModel = MainMenuModels[(int)selectedIndex];
+            var mainMenuModel = MainMenuModels[Convert.ToInt32(selectedIndex)];
             UpdateConnectionView(mainMenuModel?.MainMenuName, false);
         }
 
@@ -137,7 +137,7 @@ namespace SocketDebugger.ViewModels
             {
                 _dataService.DeleteConnectionById(configModel.Uuid);
                 //刷新界面
-                UpdateConnectionView(configModel.ConnectionType, false);
+                // UpdateConnectionView(configModel.ConnectionType, false);
             }
         }
 
@@ -166,7 +166,7 @@ namespace SocketDebugger.ViewModels
                     if (result.Result == ButtonResult.OK)
                     {
                         //更新列表
-                        UpdateConnectionView(menuModel.MainMenuName, true);
+                        // UpdateConnectionView(menuModel.MainMenuName, true);
                     }
                 }
             );
@@ -189,7 +189,9 @@ namespace SocketDebugger.ViewModels
                 }
 
                 //设置最右侧默认面板
-                MemoryCacheManager.SelectedConfigModel = _connectionObservableCollection[_currentIndex];
+                _eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Publish(
+                    _connectionObservableCollection[_currentIndex]
+                );
             }
         }
     }
