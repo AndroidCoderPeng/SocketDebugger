@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Threading;
+using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -113,30 +114,6 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private bool _isTextChecked = true;
-
-        public bool IsTextChecked
-        {
-            get => _isTextChecked;
-            set
-            {
-                _isTextChecked = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        private bool _isHexChecked = true;
-
-        public bool IsHexChecked
-        {
-            get => _isHexChecked;
-            set
-            {
-                _isHexChecked = value;
-                RaisePropertyChanged();
-            }
-        }
-
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -176,6 +153,7 @@ namespace SocketDebugger.ViewModels
         #endregion
 
         private readonly IDialogService _dialogService;
+
         // private readonly TcpService _tcpService = new TcpService();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
         private ConnectedClientModel _selectedClientModel;
@@ -195,28 +173,21 @@ namespace SocketDebugger.ViewModels
             //周期发送CheckBox选中、取消选中事件
             CycleCheckedCommand = new DelegateCommand(CycleSendMessage);
             CycleUncheckedCommand = new DelegateCommand(StopCycleSendMessage);
-            
+
             //自动发消息
             _timer.Tick += delegate { SendMessage(); };
-            
+
             eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Subscribe(UpdateDetailView);
         }
 
         private void UpdateDetailView(ConnectionConfigModel configModel)
         {
-            SelectedConfigModel = configModel;
-            if (configModel.MessageType == "文本")
+            if (configModel.ConnectionType.Equals("TCP服务端"))
             {
-                IsTextChecked = true;
-                IsHexChecked = false;
-            }
-            else
-            {
-                IsTextChecked = false;
-                IsHexChecked = true;
+                SelectedConfigModel = configModel;
             }
         }
-        
+
         private void InitDelegate()
         {
             // _tcpService.Connected = delegate(SocketClient client, TouchSocketEventArgs args)
@@ -392,7 +363,7 @@ namespace SocketDebugger.ViewModels
                 MessageBox.Show("请指定接收消息的客户端", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
         private void CycleSendMessage()
         {
             //判断周期时间是否为空

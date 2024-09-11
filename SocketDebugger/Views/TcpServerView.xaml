@@ -18,6 +18,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
+            <cvt:MessageTypeConvert x:Key="MessageTypeConvertKey" />
 
             <util:ServerChatBubbleSelector x:Key="ServerChatBubbleSelectorKey" />
         </ResourceDictionary>
@@ -202,14 +203,12 @@
                 Grid.Column="0"
                 Margin="10"
                 Content="文本"
-                GroupName="ModeGroup"
-                IsChecked="{Binding IsTextChecked}" />
+                GroupName="ModeGroup" />
 
             <RadioButton
                 Grid.Column="1"
                 Content="16进制"
-                GroupName="ModeGroup"
-                IsChecked="{Binding IsHexChecked}" />
+                GroupName="ModeGroup" />
 
             <Grid
                 Grid.Column="2"

@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Threading;
+using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -88,18 +89,6 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private bool _isTextChecked = true;
-
-        public bool IsTextChecked
-        {
-            get => _isTextChecked;
-            set
-            {
-                _isTextChecked = value;
-                RaisePropertyChanged();
-            }
-        }
-
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -168,7 +157,7 @@ namespace SocketDebugger.ViewModels
             if (configModel.ConnectionType.Equals("TCP客户端"))
             {
                 SelectedConfigModel = configModel;
-                IsTextChecked = configModel.MessageType == "文本";
+                Console.WriteLine("TcpClientViewModel " + JsonConvert.SerializeObject(SelectedConfigModel));
             }
         }
 
@@ -278,7 +267,7 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            if (_isTextChecked)
+            if (_selectedConfigModel.MessageType.Equals("文本"))
             {
                 // _tcpClient.Send(_userInputText);
 

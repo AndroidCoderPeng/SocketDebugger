@@ -122,7 +122,7 @@ namespace SocketDebugger.ViewModels
             }
 
             //切换列表时候更新信息
-            _eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Publish(configModel);
+            // _eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Publish(configModel);
         }
 
         private void DeleteConnectionConfig(ConnectionConfigModel configModel)
@@ -137,7 +137,7 @@ namespace SocketDebugger.ViewModels
             {
                 _dataService.DeleteConnectionById(configModel.Uuid);
                 //刷新界面
-                // UpdateConnectionView(configModel.ConnectionType, false);
+                UpdateConnectionView(configModel.ConnectionType, false);
             }
         }
 
@@ -166,7 +166,7 @@ namespace SocketDebugger.ViewModels
                     if (result.Result == ButtonResult.OK)
                     {
                         //更新列表
-                        // UpdateConnectionView(menuModel.MainMenuName, true);
+                        UpdateConnectionView(menuModel.MainMenuName, true);
                     }
                 }
             );
@@ -189,9 +189,8 @@ namespace SocketDebugger.ViewModels
                 }
 
                 //设置最右侧默认面板
-                _eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Publish(
-                    _connectionObservableCollection[_currentIndex]
-                );
+                var configModel = _connectionObservableCollection[_currentIndex];
+                _eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Publish(configModel);
             }
         }
     }

@@ -88,30 +88,6 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private bool _isTextChecked = true;
-
-        public bool IsTextChecked
-        {
-            get => _isTextChecked;
-            set
-            {
-                _isTextChecked = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        private bool _isHexChecked = true;
-
-        public bool IsHexChecked
-        {
-            get => _isHexChecked;
-            set
-            {
-                _isHexChecked = value;
-                RaisePropertyChanged();
-            }
-        }
-
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -173,17 +149,10 @@ namespace SocketDebugger.ViewModels
 
         private void UpdateDetailView(ConnectionConfigModel configModel)
         {
-            SelectedConfigModel = configModel;
-            // if (configModel.MessageType == "文本")
-            // {
-            //     IsTextChecked = true;
-            //     IsHexChecked = false;
-            // }
-            // else
-            // {
-            //     IsTextChecked = false;
-            //     IsHexChecked = true;
-            // }
+            if (configModel.ConnectionType.Equals("WebSocket客户端"))
+            {
+                SelectedConfigModel = configModel;
+            }
         }
 
         private void EditConnectionConfig()
@@ -259,8 +228,7 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            if (_isTextChecked)
-            {
+            if (_selectedConfigModel.MessageType.Equals("文本"))            {
                 // _webSocketClient?.Send(_userInputText);
 
                 ChatMessages.Add(new ChatMessageModel

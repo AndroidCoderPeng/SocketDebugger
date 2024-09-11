@@ -154,18 +154,15 @@
             </Grid.ColumnDefinitions>
 
             <RadioButton
-                x:Name="TextRadioButton"
                 Grid.Column="0"
                 Margin="10"
                 Content="文本"
-                GroupName="ModeGroup"
-                IsChecked="{Binding IsTextChecked}" />
+                GroupName="ModeGroup" />
 
             <RadioButton
                 Grid.Column="1"
                 Content="16进制"
-                GroupName="ModeGroup"
-                IsChecked="{Binding ElementName=TextRadioButton, Path=IsChecked, Converter={StaticResource MessageTypeConvertKey}}" />
+                GroupName="ModeGroup" />
 
             <Grid
                 Grid.Column="2"

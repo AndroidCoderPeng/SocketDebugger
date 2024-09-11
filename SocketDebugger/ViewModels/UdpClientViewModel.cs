@@ -52,30 +52,6 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private bool _isTextChecked = true;
-
-        public bool IsTextChecked
-        {
-            get => _isTextChecked;
-            set
-            {
-                _isTextChecked = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        private bool _isHexChecked = true;
-
-        public bool IsHexChecked
-        {
-            get => _isHexChecked;
-            set
-            {
-                _isHexChecked = value;
-                RaisePropertyChanged();
-            }
-        }
-
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -138,17 +114,10 @@ namespace SocketDebugger.ViewModels
 
         private void UpdateDetailView(ConnectionConfigModel configModel)
         {
-            SelectedConfigModel = configModel;
-            // if (configModel.MessageType == "文本")
-            // {
-            //     IsTextChecked = true;
-            //     IsHexChecked = false;
-            // }
-            // else
-            // {
-            //     IsTextChecked = false;
-            //     IsHexChecked = true;
-            // }
+            if (configModel.ConnectionType.Equals("UDP客户端"))
+            {
+                SelectedConfigModel = configModel;
+            }
         }
         
         private void InitDelegate()
@@ -217,7 +186,7 @@ namespace SocketDebugger.ViewModels
             // _udpSession.Setup(config).Start();
             // var endPoint = host.EndPoint;
 
-            if (_isTextChecked)
+            if (_selectedConfigModel.MessageType.Equals("文本"))
             {
                 // _udpSession.Send(endPoint, _userInputText);
 

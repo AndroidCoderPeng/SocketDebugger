@@ -8,12 +8,8 @@ namespace SocketDebugger.Converts
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
-            {
-                return true;
-            }
-
-            return !(bool)value;
+            Console.WriteLine(value);
+            return value == null || ReferenceEquals(value, "文本");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
