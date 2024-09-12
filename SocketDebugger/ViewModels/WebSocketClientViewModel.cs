@@ -252,8 +252,7 @@ namespace SocketDebugger.ViewModels
                 ConnectionTitle = "",
                 ConnectionType = type,
                 ConnectionHost = _dataService.GetHostAddress(),
-                ConnectionPort = "8080",
-                MessageType = "16进制"
+                ConnectionPort = "8080"
             };
 
             _dialogService.ShowDialog("ConfigDialog", new DialogParameters
@@ -344,37 +343,37 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            if (_selectedConfigModel.MessageType.Equals("文本"))
-            {
-                // _webSocketClient?.Send(_userInputText);
-
-                ChatMessages.Add(new ChatMessageModel
-                {
-                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                    Message = _userInputText,
-                    IsSend = true
-                });
-            }
-            else
-            {
-                if (_userInputText.IsHex())
-                {
-                    //以UTF-8的编码同步发送字符串
-                    var result = _userInputText.GetBytesWithUtf8();
-                    // _webSocketClient?.Send(result.Item2, 0, result.Item2.Length);
-
-                    ChatMessages.Add(new ChatMessageModel
-                    {
-                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = result.Item1.FormatHexString(),
-                        IsSend = true
-                    });
-                }
-                else
-                {
-                    MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
+            // if (_selectedConfigModel.MessageType.Equals("文本"))
+            // {
+            //     // _webSocketClient?.Send(_userInputText);
+            //
+            //     ChatMessages.Add(new ChatMessageModel
+            //     {
+            //         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+            //         Message = _userInputText,
+            //         IsSend = true
+            //     });
+            // }
+            // else
+            // {
+            //     if (_userInputText.IsHex())
+            //     {
+            //         //以UTF-8的编码同步发送字符串
+            //         var result = _userInputText.GetBytesWithUtf8();
+            //         // _webSocketClient?.Send(result.Item2, 0, result.Item2.Length);
+            //
+            //         ChatMessages.Add(new ChatMessageModel
+            //         {
+            //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+            //             Message = result.Item1.FormatHexString(),
+            //             IsSend = true
+            //         });
+            //     }
+            //     else
+            //     {
+            //         MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            //     }
+            // }
         }
 
         private void CycleSendMessage()

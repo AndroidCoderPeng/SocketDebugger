@@ -18,7 +18,6 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <cvt:SendMessageButtonStateConvert x:Key="SendMessageButtonStateConvertKey" />
-            <cvt:MessageTypeConvert x:Key="MessageTypeConvertKey" />
 
             <util:ClientChatBubbleSelector x:Key="ClientChatBubbleSelectorKey" />
         </ResourceDictionary>
@@ -234,26 +233,18 @@
             <Grid Grid.Row="4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <RadioButton
+                <CheckBox
+                    x:Name="HexCheckBox"
                     Grid.Column="0"
                     Margin="10"
-                    Content="文本"
-                    GroupName="ModeGroup"
-                    IsChecked="{Binding SelectedConfigModel.MessageType, Converter={StaticResource MessageTypeConvertKey}, ConverterParameter=文本}" />
-
-                <RadioButton
-                    Grid.Column="1"
-                    Content="16进制"
-                    GroupName="ModeGroup"
-                    IsChecked="{Binding SelectedConfigModel.MessageType, Converter={StaticResource MessageTypeConvertKey}, ConverterParameter=16进制}" />
+                    Content="Hex" />
 
                 <Grid
-                    Grid.Column="2"
+                    Grid.Column="1"
                     Margin="10,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
@@ -293,7 +284,7 @@
                 </Grid>
 
                 <Button
-                    Grid.Column="3"
+                    Grid.Column="2"
                     Margin="5,0"
                     Command="{Binding SendMessageCommand}"
                     Content="发送"

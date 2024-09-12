@@ -324,8 +324,7 @@ namespace SocketDebugger.ViewModels
                 ConnectionTitle = "",
                 ConnectionType = type,
                 ConnectionHost = _dataService.GetHostAddress(),
-                ConnectionPort = "8080",
-                MessageType = "16进制"
+                ConnectionPort = "8080"
             };
 
             _dialogService.ShowDialog("ConfigDialog", new DialogParameters
@@ -418,39 +417,39 @@ namespace SocketDebugger.ViewModels
 
             if (_selectedClientModel != null)
             {
-                if (_selectedConfigModel.MessageType.Equals("文本"))
-                {
-                    // var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
-                    // _udpSession.Send(endPoint, _userInputText);
-
-                    ChatMessages.Add(new ChatMessageModel
-                    {
-                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = _userInputText,
-                        IsSend = true
-                    });
-                }
-                else
-                {
-                    if (_userInputText.IsHex())
-                    {
-                        //以UTF-8的编码同步发送字符串
-                        var result = _userInputText.GetBytesWithUtf8();
-                        // var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
-                        // _udpSession.Send(endPoint, result.Item2);
-
-                        ChatMessages.Add(new ChatMessageModel
-                        {
-                            MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                            Message = result.Item1.FormatHexString(),
-                            IsSend = true
-                        });
-                    }
-                    else
-                    {
-                        MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
+                // if (_selectedConfigModel.MessageType.Equals("文本"))
+                // {
+                //     // var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
+                //     // _udpSession.Send(endPoint, _userInputText);
+                //
+                //     ChatMessages.Add(new ChatMessageModel
+                //     {
+                //         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                //         Message = _userInputText,
+                //         IsSend = true
+                //     });
+                // }
+                // else
+                // {
+                //     if (_userInputText.IsHex())
+                //     {
+                //         //以UTF-8的编码同步发送字符串
+                //         var result = _userInputText.GetBytesWithUtf8();
+                //         // var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
+                //         // _udpSession.Send(endPoint, result.Item2);
+                //
+                //         ChatMessages.Add(new ChatMessageModel
+                //         {
+                //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                //             Message = result.Item1.FormatHexString(),
+                //             IsSend = true
+                //         });
+                //     }
+                //     else
+                //     {
+                //         MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                //     }
+                // }
             }
             else
             {

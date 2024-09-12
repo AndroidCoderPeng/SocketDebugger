@@ -13,8 +13,6 @@ namespace SocketDebugger.Services
 
         void DeleteConnectionById(string id);
         
-        List<string> GetDataType();
-        
         string GetHostAddress();
 
         string[] GetSerialPorts();

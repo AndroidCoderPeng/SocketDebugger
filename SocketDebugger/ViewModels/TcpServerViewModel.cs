@@ -335,8 +335,7 @@ namespace SocketDebugger.ViewModels
                 ConnectionTitle = "",
                 ConnectionType = type,
                 ConnectionHost = _dataService.GetHostAddress(),
-                ConnectionPort = "8080",
-                MessageType = "16进制"
+                ConnectionPort = "8080"
             };
 
             _dialogService.ShowDialog("ConfigDialog", new DialogParameters

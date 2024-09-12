@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using SocketDebugger.Model;
-using SocketDebugger.Services;
 using SocketDebugger.Utils;
 
 namespace SocketDebugger.ViewModels
@@ -28,26 +26,15 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        public List<string> DataTypeArray { get; }
-
         #endregion
 
         #region DelegateCommand
-
-        public DelegateCommand<string> DataTypeSelectedCommand { set; get; }
         public DelegateCommand SaveConfigCommand { get; set; }
 
         #endregion
 
-        public ConfigDialogViewModel(IApplicationDataService dataService)
+        public ConfigDialogViewModel()
         {
-            DataTypeArray = dataService.GetDataType();
-
-            DataTypeSelectedCommand = new DelegateCommand<string>(delegate(string dataType)
-            {
-                ConnectionConfigModel.MessageType = dataType;
-            });
-
             SaveConfigCommand = new DelegateCommand(delegate
             {
                 if (_connectionConfigModel == null)
@@ -67,7 +54,6 @@ namespace SocketDebugger.ViewModels
                             ConnectionType = _connectionConfigModel.ConnectionType,
                             ConnectionHost = _connectionConfigModel.ConnectionHost,
                             ConnectionPort = _connectionConfigModel.ConnectionPort,
-                            MessageType = _connectionConfigModel.MessageType
                         };
 
                         manager.Insert(configModel);

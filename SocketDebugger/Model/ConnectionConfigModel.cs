@@ -26,10 +26,5 @@ namespace SocketDebugger.Model
         /// 连接端口
         /// </summary>
         public string ConnectionPort { get; set; }
-
-        /// <summary>
-        /// 消息类型，文本、Hex
-        /// </summary>
-        public string MessageType { get; set; }
     }
 }

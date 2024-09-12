@@ -9,7 +9,7 @@
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:SocketDebugger.ViewModels"
     Width="350"
-    Height="400"
+    Height="300"
     d:DataContext="{d:DesignInstance Type=vm:ConfigDialogViewModel}"
     Background="White"
     mc:Ignorable="d">
@@ -23,134 +23,109 @@
         </Style>
     </prism:Dialog.WindowStyle>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <Grid Grid.Row="0" Margin="20">
+    <Border BorderBrush="LightGray" BorderThickness="0,1,0,0">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="2*" />
-                </Grid.ColumnDefinitions>
+            <Grid Grid.Row="0" Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
 
-                <TextBlock
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    FontSize="14"
-                    Text="描述" />
+                <Grid Grid.Row="0" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
 
-                <TextBox
-                    Grid.Column="1"
-                    VerticalContentAlignment="Center"
-                    hc:InfoElement.Placeholder="请填写连接的描述"
-                    hc:InfoElement.ShowClearButton="True"
-                    FontSize="14"
-                    Text="{Binding ConnectionConfigModel.ConnectionTitle}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Text="描述" />
+
+                    <hc:TextBox
+                        Grid.Column="1"
+                        VerticalContentAlignment="Center"
+                        hc:InfoElement.Placeholder="请填写连接的描述"
+                        hc:InfoElement.ShowClearButton="True"
+                        FontSize="14"
+                        Text="{Binding ConnectionConfigModel.ConnectionTitle}" />
+                </Grid>
+
+                <Grid Grid.Row="1" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Text="类型" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        FontSize="14"
+                        Text="{Binding ConnectionConfigModel.ConnectionType}" />
+                </Grid>
+
+                <Grid Grid.Row="2" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Text="主机地址" />
+
+                    <hc:TextBox
+                        Grid.Column="1"
+                        VerticalContentAlignment="Center"
+                        hc:InfoElement.ShowClearButton="True"
+                        FontSize="14"
+                        Text="{Binding ConnectionConfigModel.ConnectionHost}" />
+                </Grid>
+
+                <Grid Grid.Row="3" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Text="端口" />
+
+                    <hc:TextBox
+                        Grid.Column="1"
+                        VerticalContentAlignment="Center"
+                        hc:InfoElement.ShowClearButton="True"
+                        FontSize="14"
+                        Text="{Binding ConnectionConfigModel.ConnectionPort}" />
+                </Grid>
             </Grid>
 
-            <Grid Grid.Row="1" VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="2*" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    FontSize="14"
-                    Text="类型" />
-
-                <TextBlock
-                    Grid.Column="1"
-                    HorizontalAlignment="Stretch"
-                    FontSize="14"
-                    Text="{Binding ConnectionConfigModel.ConnectionType}" />
-            </Grid>
-
-            <Grid Grid.Row="2" VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="2*" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    FontSize="14"
-                    Text="主机地址" />
-
-                <TextBox
-                    Grid.Column="1"
-                    VerticalContentAlignment="Center"
-                    hc:InfoElement.ShowClearButton="True"
-                    FontSize="14"
-                    Text="{Binding ConnectionConfigModel.ConnectionHost}" />
-            </Grid>
-
-            <Grid Grid.Row="3" VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="2*" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    FontSize="14"
-                    Text="端口" />
-
-                <TextBox
-                    Grid.Column="1"
-                    VerticalContentAlignment="Center"
-                    hc:InfoElement.ShowClearButton="True"
-                    FontSize="14"
-                    Text="{Binding ConnectionConfigModel.ConnectionPort}" />
-            </Grid>
-
-            <Grid Grid.Row="4" VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="2*" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    FontSize="14"
-                    Text="数据类型" />
-
-                <ComboBox
-                    x:Name="DataTypeComboBox"
-                    Grid.Column="1"
-                    FontSize="14"
-                    ItemsSource="{Binding DataTypeArray}"
-                    SelectedItem="{Binding ConnectionConfigModel.MessageType}">
-                    <b:Interaction.Triggers>
-                        <b:EventTrigger EventName="SelectionChanged">
-                            <b:InvokeCommandAction Command="{Binding DataTypeSelectedCommand}" CommandParameter="{Binding ElementName=DataTypeComboBox, Path=SelectedItem}" />
-                        </b:EventTrigger>
-                    </b:Interaction.Triggers>
-                </ComboBox>
-            </Grid>
+            <Button
+                Grid.Row="1"
+                Margin="20"
+                HorizontalAlignment="Stretch"
+                Command="{Binding SaveConfigCommand}"
+                Content="保存配置"
+                Style="{StaticResource ButtonPrimary}" />
         </Grid>
-
-        <Button
-            Grid.Row="1"
-            Margin="20"
-            HorizontalAlignment="Stretch"
-            Command="{Binding SaveConfigCommand}"
-            Content="保存配置"
-            Style="{StaticResource ButtonPrimary}" />
-    </Grid>
+    </Border>
 </UserControl>

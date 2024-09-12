@@ -205,7 +205,6 @@
             <SubType>Designer</SubType>
         </ApplicationDefinition>
         <Compile Include="Converts\ListConvert.cs"/>
-        <Compile Include="Converts\MessageTypeConvert.cs" />
         <Compile Include="Converts\SendMessageButtonStateConvert.cs"/>
         <Compile Include="Converts\SerialPortConfigStateConvert.cs"/>
         <Compile Include="Dialogs\ConfigDialog.xaml.cs">

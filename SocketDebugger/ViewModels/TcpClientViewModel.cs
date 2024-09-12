@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
+using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -292,8 +293,7 @@ namespace SocketDebugger.ViewModels
                 ConnectionTitle = "",
                 ConnectionType = type,
                 ConnectionHost = _dataService.GetHostAddress(),
-                ConnectionPort = "8080",
-                MessageType = "16进制"
+                ConnectionPort = "8080"
             };
 
             _dialogService.ShowDialog("ConfigDialog", new DialogParameters
@@ -378,38 +378,38 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            if (_selectedConfigModel.MessageType.Equals("文本"))
-            {
-                // _tcpClient.Send(_userInputText);
-
-                ChatMessages.Add(new ChatMessageModel
-                {
-                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                    Message = _userInputText,
-                    IsSend = true
-                });
-            }
-            else
-            {
-                if (_userInputText.IsHex())
-                {
-                    //以UTF-8的编码同步发送字符串
-                    var result = _userInputText.GetBytesWithUtf8();
-                    // _tcpClient.Send(result.Item2);
-
-                    //将发送的数据格式化为每两个字符为一个整体
-                    ChatMessages.Add(new ChatMessageModel
-                    {
-                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = result.Item1.FormatHexString(),
-                        IsSend = true
-                    });
-                }
-                else
-                {
-                    MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
+            // if (_selectedConfigModel.MessageType.Equals("文本"))
+            // {
+            //     // _tcpClient.Send(_userInputText);
+            //
+            //     ChatMessages.Add(new ChatMessageModel
+            //     {
+            //         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+            //         Message = _userInputText,
+            //         IsSend = true
+            //     });
+            // }
+            // else
+            // {
+            //     if (_userInputText.IsHex())
+            //     {
+            //         //以UTF-8的编码同步发送字符串
+            //         var result = _userInputText.GetBytesWithUtf8();
+            //         // _tcpClient.Send(result.Item2);
+            //
+            //         //将发送的数据格式化为每两个字符为一个整体
+            //         ChatMessages.Add(new ChatMessageModel
+            //         {
+            //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+            //             Message = result.Item1.FormatHexString(),
+            //             IsSend = true
+            //         });
+            //     }
+            //     else
+            //     {
+            //         MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            //     }
+            // }
         }
 
         private void CycleSendMessage()
