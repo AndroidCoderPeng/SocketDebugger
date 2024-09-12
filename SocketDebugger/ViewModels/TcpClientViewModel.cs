@@ -141,7 +141,6 @@ namespace SocketDebugger.ViewModels
         #endregion
 
         #region DelegateCommand
-
         public DelegateCommand<ConnectionConfigModel> ConnectionItemSelectedCommand { set; get; }
         public DelegateCommand<ConnectionConfigModel> DeleteConnectionConfigCommand { set; get; }
         public DelegateCommand<string> AddConnectionConfigCommand { set; get; }
