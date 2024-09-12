@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 using Prism.Commands;
@@ -8,6 +9,7 @@ using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using SocketDebugger.Events;
 using SocketDebugger.Model;
+using SocketDebugger.Services;
 using SocketDebugger.Utils;
 
 namespace SocketDebugger.ViewModels
@@ -16,12 +18,36 @@ namespace SocketDebugger.ViewModels
     {
         #region VM
 
+        private ObservableCollection<ConnectionConfigModel> _connectionConfigCollection;
+
+        public ObservableCollection<ConnectionConfigModel> ConnectionConfigCollection
+        {
+            get => _connectionConfigCollection;
+            set
+            {
+                _connectionConfigCollection = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private int _currentIndex;
+
+        public int CurrentIndex
+        {
+            get => _currentIndex;
+            set
+            {
+                _currentIndex = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private ConnectionConfigModel _selectedConfigModel;
 
         public ConnectionConfigModel SelectedConfigModel
         {
             get => _selectedConfigModel;
-            private set
+            set
             {
                 _selectedConfigModel = value;
                 RaisePropertyChanged();
@@ -33,7 +59,7 @@ namespace SocketDebugger.ViewModels
         public string ConnectColorBrush
         {
             get => _connectColorBrush;
-            private set
+            set
             {
                 _connectColorBrush = value;
                 RaisePropertyChanged();
@@ -45,7 +71,7 @@ namespace SocketDebugger.ViewModels
         public string ConnectState
         {
             get => _connectState;
-            private set
+            set
             {
                 _connectState = value;
                 RaisePropertyChanged();
@@ -57,7 +83,7 @@ namespace SocketDebugger.ViewModels
         public string ConnectButtonState
         {
             get => _connectButtonState;
-            private set
+            set
             {
                 _connectButtonState = value;
                 RaisePropertyChanged();
@@ -115,6 +141,10 @@ namespace SocketDebugger.ViewModels
         #endregion
 
         #region DelegateCommand
+
+        public DelegateCommand<ConnectionConfigModel> ConnectionItemSelectedCommand { set; get; }
+        public DelegateCommand<ConnectionConfigModel> DeleteConnectionConfigCommand { set; get; }
+        public DelegateCommand<string> AddConnectionConfigCommand { set; get; }
         public DelegateCommand EditConfigCommand { get; set; }
         public DelegateCommand ConnectServerCommand { get; set; }
         public DelegateCommand ClearMessageCommand { get; set; }
@@ -124,14 +154,25 @@ namespace SocketDebugger.ViewModels
 
         #endregion
 
+        private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
+
         private readonly DispatcherTimer _timer = new DispatcherTimer();
         // private WebSocket _webSocketClient;
 
-        public WebSocketClientViewModel(IDialogService dialogService, IEventAggregator eventAggregator)
+        public WebSocketClientViewModel(IApplicationDataService dataService, IDialogService dialogService,
+            IEventAggregator eventAggregator)
         {
+            _dataService = dataService;
             _dialogService = dialogService;
 
+            InitDefaultConfig();
+
+            eventAggregator.GetEvent<ChangeViewByMainMenuEvent>().Subscribe(ChangeViewByMainMenu);
+            
+            ConnectionItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(ConnectionItemSelected);
+            DeleteConnectionConfigCommand = new DelegateCommand<ConnectionConfigModel>(DeleteConnectionConfig);
+            AddConnectionConfigCommand = new DelegateCommand<string>(AddConnectionConfig);
             EditConfigCommand = new DelegateCommand(EditConnectionConfig);
             ConnectServerCommand = new DelegateCommand(ConnectWebsocketServer);
             ClearMessageCommand = new DelegateCommand(ClearMessage);
@@ -140,19 +181,96 @@ namespace SocketDebugger.ViewModels
             //周期发送CheckBox选中、取消选中事件
             CycleCheckedCommand = new DelegateCommand(CycleSendMessage);
             CycleUncheckedCommand = new DelegateCommand(StopCycleSendMessage);
-            
+
             //自动发消息
             _timer.Tick += delegate { SendMessage(); };
-            
-            eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Subscribe(UpdateDetailView);
         }
 
-        private void UpdateDetailView(ConnectionConfigModel configModel)
+        private void InitDefaultConfig()
         {
+            ConnectionConfigCollection = _dataService.GetConnectionCollection("WebSocket客户端");
+            if (_connectionConfigCollection.Any())
+            {
+                SelectedConfigModel = _connectionConfigCollection.First();
+                CurrentIndex = 0;
+            }
+        }
+
+        private void ChangeViewByMainMenu(string type)
+        {
+            ConnectionConfigCollection = _dataService.GetConnectionCollection(type);
+            if (_connectionConfigCollection.Any())
+            {
+                SelectedConfigModel = _connectionConfigCollection.First();
+                CurrentIndex = 0;
+            }
+        }
+        
+        private void ConnectionItemSelected(ConnectionConfigModel configModel)
+        {
+            if (configModel == null)
+            {
+                return;
+            }
+
             if (configModel.ConnectionType.Equals("WebSocket客户端"))
             {
                 SelectedConfigModel = configModel;
             }
+        }
+
+        private void DeleteConnectionConfig(ConnectionConfigModel configModel)
+        {
+            if (configModel == null)
+            {
+                return;
+            }
+
+            var result = MessageBox.Show("是否删除当前配置？", "温馨提示", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                _dataService.DeleteConnectionById(configModel.Uuid);
+                //更新列表和面板
+                ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
+                if (_connectionConfigCollection.Any())
+                {
+                    SelectedConfigModel = _connectionConfigCollection.First();
+                    CurrentIndex = 0;
+                }
+            }
+        }
+
+        private void AddConnectionConfig(string type)
+        {
+            if (type == null)
+            {
+                return;
+            }
+
+            var configModel = new ConnectionConfigModel
+            {
+                ConnectionTitle = "",
+                ConnectionType = type,
+                ConnectionHost = _dataService.GetHostAddress(),
+                ConnectionPort = "8080",
+                MessageType = "16进制"
+            };
+
+            _dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                {
+                    { "Title", "添加配置" }, { "ConnectionConfigModel", configModel }
+                },
+                delegate(IDialogResult result)
+                {
+                    if (result.Result == ButtonResult.OK)
+                    {
+                        //更新列表和面板
+                        ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
+                        SelectedConfigModel = _connectionConfigCollection.Last();
+                        CurrentIndex = _connectionConfigCollection.Count - 1;
+                    }
+                }
+            );
         }
 
         private void EditConnectionConfig()
@@ -165,14 +283,12 @@ namespace SocketDebugger.ViewModels
                 {
                     if (result.Result == ButtonResult.OK)
                     {
-                        UpdateDetailView(
-                            result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel")
-                        );
+                        SelectedConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
                     }
                 }
             );
         }
-        
+
         private void ConnectWebsocketServer()
         {
             // if (_webSocketClient == null)
@@ -210,7 +326,7 @@ namespace SocketDebugger.ViewModels
         {
             ChatMessages.Clear();
         }
-        
+
         /// <summary>
         /// 发送消息
         /// </summary>
@@ -228,7 +344,8 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            if (_selectedConfigModel.MessageType.Equals("文本"))            {
+            if (_selectedConfigModel.MessageType.Equals("文本"))
+            {
                 // _webSocketClient?.Send(_userInputText);
 
                 ChatMessages.Add(new ChatMessageModel
@@ -290,7 +407,7 @@ namespace SocketDebugger.ViewModels
                 _timer.Stop();
             }
         }
-        
+
         // private void WebSocketOpened(object sender, EventArgs e)
         // {
         //     ConnectColorBrush = "LimeGreen";
