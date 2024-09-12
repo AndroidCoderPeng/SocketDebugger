@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
 using System.Windows;
 using System.Windows.Threading;
 using Prism.Commands;
@@ -12,6 +9,7 @@ using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using SocketDebugger.Events;
 using SocketDebugger.Model;
+using SocketDebugger.Services;
 using SocketDebugger.Utils;
 
 namespace SocketDebugger.ViewModels
@@ -20,14 +18,26 @@ namespace SocketDebugger.ViewModels
     {
         #region VM
 
-        private ObservableCollection<ConnectionConfigModel> _configModels;
+        private ObservableCollection<ConnectionConfigModel> _connectionConfigCollection;
 
-        public ObservableCollection<ConnectionConfigModel> ConfigModels
+        public ObservableCollection<ConnectionConfigModel> ConnectionConfigCollection
         {
-            get => _configModels;
-            private set
+            get => _connectionConfigCollection;
+            set
             {
-                _configModels = value;
+                _connectionConfigCollection = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private int _currentIndex;
+
+        public int CurrentIndex
+        {
+            get => _currentIndex;
+            set
+            {
+                _currentIndex = value;
                 RaisePropertyChanged();
             }
         }
@@ -37,7 +47,7 @@ namespace SocketDebugger.ViewModels
         public ConnectionConfigModel SelectedConfigModel
         {
             get => _selectedConfigModel;
-            private set
+            set
             {
                 _selectedConfigModel = value;
                 RaisePropertyChanged();
@@ -73,7 +83,7 @@ namespace SocketDebugger.ViewModels
         public string ConnectColorBrush
         {
             get => _connectColorBrush;
-            private set
+            set
             {
                 _connectColorBrush = value;
                 RaisePropertyChanged();
@@ -85,7 +95,7 @@ namespace SocketDebugger.ViewModels
         public string ConnectState
         {
             get => _connectState;
-            private set
+            set
             {
                 _connectState = value;
                 RaisePropertyChanged();
@@ -97,7 +107,7 @@ namespace SocketDebugger.ViewModels
         public string ConnectButtonState
         {
             get => _connectButtonState;
-            private set
+            set
             {
                 _connectButtonState = value;
                 RaisePropertyChanged();
@@ -164,14 +174,14 @@ namespace SocketDebugger.ViewModels
                 RaisePropertyChanged();
             }
         }
-        
+
         #endregion
 
         #region DelegateCommand
 
-        public DelegateCommand<ConnectionConfigModel> ConfigItemSelectedCommand { get; set; }
-        public DelegateCommand AddConfigCommand { get; set; }
-        public DelegateCommand DeleteConfigCommand { get; set; }
+        public DelegateCommand<ConnectionConfigModel> ConnectionItemSelectedCommand { set; get; }
+        public DelegateCommand<ConnectionConfigModel> DeleteConnectionConfigCommand { set; get; }
+        public DelegateCommand<string> AddConnectionConfigCommand { set; get; }
         public DelegateCommand EditConfigCommand { get; set; }
         public DelegateCommand StartListenCommand { get; set; }
         public DelegateCommand ClearMessageCommand { get; set; }
@@ -181,18 +191,29 @@ namespace SocketDebugger.ViewModels
         public DelegateCommand CycleUncheckedCommand { get; set; }
 
         #endregion
-        
+
+        private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
+
         // private readonly UdpSession _udpSession = new UdpSession();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
         private ConnectedClientModel _selectedClientModel;
-        
-        public UdpServerViewModel(IDialogService dialogService, IEventAggregator eventAggregator)
+
+        public UdpServerViewModel(IApplicationDataService dataService, IDialogService dialogService,
+            IEventAggregator eventAggregator)
         {
+            _dataService = dataService;
             _dialogService = dialogService;
+
+            InitDefaultConfig();
+
+            eventAggregator.GetEvent<ChangeViewByMainMenuEvent>().Subscribe(ChangeViewByMainMenu);
 
             InitDelegate();
 
+            ConnectionItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(ConnectionItemSelected);
+            DeleteConnectionConfigCommand = new DelegateCommand<ConnectionConfigModel>(DeleteConnectionConfig);
+            AddConnectionConfigCommand = new DelegateCommand<string>(AddConnectionConfig);
             EditConfigCommand = new DelegateCommand(EditConnectionConfig);
             StartListenCommand = new DelegateCommand(StartListenPort);
             ClearMessageCommand = new DelegateCommand(ClearMessage);
@@ -202,21 +223,31 @@ namespace SocketDebugger.ViewModels
             //周期发送CheckBox选中、取消选中事件
             CycleCheckedCommand = new DelegateCommand(CycleSendMessage);
             CycleUncheckedCommand = new DelegateCommand(StopCycleSendMessage);
-            
+
             //自动发消息
             _timer.Tick += delegate { SendMessage(); };
-            
-            eventAggregator.GetEvent<UpdateConnectionDetailEvent>().Subscribe(UpdateDetailView);
         }
 
-        private void UpdateDetailView(ConnectionConfigModel configModel)
+        private void InitDefaultConfig()
         {
-            if (configModel.ConnectionType.Equals("UDP服务端"))
+            ConnectionConfigCollection = _dataService.GetConnectionCollection("UDP服务端");
+            if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = configModel;
+                SelectedConfigModel = _connectionConfigCollection.First();
+                CurrentIndex = 0;
             }
         }
-        
+
+        private void ChangeViewByMainMenu(string type)
+        {
+            ConnectionConfigCollection = _dataService.GetConnectionCollection(type);
+            if (_connectionConfigCollection.Any())
+            {
+                SelectedConfigModel = _connectionConfigCollection.First();
+                CurrentIndex = 0;
+            }
+        }
+
         private void InitDelegate()
         {
             // _udpSession.Received += delegate(EndPoint endpoint, ByteBlock block, IRequestInfo info)
@@ -247,6 +278,73 @@ namespace SocketDebugger.ViewModels
             // };
         }
 
+        private void ConnectionItemSelected(ConnectionConfigModel configModel)
+        {
+            if (configModel == null)
+            {
+                return;
+            }
+
+            if (configModel.ConnectionType.Equals("UDP服务端"))
+            {
+                SelectedConfigModel = configModel;
+            }
+        }
+
+        private void DeleteConnectionConfig(ConnectionConfigModel configModel)
+        {
+            if (configModel == null)
+            {
+                return;
+            }
+
+            var result = MessageBox.Show("是否删除当前配置？", "温馨提示", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                _dataService.DeleteConnectionById(configModel.Uuid);
+                //更新列表和面板
+                ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
+                if (_connectionConfigCollection.Any())
+                {
+                    SelectedConfigModel = _connectionConfigCollection.First();
+                    CurrentIndex = 0;
+                }
+            }
+        }
+
+        private void AddConnectionConfig(string type)
+        {
+            if (type == null)
+            {
+                return;
+            }
+
+            var configModel = new ConnectionConfigModel
+            {
+                ConnectionTitle = "",
+                ConnectionType = type,
+                ConnectionHost = _dataService.GetHostAddress(),
+                ConnectionPort = "8080",
+                MessageType = "16进制"
+            };
+
+            _dialogService.ShowDialog("ConfigDialog", new DialogParameters
+                {
+                    { "Title", "添加配置" }, { "ConnectionConfigModel", configModel }
+                },
+                delegate(IDialogResult result)
+                {
+                    if (result.Result == ButtonResult.OK)
+                    {
+                        //更新列表和面板
+                        ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
+                        SelectedConfigModel = _connectionConfigCollection.Last();
+                        CurrentIndex = _connectionConfigCollection.Count - 1;
+                    }
+                }
+            );
+        }
+
         private void EditConnectionConfig()
         {
             _dialogService.ShowDialog("ConfigDialog", new DialogParameters
@@ -257,9 +355,8 @@ namespace SocketDebugger.ViewModels
                 {
                     if (result.Result == ButtonResult.OK)
                     {
-                        UpdateDetailView(
-                            result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel")
-                        );
+                        SelectedConfigModel =
+                            result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
                     }
                 }
             );
@@ -302,12 +399,12 @@ namespace SocketDebugger.ViewModels
         {
             ChatMessages.Clear();
         }
-        
+
         private void ClientItemSelected(ConnectedClientModel clientModel)
         {
             _selectedClientModel = clientModel;
         }
-        
+
         /// <summary>
         /// 发送消息
         /// </summary>
@@ -360,7 +457,7 @@ namespace SocketDebugger.ViewModels
                 MessageBox.Show("请指定接收消息的客户端", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
         private void CycleSendMessage()
         {
             //判断周期时间是否为空

@@ -296,12 +296,14 @@
                     Grid.Column="0"
                     Margin="10"
                     Content="文本"
-                    GroupName="ModeGroup" />
+                    GroupName="ModeGroup"
+                    IsChecked="{Binding SelectedConfigModel.MessageType, Converter={StaticResource MessageTypeConvertKey}, ConverterParameter=文本}" />
 
                 <RadioButton
                     Grid.Column="1"
                     Content="16进制"
-                    GroupName="ModeGroup" />
+                    GroupName="ModeGroup"
+                    IsChecked="{Binding SelectedConfigModel.MessageType, Converter={StaticResource MessageTypeConvertKey}, ConverterParameter=16进制}" />
 
                 <Grid
                     Grid.Column="2"
