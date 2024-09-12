@@ -1,9 +1,9 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Threading;
-using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -115,6 +115,18 @@ namespace SocketDebugger.ViewModels
             }
         }
 
+        private bool _isHexChecked;
+
+        public bool IsHexChecked
+        {
+            get => _isHexChecked;
+            set
+            {
+                _isHexChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -142,6 +154,7 @@ namespace SocketDebugger.ViewModels
         #endregion
 
         #region DelegateCommand
+
         public DelegateCommand<ConnectionConfigModel> ConnectionItemSelectedCommand { set; get; }
         public DelegateCommand<ConnectionConfigModel> DeleteConnectionConfigCommand { set; get; }
         public DelegateCommand<string> AddConnectionConfigCommand { set; get; }
@@ -157,7 +170,7 @@ namespace SocketDebugger.ViewModels
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
 
-        // private readonly TcpClient _tcpClient = new TcpClient();
+        private readonly TcpClient _tcpClient = new TcpClient();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
 
         public TcpClientViewModel(IApplicationDataService dataService, IDialogService dialogService,
@@ -296,11 +309,11 @@ namespace SocketDebugger.ViewModels
                 ConnectionPort = "8080"
             };
 
-            _dialogService.ShowDialog("ConfigDialog", new DialogParameters
-                {
-                    { "Title", "添加配置" }, { "ConnectionConfigModel", configModel }
-                },
-                delegate(IDialogResult result)
+            var dialogParameters = new DialogParameters
+            {
+                { "Title", "添加配置" }, { "ConnectionConfigModel", configModel }
+            };
+            _dialogService.ShowDialog("ConfigDialog", dialogParameters, delegate(IDialogResult result)
                 {
                     if (result.Result == ButtonResult.OK)
                     {
@@ -315,15 +328,16 @@ namespace SocketDebugger.ViewModels
 
         private void EditConnectionConfig()
         {
-            _dialogService.ShowDialog("ConfigDialog", new DialogParameters
-                {
-                    { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfigModel }
-                },
-                delegate(IDialogResult result)
+            var dialogParameters = new DialogParameters
+            {
+                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfigModel }
+            };
+            _dialogService.ShowDialog("ConfigDialog", dialogParameters, delegate(IDialogResult result)
                 {
                     if (result.Result == ButtonResult.OK)
                     {
-                        SelectedConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
+                        SelectedConfigModel =
+                            result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
                     }
                 }
             );
@@ -366,6 +380,7 @@ namespace SocketDebugger.ViewModels
         /// </summary>
         private void SendMessage()
         {
+            Console.WriteLine(_isHexChecked);
             if (string.IsNullOrEmpty(_userInputText))
             {
                 MessageBox.Show("不能发送空消息", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -378,49 +393,49 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            // if (_selectedConfigModel.MessageType.Equals("文本"))
-            // {
-            //     // _tcpClient.Send(_userInputText);
-            //
-            //     ChatMessages.Add(new ChatMessageModel
-            //     {
-            //         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-            //         Message = _userInputText,
-            //         IsSend = true
-            //     });
-            // }
-            // else
-            // {
-            //     if (_userInputText.IsHex())
-            //     {
-            //         //以UTF-8的编码同步发送字符串
-            //         var result = _userInputText.GetBytesWithUtf8();
-            //         // _tcpClient.Send(result.Item2);
-            //
-            //         //将发送的数据格式化为每两个字符为一个整体
-            //         ChatMessages.Add(new ChatMessageModel
-            //         {
-            //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-            //             Message = result.Item1.FormatHexString(),
-            //             IsSend = true
-            //         });
-            //     }
-            //     else
-            //     {
-            //         MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            //     }
-            // }
+            if (_isHexChecked)
+            {
+                if (_userInputText.IsHex())
+                {
+                    //以UTF-8的编码同步发送字符串
+                    var result = _userInputText.GetBytesWithUtf8();
+                    // _tcpClient.Send(result.Item2);
+
+                    //将发送的数据格式化为每两个字符为一个整体
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = result.Item1.FormatHexString(),
+                        IsSend = true
+                    });
+                }
+                else
+                {
+                    MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                // _tcpClient.Send(_userInputText);
+
+                ChatMessages.Add(new ChatMessageModel
+                {
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                    Message = _userInputText,
+                    IsSend = true
+                });
+            }
         }
 
         private void CycleSendMessage()
         {
             //判断周期时间是否为空
-            // if (_messageCycleTime.IsNullOrWhiteSpace())
-            // {
-            //     MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            //     IsCycleChecked = false;
-            //     return;
-            // }
+            if (string.IsNullOrWhiteSpace(_messageCycleTime))
+            {
+                MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsCycleChecked = false;
+                return;
+            }
 
             //判断周期时间是否是数字
             if (!_messageCycleTime.IsNumber())

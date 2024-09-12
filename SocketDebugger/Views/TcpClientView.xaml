@@ -246,10 +246,10 @@
                 </Grid.ColumnDefinitions>
 
                 <CheckBox
-                    x:Name="HexCheckBox"
                     Grid.Column="0"
                     Margin="10"
-                    Content="Hex" />
+                    Content="Hex"
+                    IsChecked="{Binding IsHexChecked}" />
 
                 <Grid
                     Grid.Column="1"

@@ -255,11 +255,11 @@ namespace SocketDebugger.ViewModels
                 ConnectionPort = "8080"
             };
 
-            _dialogService.ShowDialog("ConfigDialog", new DialogParameters
-                {
-                    { "Title", "添加配置" }, { "ConnectionConfigModel", configModel }
-                },
-                delegate(IDialogResult result)
+            var dialogParameters = new DialogParameters
+            {
+                { "Title", "添加配置" }, { "ConnectionConfigModel", configModel }
+            };
+            _dialogService.ShowDialog("ConfigDialog", dialogParameters, delegate(IDialogResult result)
                 {
                     if (result.Result == ButtonResult.OK)
                     {
@@ -274,11 +274,11 @@ namespace SocketDebugger.ViewModels
 
         private void EditConnectionConfig()
         {
-            _dialogService.ShowDialog("ConfigDialog", new DialogParameters
-                {
-                    { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfigModel }
-                },
-                delegate(IDialogResult result)
+            var dialogParameters = new DialogParameters
+            {
+                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfigModel }
+            };
+            _dialogService.ShowDialog("ConfigDialog", dialogParameters, delegate(IDialogResult result)
                 {
                     if (result.Result == ButtonResult.OK)
                     {

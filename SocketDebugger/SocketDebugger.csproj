@@ -37,18 +37,6 @@
         <ApplicationIcon>Images\Net.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
-        <Reference Include="DotNetty.Buffers, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
-          <HintPath>..\packages\DotNetty.Buffers.0.7.6\lib\net472\DotNetty.Buffers.dll</HintPath>
-        </Reference>
-        <Reference Include="DotNetty.Codecs, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
-          <HintPath>..\packages\DotNetty.Codecs.0.7.6\lib\net472\DotNetty.Codecs.dll</HintPath>
-        </Reference>
-        <Reference Include="DotNetty.Common, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
-          <HintPath>..\packages\DotNetty.Common.0.7.6\lib\net472\DotNetty.Common.dll</HintPath>
-        </Reference>
-        <Reference Include="DotNetty.Transport, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
-          <HintPath>..\packages\DotNetty.Transport.0.7.6\lib\net472\DotNetty.Transport.dll</HintPath>
-        </Reference>
         <Reference Include="DryIoc, Version=4.7.7.0, Culture=neutral, PublicKeyToken=dfbf2bd50fcf7768, processorArchitecture=MSIL">
             <HintPath>..\packages\DryIoc.dll.4.7.7\lib\net45\DryIoc.dll</HintPath>
         </Reference>
