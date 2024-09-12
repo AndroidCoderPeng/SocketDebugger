@@ -212,7 +212,6 @@
             <DependentUpon>ConfigDialog.xaml</DependentUpon>
         </Compile>
         <Compile Include="Events\ChangeViewByMainMenuEvent.cs" />
-        <Compile Include="Events\UpdateConnectionDetailEvent.cs"/>
         <Compile Include="Model\ChatMessageModel.cs"/>
         <Compile Include="Model\ConnectedClientModel.cs"/>
         <Compile Include="Model\ConnectionConfigModel.cs"/>
