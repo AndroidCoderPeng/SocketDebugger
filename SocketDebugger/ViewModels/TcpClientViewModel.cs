@@ -313,9 +313,9 @@ namespace SocketDebugger.ViewModels
                 _tcpClient = new TcpClient();
                 try
                 {
-                    _tcpClient.Setup(new TouchSocketConfig().SetRemoteIPHost(
-                        $"{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}")
-                    );
+                    var socketConfig = new TouchSocketConfig();
+                    socketConfig.SetRemoteIPHost($"{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}");
+                    _tcpClient.Setup(socketConfig);
                     _tcpClient.Connect();
                     _tcpClient.Connected += Client_Connected;
                     _tcpClient.Closing += Client_DisConnected;
