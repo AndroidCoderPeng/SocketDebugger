@@ -126,8 +126,8 @@
         <Reference Include="System.Linq, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
             <HintPath>..\packages\System.Linq.4.3.0\lib\net463\System.Linq.dll</HintPath>
         </Reference>
-        <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-          <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+        <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
         </Reference>
         <Reference Include="System.Net.NameResolution, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
             <HintPath>..\packages\System.Net.NameResolution.4.3.0\lib\net46\System.Net.NameResolution.dll</HintPath>
@@ -182,6 +182,12 @@
         <Reference Include="System.Xml"/>
         <Reference Include="System.Xaml">
             <RequiredTargetFramework>4.0</RequiredTargetFramework>
+        </Reference>
+        <Reference Include="TouchSocket, Version=2.1.0.0, Culture=neutral, PublicKeyToken=5f39d7da98dac6a9, processorArchitecture=MSIL">
+          <HintPath>..\packages\TouchSocket.2.1.0\lib\net472\TouchSocket.dll</HintPath>
+        </Reference>
+        <Reference Include="TouchSocket.Core, Version=2.1.0.0, Culture=neutral, PublicKeyToken=d6c415a2f58eda72, processorArchitecture=MSIL">
+          <HintPath>..\packages\TouchSocket.Core.2.1.0\lib\net472\TouchSocket.Core.dll</HintPath>
         </Reference>
         <Reference Include="WindowsBase"/>
         <Reference Include="PresentationCore"/>
@@ -295,6 +301,9 @@
     </ItemGroup>
     <ItemGroup>
         <Resource Include="Images\empty.png"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Analyzer Include="..\packages\TouchSocket.Core.2.1.0\analyzers\dotnet\cs\TouchSocket.Core.SourceGenerator.dll" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

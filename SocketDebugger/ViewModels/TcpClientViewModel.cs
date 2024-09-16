@@ -2,6 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Prism.Commands;
@@ -12,6 +14,9 @@ using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
+using TouchSocket.Core;
+using TouchSocket.Sockets;
+using TcpClient = TouchSocket.Sockets.TcpClient;
 
 namespace SocketDebugger.ViewModels
 {
@@ -43,14 +48,14 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private ConnectionConfigModel _selectedConfigModel;
+        private ConnectionConfigModel _selectedConfig;
 
-        public ConnectionConfigModel SelectedConfigModel
+        public ConnectionConfigModel SelectedConfig
         {
-            get => _selectedConfigModel;
+            get => _selectedConfig;
             set
             {
-                _selectedConfigModel = value;
+                _selectedConfig = value;
                 RaisePropertyChanged();
             }
         }
@@ -169,9 +174,9 @@ namespace SocketDebugger.ViewModels
 
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
-
-        private readonly TcpClient _tcpClient = new TcpClient();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
+        private TcpClient _tcpClient;
+        private bool _isConnected;
 
         public TcpClientViewModel(IApplicationDataService dataService, IDialogService dialogService,
             IEventAggregator eventAggregator)
@@ -182,8 +187,6 @@ namespace SocketDebugger.ViewModels
             InitDefaultConfig();
 
             eventAggregator.GetEvent<ChangeViewByMainMenuEvent>().Subscribe(ChangeViewByMainMenu);
-
-            InitDelegate();
 
             ConnectionItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(ConnectionItemSelected);
             DeleteConnectionConfigCommand = new DelegateCommand<ConnectionConfigModel>(DeleteConnectionConfig);
@@ -206,7 +209,7 @@ namespace SocketDebugger.ViewModels
             ConnectionConfigCollection = _dataService.GetConnectionCollection("TCP客户端");
             if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = _connectionConfigCollection.First();
+                SelectedConfig = _connectionConfigCollection.First();
                 CurrentIndex = 0;
             }
         }
@@ -216,48 +219,9 @@ namespace SocketDebugger.ViewModels
             ConnectionConfigCollection = _dataService.GetConnectionCollection(type);
             if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = _connectionConfigCollection.First();
+                SelectedConfig = _connectionConfigCollection.First();
                 CurrentIndex = 0;
             }
-        }
-
-        private void InitDelegate()
-        {
-            // _tcpClient.Connected += delegate
-            // {
-            //     ConnectColorBrush = "LimeGreen";
-            //     ConnectState = "已连接";
-            //     ConnectButtonState = "断开";
-            // };
-            //
-            // _tcpClient.Disconnected += delegate
-            // {
-            //     ConnectColorBrush = "DarkGray";
-            //     ConnectState = "未连接";
-            //     ConnectButtonState = "连接";
-            //
-            //     if (_timer.IsEnabled)
-            //     {
-            //         _timer.Stop();
-            //     }
-            // };
-            //
-            // _tcpClient.Received += delegate(TcpClient client, ByteBlock block, IRequestInfo info)
-            // {
-            //     var message = _isTextChecked
-            //         ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
-            //         : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
-            //
-            //     Application.Current.Dispatcher.Invoke(delegate
-            //     {
-            //         ChatMessages.Add(new ChatMessageModel
-            //         {
-            //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-            //             Message = message,
-            //             IsSend = false
-            //         });
-            //     });
-            // };
         }
 
         private void ConnectionItemSelected(ConnectionConfigModel configModel)
@@ -269,7 +233,7 @@ namespace SocketDebugger.ViewModels
 
             if (configModel.ConnectionType.Equals("TCP客户端"))
             {
-                SelectedConfigModel = configModel;
+                SelectedConfig = configModel;
             }
         }
 
@@ -288,7 +252,7 @@ namespace SocketDebugger.ViewModels
                 ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
                 if (_connectionConfigCollection.Any())
                 {
-                    SelectedConfigModel = _connectionConfigCollection.First();
+                    SelectedConfig = _connectionConfigCollection.First();
                     CurrentIndex = 0;
                 }
             }
@@ -319,7 +283,7 @@ namespace SocketDebugger.ViewModels
                     {
                         //更新列表和面板
                         ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
-                        SelectedConfigModel = _connectionConfigCollection.Last();
+                        SelectedConfig = _connectionConfigCollection.Last();
                         CurrentIndex = _connectionConfigCollection.Count - 1;
                     }
                 }
@@ -330,14 +294,13 @@ namespace SocketDebugger.ViewModels
         {
             var dialogParameters = new DialogParameters
             {
-                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfigModel }
+                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfig }
             };
             _dialogService.ShowDialog("ConfigDialog", dialogParameters, delegate(IDialogResult result)
                 {
                     if (result.Result == ButtonResult.OK)
                     {
-                        SelectedConfigModel =
-                            result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
+                        SelectedConfig = result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
                     }
                 }
             );
@@ -345,29 +308,88 @@ namespace SocketDebugger.ViewModels
 
         private void ConnectTcpServer()
         {
-            //声明配置
-            // var config = new TouchSocketConfig();
-            // config.SetRemoteIPHost(new IPHost(_selectedConfigModel.ConnectionHost + ":" + _selectedConfigModel.ConnectionPort))
-            //     .UsePlugin()
-            //     .ConfigurePlugins(manager => { manager.UseReconnection(5, true, 3000); });
-            //
-            // //载入配置
-            // _tcpClient.Setup(config);
-            // try
-            // {
-            //     if (_connectButtonState == "连接")
-            //     {
-            //         _tcpClient.Connect();
-            //     }
-            //     else
-            //     {
-            //         _tcpClient.Close();
-            //     }
-            // }
-            // catch (SocketException e)
-            // {
-            //     MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            // }
+            if (!_isConnected)
+            {
+                _tcpClient = new TcpClient();
+                try
+                {
+                    _tcpClient.Setup(new TouchSocketConfig().SetRemoteIPHost(
+                        $"{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}")
+                    );
+                    _tcpClient.Connect();
+                    _tcpClient.Connected += Client_Connected;
+                    _tcpClient.Closing += Client_DisConnected;
+                    _tcpClient.Closed += Server_DisConnected;
+                    _tcpClient.Received += Message_Received;
+                }
+                catch (SocketException e)
+                {
+                    MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                _tcpClient.Close();
+                _tcpClient.Connected -= Client_Connected;
+                _tcpClient.Closing -= Client_DisConnected;
+                _tcpClient.Closed -= Server_DisConnected;
+                _tcpClient.Received -= Message_Received;
+            }
+        }
+
+        private Task Client_Connected(ITcpClient client, ConnectedEventArgs e)
+        {
+            _isConnected = true;
+            ConnectColorBrush = "LimeGreen";
+            ConnectState = "已连接";
+            ConnectButtonState = "断开";
+            return EasyTask.CompletedTask;
+        }
+
+        private Task Client_DisConnected(ITcpClient client, ClosingEventArgs e)
+        {
+            TcpClosed();
+            return EasyTask.CompletedTask;
+        }
+
+        private Task Server_DisConnected(ITcpClient client, ClosedEventArgs e)
+        {
+            TcpClosed();
+            return EasyTask.CompletedTask;
+        }
+
+        private void TcpClosed()
+        {
+            ConnectColorBrush = "DarkGray";
+            ConnectState = "未连接";
+            ConnectButtonState = "连接";
+
+            if (_timer.IsEnabled)
+            {
+                _timer.Stop();
+            }
+
+            _isConnected = false;
+        }
+
+        private Task Message_Received(ITcpClient client, ReceivedDataEventArgs e)
+        {
+            var bytes = e.ByteBlock.ToArray();
+
+            var message = _isHexChecked
+                ? BitConverter.ToString(bytes).Replace("-", " ")
+                : Encoding.UTF8.GetString(bytes);
+
+            Application.Current.Dispatcher.Invoke(delegate
+            {
+                ChatMessages.Add(new ChatMessageModel
+                {
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                    Message = message,
+                    IsSend = false
+                });
+            });
+            return EasyTask.CompletedTask;
         }
 
         private void ClearMessage()
@@ -380,14 +402,13 @@ namespace SocketDebugger.ViewModels
         /// </summary>
         private void SendMessage()
         {
-            Console.WriteLine(_isHexChecked);
             if (string.IsNullOrEmpty(_userInputText))
             {
                 MessageBox.Show("不能发送空消息", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            if (ConnectState == "未连接")
+            if (!_isConnected)
             {
                 MessageBox.Show("未连接成功，无法发送消息", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -397,11 +418,8 @@ namespace SocketDebugger.ViewModels
             {
                 if (_userInputText.IsHex())
                 {
-                    //以UTF-8的编码同步发送字符串
                     var result = _userInputText.GetBytesWithUtf8();
-                    // _tcpClient.Send(result.Item2);
-
-                    //将发送的数据格式化为每两个字符为一个整体
+                    _tcpClient.Send(result.Item2);
                     ChatMessages.Add(new ChatMessageModel
                     {
                         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
@@ -416,8 +434,7 @@ namespace SocketDebugger.ViewModels
             }
             else
             {
-                // _tcpClient.Send(_userInputText);
-
+                _tcpClient.Send(_userInputText);
                 ChatMessages.Add(new ChatMessageModel
                 {
                     MessageTime = DateTime.Now.ToString("HH:mm:ss"),
@@ -451,7 +468,6 @@ namespace SocketDebugger.ViewModels
 
         private void StopCycleSendMessage()
         {
-            //停止timer
             if (_timer.IsEnabled)
             {
                 _timer.Stop();
