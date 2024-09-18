@@ -175,7 +175,7 @@ namespace SocketDebugger.ViewModels
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
         private readonly DispatcherTimer _timer = new DispatcherTimer();
-        private TcpClient _tcpClient;
+        private readonly TcpClient _tcpClient = new TcpClient();
         private bool _isConnected;
 
         public TcpClientViewModel(IApplicationDataService dataService, IDialogService dialogService,
@@ -310,7 +310,6 @@ namespace SocketDebugger.ViewModels
         {
             if (!_isConnected)
             {
-                _tcpClient = new TcpClient();
                 try
                 {
                     var socketConfig = new TouchSocketConfig();

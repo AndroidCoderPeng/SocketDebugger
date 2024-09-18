@@ -198,7 +198,7 @@ namespace SocketDebugger.ViewModels
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
         private readonly DispatcherTimer _timer = new DispatcherTimer();
-        private TcpService _tcpService;
+        private readonly TcpService _tcpService = new TcpService();
         private bool _isListened;
         private ConnectedClientModel _selectedClient;
 
@@ -335,7 +335,6 @@ namespace SocketDebugger.ViewModels
         {
             if (!_isListened)
             {
-                _tcpService = new TcpService();
                 var socketConfig = new TouchSocketConfig();
                 socketConfig.SetListenIPHosts(
                     new IPHost($"{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}")

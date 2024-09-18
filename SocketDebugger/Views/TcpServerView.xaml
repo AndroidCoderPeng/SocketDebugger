@@ -211,7 +211,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="1" />
-                    <ColumnDefinition Width="165" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <ListBox
@@ -243,23 +243,30 @@
 
                 <Grid Grid.Column="1" Background="LightGray" />
 
-                <StackPanel Grid.Column="2" Orientation="Vertical">
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="1" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
                     <TextBlock
+                        Grid.Row="0"
                         Padding="0,7"
                         HorizontalAlignment="Center"
                         Text="客户端" />
 
-                    <Grid Height="1" Background="LightGray" />
+                    <Grid Grid.Row="1" Background="LightGray" />
 
                     <ListBox
-                        x:Name="ClientListView"
+                        x:Name="ClientListBox"
+                        Grid.Row="2"
                         BorderThickness="0"
                         ItemsSource="{Binding ConnectedClients}"
-                        ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                         SelectedIndex="{Binding ClientIndex}">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="SelectionChanged">
-                                <b:InvokeCommandAction Command="{Binding ClientItemSelectedCommand}" CommandParameter="{Binding ElementName=ClientListView, Path=SelectedItem}" />
+                                <b:InvokeCommandAction Command="{Binding ClientItemSelectedCommand}" CommandParameter="{Binding ElementName=ClientListBox, Path=SelectedItem}" />
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
 
@@ -279,7 +286,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </StackPanel>
+                </Grid>
             </Grid>
 
             <Grid Grid.Row="3" Background="LightGray" />
