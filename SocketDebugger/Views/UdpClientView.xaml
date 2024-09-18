@@ -109,7 +109,7 @@
                     hc:BorderElement.CornerRadius="0"
                     BorderThickness="0"
                     Command="{Binding AddConnectionConfigCommand}"
-                    CommandParameter="{Binding SelectedConfigModel.ConnectionType}"
+                    CommandParameter="{Binding SelectedConfig.ConnectionType}"
                     Content="&#xe604;"
                     FontFamily="/SocketDebugger;component/IconFont/#iconfont" />
             </Grid>
@@ -146,7 +146,7 @@
                         Margin="10,0"
                         VerticalAlignment="Center"
                         FontSize="14"
-                        Text="{Binding SelectedConfigModel.ConnectionTitle}" />
+                        Text="{Binding SelectedConfig.ConnectionTitle}" />
 
                     <TextBlock
                         Grid.Row="1"
@@ -155,8 +155,8 @@
                         <!--  多重绑定  -->
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0}:{1}">
-                                <Binding Path="SelectedConfigModel.ConnectionHost" />
-                                <Binding Path="SelectedConfigModel.ConnectionPort" />
+                                <Binding Path="SelectedConfig.ConnectionHost" />
+                                <Binding Path="SelectedConfig.ConnectionPort" />
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>
@@ -238,10 +238,10 @@
                 </Grid.ColumnDefinitions>
 
                 <CheckBox
-                    x:Name="HexCheckBox"
                     Grid.Column="0"
                     Margin="10"
-                    Content="Hex" />
+                    Content="Hex"
+                    IsChecked="{Binding IsHexChecked}" />
 
                 <Grid
                     Grid.Column="1"

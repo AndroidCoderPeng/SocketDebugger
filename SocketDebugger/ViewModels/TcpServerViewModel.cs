@@ -508,7 +508,7 @@ namespace SocketDebugger.ViewModels
         private void CycleSendMessage()
         {
             //判断周期时间是否为空
-            if (_messageCycleTime.IsNullOrWhiteSpace())
+            if (string.IsNullOrWhiteSpace(_messageCycleTime))
             {
                 MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 IsCycleChecked = false;
