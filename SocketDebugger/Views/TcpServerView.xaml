@@ -211,7 +211,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="1" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="165" />
                 </Grid.ColumnDefinitions>
 
                 <ListBox
