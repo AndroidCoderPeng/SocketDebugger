@@ -349,6 +349,7 @@ namespace SocketDebugger.ViewModels
                 _isListened = true;
 
                 _tcpService.Connected += Client_Connected;
+                _tcpService.Closing += Server_DisConnected;
                 _tcpService.Closed += Client_DisConnected;
                 _tcpService.Received += Message_Received;
             }
@@ -362,6 +363,7 @@ namespace SocketDebugger.ViewModels
                 _isListened = false;
 
                 _tcpService.Connected -= Client_Connected;
+                _tcpService.Closing -= Server_DisConnected;
                 _tcpService.Closed -= Client_DisConnected;
                 _tcpService.Received -= Message_Received;
 
@@ -385,8 +387,23 @@ namespace SocketDebugger.ViewModels
             return EasyTask.CompletedTask;
         }
 
+        private Task Server_DisConnected(TcpSessionClient client, ClosingEventArgs e)
+        {
+            Console.WriteLine(@"服务器主动断开");
+            Application.Current.Dispatcher.Invoke(delegate
+            {
+                foreach (var model in ConnectedClients)
+                {
+                    //改变连接状态颜色
+                    model.ClientConnectColorBrush = "DarkGray";
+                }
+            });
+            return EasyTask.CompletedTask;
+        }
+        
         private Task Client_DisConnected(TcpSessionClient client, ClosedEventArgs e)
         {
+            Console.WriteLine(@"客户端主动断开");
             Application.Current.Dispatcher.Invoke(delegate
             {
                 //有客户端断开后，找到断开的那个客户端
