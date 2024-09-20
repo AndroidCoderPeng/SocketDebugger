@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Prism.Commands;
@@ -11,6 +13,8 @@ using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
+using TouchSocket.Core;
+using TouchSocket.Sockets;
 
 namespace SocketDebugger.ViewModels
 {
@@ -42,38 +46,14 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private ConnectionConfigModel _selectedConfigModel;
+        private ConnectionConfigModel _selectedConfig;
 
-        public ConnectionConfigModel SelectedConfigModel
+        public ConnectionConfigModel SelectedConfig
         {
-            get => _selectedConfigModel;
+            get => _selectedConfig;
             set
             {
-                _selectedConfigModel = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        private int _index;
-
-        public int Index
-        {
-            get => _index;
-            set
-            {
-                _index = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        private int _clientIndex;
-
-        public int ClientIndex
-        {
-            get => _clientIndex;
-            set
-            {
-                _clientIndex = value;
+                _selectedConfig = value;
                 RaisePropertyChanged();
             }
         }
@@ -151,6 +131,18 @@ namespace SocketDebugger.ViewModels
             }
         }
 
+        private bool _isHexChecked;
+
+        public bool IsHexChecked
+        {
+            get => _isHexChecked;
+            set
+            {
+                _isHexChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -194,10 +186,10 @@ namespace SocketDebugger.ViewModels
 
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
-
-        // private readonly UdpSession _udpSession = new UdpSession();
+        private readonly UdpSession _udpServer = new UdpSession();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
-        private ConnectedClientModel _selectedClientModel;
+        private bool _isListened;
+        private ConnectedClientModel _selectedClient;
 
         public UdpServerViewModel(IApplicationDataService dataService, IDialogService dialogService,
             IEventAggregator eventAggregator)
@@ -208,8 +200,6 @@ namespace SocketDebugger.ViewModels
             InitDefaultConfig();
 
             eventAggregator.GetEvent<ChangeViewByMainMenuEvent>().Subscribe(ChangeViewByMainMenu);
-
-            InitDelegate();
 
             ConnectionItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(ConnectionItemSelected);
             DeleteConnectionConfigCommand = new DelegateCommand<ConnectionConfigModel>(DeleteConnectionConfig);
@@ -233,7 +223,7 @@ namespace SocketDebugger.ViewModels
             ConnectionConfigCollection = _dataService.GetConnectionCollection("UDP服务端");
             if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = _connectionConfigCollection.First();
+                SelectedConfig = _connectionConfigCollection.First();
                 CurrentIndex = 0;
             }
         }
@@ -243,39 +233,9 @@ namespace SocketDebugger.ViewModels
             ConnectionConfigCollection = _dataService.GetConnectionCollection(type);
             if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = _connectionConfigCollection.First();
+                SelectedConfig = _connectionConfigCollection.First();
                 CurrentIndex = 0;
             }
-        }
-
-        private void InitDelegate()
-        {
-            // _udpSession.Received += delegate(EndPoint endpoint, ByteBlock block, IRequestInfo info)
-            // {
-            //     var message = _isTextChecked
-            //         ? Encoding.UTF8.GetString(block.Buffer, 0, block.Len)
-            //         : BitConverter.ToString(block.Buffer, 0, block.Len).Replace("-", " ");
-            //
-            //     Application.Current.Dispatcher.Invoke(() =>
-            //     {
-            //         ChatMessages.Add(new ChatMessageModel
-            //         {
-            //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-            //             Message = message,
-            //             IsSend = false
-            //         });
-            //
-            //         if (ConnectedClients.All(x => x.ClientId != endpoint.GetHashCode().ToString()))
-            //         {
-            //             ConnectedClients.Add(new ConnectedClientModel
-            //             {
-            //                 ClientId = endpoint.GetHashCode().ToString(),
-            //                 ClientConnectColorBrush = "LimeGreen",
-            //                 ClientHostAddress = endpoint.GetIP() + ":" + endpoint.GetPort()
-            //             });
-            //         }
-            //     });
-            // };
         }
 
         private void ConnectionItemSelected(ConnectionConfigModel configModel)
@@ -287,7 +247,7 @@ namespace SocketDebugger.ViewModels
 
             if (configModel.ConnectionType.Equals("UDP服务端"))
             {
-                SelectedConfigModel = configModel;
+                SelectedConfig = configModel;
             }
         }
 
@@ -306,7 +266,7 @@ namespace SocketDebugger.ViewModels
                 ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
                 if (_connectionConfigCollection.Any())
                 {
-                    SelectedConfigModel = _connectionConfigCollection.First();
+                    SelectedConfig = _connectionConfigCollection.First();
                     CurrentIndex = 0;
                 }
             }
@@ -337,7 +297,7 @@ namespace SocketDebugger.ViewModels
                     {
                         //更新列表和面板
                         ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
-                        SelectedConfigModel = _connectionConfigCollection.Last();
+                        SelectedConfig = _connectionConfigCollection.Last();
                         CurrentIndex = _connectionConfigCollection.Count - 1;
                     }
                 }
@@ -348,13 +308,14 @@ namespace SocketDebugger.ViewModels
         {
             var dialogParameters = new DialogParameters
             {
-                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfigModel }
+                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfig }
             };
             _dialogService.ShowDialog("ConfigDialog", dialogParameters, delegate(IDialogResult result)
                 {
                     if (result.Result == ButtonResult.OK)
                     {
-                        SelectedConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
+                        SelectedConfig =
+                            result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
                     }
                 }
             );
@@ -362,35 +323,68 @@ namespace SocketDebugger.ViewModels
 
         private void StartListenPort()
         {
-            // var config = new TouchSocketConfig();
-            // config.SetBindIPHost(new IPHost(_selectedConfigModel.ConnectionHost + ":" + _selectedConfigModel.ConnectionPort));
-            //
-            // //载入配置
-            // _udpSession.Setup(config);
-            // try
-            // {
-            //     if (_connectButtonState == "开始监听")
-            //     {
-            //         _udpSession.Start();
-            //
-            //         ConnectColorBrush = "LimeGreen";
-            //         ConnectState = "监听中";
-            //         ConnectButtonState = "停止监听";
-            //     }
-            //     else
-            //     {
-            //         _timer.Stop();
-            //         _udpSession.Stop();
-            //
-            //         ConnectColorBrush = "DarkGray";
-            //         ConnectState = "未在监听";
-            //         ConnectButtonState = "开始监听";
-            //     }
-            // }
-            // catch (SocketException e)
-            // {
-            //     MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            // }
+            if (!_isListened)
+            {
+                var socketConfig = new TouchSocketConfig();
+                var host = new IPHost($"{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}");
+                socketConfig.SetRemoteIPHost(host);
+                socketConfig.UseUdpReceive();
+                _udpServer.Setup(socketConfig);
+                _udpServer.Start();
+
+                _isListened = true;
+
+                ConnectColorBrush = "LimeGreen";
+                ConnectState = "监听中";
+                ConnectButtonState = "停止监听";
+
+                _udpServer.Received += Message_Received;
+            }
+            else
+            {
+                _timer.Stop();
+                _udpServer.Stop();
+
+                _isListened = false;
+
+                ConnectColorBrush = "DarkGray";
+                ConnectState = "未在监听";
+                ConnectButtonState = "开始监听";
+
+                _udpServer.Received -= Message_Received;
+            }
+        }
+
+        private Task Message_Received(IUdpSession client, UdpReceivedDataEventArgs e)
+        {
+            var bytes = e.ByteBlock.ToArray();
+
+            var message = _isHexChecked
+                ? BitConverter.ToString(bytes).Replace("-", " ")
+                : Encoding.UTF8.GetString(bytes);
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ChatMessages.Add(new ChatMessageModel
+                {
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                    Message = message,
+                    IsSend = false
+                });
+
+                //获取发送端得IP和端口，并显示在列表中
+                var hashCode = e.EndPoint.GetHashCode().ToString();
+                if (ConnectedClients.All(x => x.ClientId != hashCode))
+                {
+                    ConnectedClients.Add(new ConnectedClientModel
+                    {
+                        ClientId = hashCode,
+                        ClientConnectColorBrush = "LimeGreen",
+                        ClientHostAddress = e.EndPoint.GetIP() + ":" + e.EndPoint.GetPort()
+                    });
+                }
+            });
+            return EasyTask.CompletedTask;
         }
 
         private void ClearMessage()
@@ -400,7 +394,7 @@ namespace SocketDebugger.ViewModels
 
         private void ClientItemSelected(ConnectedClientModel clientModel)
         {
-            _selectedClientModel = clientModel;
+            _selectedClient = clientModel;
         }
 
         /// <summary>
@@ -414,41 +408,38 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            if (_selectedClientModel != null)
+            if (_selectedClient != null)
             {
-                // if (_selectedConfigModel.MessageType.Equals("文本"))
-                // {
-                //     // var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
-                //     // _udpSession.Send(endPoint, _userInputText);
-                //
-                //     ChatMessages.Add(new ChatMessageModel
-                //     {
-                //         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                //         Message = _userInputText,
-                //         IsSend = true
-                //     });
-                // }
-                // else
-                // {
-                //     if (_userInputText.IsHex())
-                //     {
-                //         //以UTF-8的编码同步发送字符串
-                //         var result = _userInputText.GetBytesWithUtf8();
-                //         // var endPoint = new IPHost(_selectedClientModel.ClientHostAddress).EndPoint;
-                //         // _udpSession.Send(endPoint, result.Item2);
-                //
-                //         ChatMessages.Add(new ChatMessageModel
-                //         {
-                //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                //             Message = result.Item1.FormatHexString(),
-                //             IsSend = true
-                //         });
-                //     }
-                //     else
-                //     {
-                //         MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                //     }
-                // }
+                if (_isHexChecked)
+                {
+                    if (_userInputText.IsHex())
+                    {
+                        var result = _userInputText.GetBytesWithUtf8();
+                        var endPoint = new IPHost(_selectedClient.ClientHostAddress).EndPoint;
+                        _udpServer.Send(endPoint, result.Item2);
+                        ChatMessages.Add(new ChatMessageModel
+                        {
+                            MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                            Message = result.Item1.FormatHexString(),
+                            IsSend = true
+                        });
+                    }
+                    else
+                    {
+                        MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    var endPoint = new IPHost(_selectedClient.ClientHostAddress).EndPoint;
+                    _udpServer.Send(endPoint, _userInputText);
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = _userInputText,
+                        IsSend = true
+                    });
+                }
             }
             else
             {
@@ -459,12 +450,12 @@ namespace SocketDebugger.ViewModels
         private void CycleSendMessage()
         {
             //判断周期时间是否为空
-            // if (_messageCycleTime.IsNullOrWhiteSpace())
-            // {
-            //     MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            //     IsCycleChecked = false;
-            //     return;
-            // }
+            if (string.IsNullOrWhiteSpace(_messageCycleTime))
+            {
+                MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsCycleChecked = false;
+                return;
+            }
 
             //判断周期时间是否是数字
             if (!_messageCycleTime.IsNumber())

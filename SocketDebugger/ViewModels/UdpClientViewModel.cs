@@ -150,7 +150,7 @@ namespace SocketDebugger.ViewModels
             eventAggregator.GetEvent<ChangeViewByMainMenuEvent>().Subscribe(ChangeViewByMainMenu);
 
             _udpClient.Received += Message_Received;
-
+            
             ConnectionItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(ConnectionItemSelected);
             DeleteConnectionConfigCommand = new DelegateCommand<ConnectionConfigModel>(DeleteConnectionConfig);
             AddConnectionConfigCommand = new DelegateCommand<string>(AddConnectionConfig);
@@ -312,7 +312,8 @@ namespace SocketDebugger.ViewModels
 
             var socketConfig = new TouchSocketConfig();
             var host = new IPHost($"{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}");
-            socketConfig.SetBindIPHost(host);
+            socketConfig.SetRemoteIPHost(host);
+            socketConfig.UseUdpReceive();
             _udpClient.Setup(socketConfig);
             _udpClient.Start();
 
@@ -321,7 +322,7 @@ namespace SocketDebugger.ViewModels
                 if (_userInputText.IsHex())
                 {
                     var result = _userInputText.GetBytesWithUtf8();
-                    _udpClient.Send(host.EndPoint, result.Item2);
+                    _udpClient.Send(result.Item2);
                     ChatMessages.Add(new ChatMessageModel
                     {
                         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
@@ -336,7 +337,7 @@ namespace SocketDebugger.ViewModels
             }
             else
             {
-                _udpClient.Send(host.EndPoint, _userInputText);
+                _udpClient.Send(_userInputText);
                 ChatMessages.Add(new ChatMessageModel
                 {
                     MessageTime = DateTime.Now.ToString("HH:mm:ss"),

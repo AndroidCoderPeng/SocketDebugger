@@ -130,7 +130,8 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private ObservableCollection<ConnectedClientModel> _connectedClients = new ObservableCollection<ConnectedClientModel>();
+        private ObservableCollection<ConnectedClientModel> _connectedClients =
+            new ObservableCollection<ConnectedClientModel>();
 
         public ObservableCollection<ConnectedClientModel> ConnectedClients
         {
@@ -354,6 +355,7 @@ namespace SocketDebugger.ViewModels
             }
             else
             {
+                _timer.Stop();
                 _tcpService.Stop();
                 ConnectColorBrush = "DarkGray";
                 ConnectState = "未在监听";
@@ -365,8 +367,6 @@ namespace SocketDebugger.ViewModels
                 _tcpService.Closing -= Server_DisConnected;
                 _tcpService.Closed -= Client_DisConnected;
                 _tcpService.Received -= Message_Received;
-
-                _timer.Stop();
             }
         }
 
@@ -399,7 +399,7 @@ namespace SocketDebugger.ViewModels
             });
             return EasyTask.CompletedTask;
         }
-        
+
         private Task Client_DisConnected(TcpSessionClient client, ClosedEventArgs e)
         {
             Console.WriteLine(@"客户端主动断开");
@@ -444,7 +444,7 @@ namespace SocketDebugger.ViewModels
             {
                 return;
             }
-            
+
             _selectedClient = client;
         }
 
@@ -469,7 +469,7 @@ namespace SocketDebugger.ViewModels
                         {
                             var result = _userInputText.GetBytesWithUtf8();
                             _tcpService.Send(_selectedClient.ClientId, result.Item2);
-                    
+
                             ChatMessages.Add(new ChatMessageModel
                             {
                                 MessageTime = DateTime.Now.ToString("HH:mm:ss"),
@@ -499,7 +499,6 @@ namespace SocketDebugger.ViewModels
                 }
             }
             else
-
             {
                 MessageBox.Show("请指定接收消息的客户端", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
