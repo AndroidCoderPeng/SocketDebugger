@@ -183,11 +183,14 @@
         <Reference Include="System.Xaml">
             <RequiredTargetFramework>4.0</RequiredTargetFramework>
         </Reference>
-        <Reference Include="TouchSocket, Version=2.1.0.0, Culture=neutral, PublicKeyToken=5f39d7da98dac6a9, processorArchitecture=MSIL">
-          <HintPath>..\packages\TouchSocket.2.1.0\lib\net472\TouchSocket.dll</HintPath>
+        <Reference Include="TouchSocket, Version=2.1.2.0, Culture=neutral, PublicKeyToken=5f39d7da98dac6a9, processorArchitecture=MSIL">
+          <HintPath>..\packages\TouchSocket.2.1.2\lib\net472\TouchSocket.dll</HintPath>
         </Reference>
-        <Reference Include="TouchSocket.Core, Version=2.1.0.0, Culture=neutral, PublicKeyToken=d6c415a2f58eda72, processorArchitecture=MSIL">
-          <HintPath>..\packages\TouchSocket.Core.2.1.0\lib\net472\TouchSocket.Core.dll</HintPath>
+        <Reference Include="TouchSocket.Core, Version=2.1.2.0, Culture=neutral, PublicKeyToken=d6c415a2f58eda72, processorArchitecture=MSIL">
+          <HintPath>..\packages\TouchSocket.Core.2.1.2\lib\net472\TouchSocket.Core.dll</HintPath>
+        </Reference>
+        <Reference Include="TouchSocket.Http, Version=2.1.2.0, Culture=neutral, PublicKeyToken=ecea290704fb8ddd, processorArchitecture=MSIL">
+          <HintPath>..\packages\TouchSocket.Http.2.1.2\lib\net472\TouchSocket.Http.dll</HintPath>
         </Reference>
         <Reference Include="WindowsBase"/>
         <Reference Include="PresentationCore"/>
@@ -303,7 +306,7 @@
         <Resource Include="Images\empty.png"/>
     </ItemGroup>
     <ItemGroup>
-      <Analyzer Include="..\packages\TouchSocket.Core.2.1.0\analyzers\dotnet\cs\TouchSocket.Core.SourceGenerator.dll" />
+      <Analyzer Include="..\packages\TouchSocket.Core.2.1.2\analyzers\dotnet\cs\TouchSocket.Core.SourceGenerator.dll" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

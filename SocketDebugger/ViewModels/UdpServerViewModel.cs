@@ -118,8 +118,7 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private ObservableCollection<ConnectedClientModel> _connectedClients =
-            new ObservableCollection<ConnectedClientModel>();
+        private ObservableCollection<ConnectedClientModel> _connectedClients = new ObservableCollection<ConnectedClientModel>();
 
         public ObservableCollection<ConnectedClientModel> ConnectedClients
         {

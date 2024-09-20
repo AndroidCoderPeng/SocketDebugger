@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Prism.Commands;
@@ -11,6 +13,10 @@ using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
+using TouchSocket.Core;
+using TouchSocket.Http;
+using TouchSocket.Http.WebSockets;
+using TouchSocket.Sockets;
 
 namespace SocketDebugger.ViewModels
 {
@@ -42,14 +48,14 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private ConnectionConfigModel _selectedConfigModel;
+        private ConnectionConfigModel _selectedConfig;
 
-        public ConnectionConfigModel SelectedConfigModel
+        public ConnectionConfigModel SelectedConfig
         {
-            get => _selectedConfigModel;
+            get => _selectedConfig;
             set
             {
-                _selectedConfigModel = value;
+                _selectedConfig = value;
                 RaisePropertyChanged();
             }
         }
@@ -156,9 +162,9 @@ namespace SocketDebugger.ViewModels
 
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
-
         private readonly DispatcherTimer _timer = new DispatcherTimer();
-        // private WebSocket _webSocketClient;
+        private readonly WebSocketClient _webSocketClient = new WebSocketClient();
+        private bool _isConnected;
 
         public WebSocketClientViewModel(IApplicationDataService dataService, IDialogService dialogService,
             IEventAggregator eventAggregator)
@@ -169,7 +175,7 @@ namespace SocketDebugger.ViewModels
             InitDefaultConfig();
 
             eventAggregator.GetEvent<ChangeViewByMainMenuEvent>().Subscribe(ChangeViewByMainMenu);
-            
+
             ConnectionItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(ConnectionItemSelected);
             DeleteConnectionConfigCommand = new DelegateCommand<ConnectionConfigModel>(DeleteConnectionConfig);
             AddConnectionConfigCommand = new DelegateCommand<string>(AddConnectionConfig);
@@ -191,7 +197,7 @@ namespace SocketDebugger.ViewModels
             ConnectionConfigCollection = _dataService.GetConnectionCollection("WebSocket客户端");
             if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = _connectionConfigCollection.First();
+                SelectedConfig = _connectionConfigCollection.First();
                 CurrentIndex = 0;
             }
         }
@@ -201,11 +207,11 @@ namespace SocketDebugger.ViewModels
             ConnectionConfigCollection = _dataService.GetConnectionCollection(type);
             if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = _connectionConfigCollection.First();
+                SelectedConfig = _connectionConfigCollection.First();
                 CurrentIndex = 0;
             }
         }
-        
+
         private void ConnectionItemSelected(ConnectionConfigModel configModel)
         {
             if (configModel == null)
@@ -215,7 +221,7 @@ namespace SocketDebugger.ViewModels
 
             if (configModel.ConnectionType.Equals("WebSocket客户端"))
             {
-                SelectedConfigModel = configModel;
+                SelectedConfig = configModel;
             }
         }
 
@@ -234,7 +240,7 @@ namespace SocketDebugger.ViewModels
                 ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
                 if (_connectionConfigCollection.Any())
                 {
-                    SelectedConfigModel = _connectionConfigCollection.First();
+                    SelectedConfig = _connectionConfigCollection.First();
                     CurrentIndex = 0;
                 }
             }
@@ -265,7 +271,7 @@ namespace SocketDebugger.ViewModels
                     {
                         //更新列表和面板
                         ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
-                        SelectedConfigModel = _connectionConfigCollection.Last();
+                        SelectedConfig = _connectionConfigCollection.Last();
                         CurrentIndex = _connectionConfigCollection.Count - 1;
                     }
                 }
@@ -276,13 +282,13 @@ namespace SocketDebugger.ViewModels
         {
             var dialogParameters = new DialogParameters
             {
-                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfigModel }
+                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfig }
             };
             _dialogService.ShowDialog("ConfigDialog", dialogParameters, delegate(IDialogResult result)
                 {
                     if (result.Result == ButtonResult.OK)
                     {
-                        SelectedConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
+                        SelectedConfig = result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
                     }
                 }
             );
@@ -290,35 +296,78 @@ namespace SocketDebugger.ViewModels
 
         private void ConnectWebsocketServer()
         {
-            // if (_webSocketClient == null)
-            // {
-            //     _webSocketClient = new WebSocket(
-            //         "ws://" + _selectedConfigModel.ConnectionHost + ":" + _selectedConfigModel.ConnectionPort);
-            // }
-            //
-            // _webSocketClient.Opened += WebSocketOpened;
-            // _webSocketClient.MessageReceived += WebSocketMessageReceived;
-            // _webSocketClient.Closed += WebSocketClosed;
-            //
-            // try
-            // {
-            //     if (_connectButtonState == "连接")
-            //     {
-            //         _webSocketClient.Open();
-            //     }
-            //     else
-            //     {
-            //         _webSocketClient.Opened -= WebSocketOpened;
-            //         _webSocketClient.MessageReceived -= WebSocketMessageReceived;
-            //         _webSocketClient.Closed -= WebSocketClosed;
-            //
-            //         _webSocketClient.Close();
-            //     }
-            // }
-            // catch (SocketException e)
-            // {
-            //     MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            // }
+            if (!_isConnected)
+            {
+                try
+                {
+                    var socketConfig = new TouchSocketConfig();
+                    //ws://192.168.92.146:8080/websocket/1
+                    var remote = $"ws://{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}/websocket/1";
+                    socketConfig.SetRemoteIPHost(remote);
+                    _webSocketClient.Setup(socketConfig);
+                    _webSocketClient.Connect();
+                    _webSocketClient.Handshaked += Client_Connected;
+                    // _webSocketClient.Closing += Client_DisConnected;
+                    // _webSocketClient.Closed += Server_DisConnected;
+                    // _webSocketClient.Received += Message_Received;
+                }
+                catch (SocketException e)
+                {
+                    MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                _webSocketClient.Close();
+                _webSocketClient.Handshaked -= Client_Connected;
+                // _webSocketClient.Closing -= Client_DisConnected;
+                // _webSocketClient.Closed -= Server_DisConnected;
+                // _webSocketClient.Received -= Message_Received;
+            }
+        }
+
+        private Task Client_Connected(IWebSocketClient client, HttpContextEventArgs e)
+        {
+            Console.WriteLine(@"Client_Connected");
+            _isConnected = true;
+            ConnectColorBrush = "LimeGreen";
+            ConnectState = "已连接";
+            ConnectButtonState = "断开";
+            return EasyTask.CompletedTask;
+        }
+
+        private Task Client_DisConnected(IWebSocketClient client, ClosingEventArgs e)
+        {
+            Console.WriteLine(@"Client_DisConnected");
+            WebSocketClosed();
+            return EasyTask.CompletedTask;
+        }
+
+        private Task Server_DisConnected(IWebSocketClient client, ClosedEventArgs e)
+        {
+            Console.WriteLine(@"Server_DisConnected");
+            WebSocketClosed();
+            return EasyTask.CompletedTask;
+        }
+
+        private void WebSocketClosed()
+        {
+            ConnectColorBrush = "DarkGray";
+            ConnectState = "未连接";
+            ConnectButtonState = "连接";
+
+            if (_timer.IsEnabled)
+            {
+                _timer.Stop();
+            }
+
+            _isConnected = false;
+        }
+
+        private Task Message_Received(IWebSocketClient client, WSDataFrameEventArgs e)
+        {
+            Console.WriteLine(@"Message_Received");
+            return EasyTask.CompletedTask;
         }
 
         private void ClearMessage()
@@ -343,7 +392,7 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            // if (_selectedConfigModel.MessageType.Equals("文本"))
+            // if (_selectedConfig.MessageType.Equals("文本"))
             // {
             //     // _webSocketClient?.Send(_userInputText);
             //
@@ -376,37 +425,6 @@ namespace SocketDebugger.ViewModels
             // }
         }
 
-        private void CycleSendMessage()
-        {
-            //判断周期时间是否为空
-            // if (_messageCycleTime.IsNullOrWhiteSpace())
-            // {
-            //     MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            //     IsCycleChecked = false;
-            //     return;
-            // }
-
-            //判断周期时间是否是数字
-            if (!_messageCycleTime.IsNumber())
-            {
-                MessageBox.Show("时间间隔只能是数字", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                IsCycleChecked = false;
-                return;
-            }
-
-            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(_messageCycleTime));
-            _timer.Start();
-        }
-
-        private void StopCycleSendMessage()
-        {
-            //停止timer
-            if (_timer.IsEnabled)
-            {
-                _timer.Stop();
-            }
-        }
-
         // private void WebSocketOpened(object sender, EventArgs e)
         // {
         //     ConnectColorBrush = "LimeGreen";
@@ -433,5 +451,36 @@ namespace SocketDebugger.ViewModels
         //         });
         //     });
         // }
+
+        private void CycleSendMessage()
+        {
+            //判断周期时间是否为空
+            if (string.IsNullOrWhiteSpace(_messageCycleTime))
+            {
+                MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsCycleChecked = false;
+                return;
+            }
+
+            //判断周期时间是否是数字
+            if (!_messageCycleTime.IsNumber())
+            {
+                MessageBox.Show("时间间隔只能是数字", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsCycleChecked = false;
+                return;
+            }
+
+            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(_messageCycleTime));
+            _timer.Start();
+        }
+
+        private void StopCycleSendMessage()
+        {
+            //停止timer
+            if (_timer.IsEnabled)
+            {
+                _timer.Stop();
+            }
+        }
     }
 }
