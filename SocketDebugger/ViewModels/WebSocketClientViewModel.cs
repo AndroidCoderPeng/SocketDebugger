@@ -120,6 +120,18 @@ namespace SocketDebugger.ViewModels
             }
         }
 
+        private bool _isHexChecked;
+
+        public bool IsHexChecked
+        {
+            get => _isHexChecked;
+            set
+            {
+                _isHexChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+        
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -367,6 +379,47 @@ namespace SocketDebugger.ViewModels
         private Task Message_Received(IWebSocketClient client, WSDataFrameEventArgs e)
         {
             Console.WriteLine(@"Message_Received");
+            var message = "";
+            switch (e.DataFrame.Opcode)
+            {
+                case WSDataType.Cont:
+                    Console.WriteLine($@"收到中间数据，长度为：{e.DataFrame.PayloadLength}");
+                    break;
+                case WSDataType.Text:
+                    message = e.DataFrame.ToText();
+                    break;
+                case WSDataType.Binary:
+                    if (e.DataFrame.FIN)
+                    {
+                        Console.WriteLine($@"收到二进制数据，长度为：{e.DataFrame.PayloadLength}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($@"收到未结束的二进制数据，长度为：{e.DataFrame.PayloadLength}");
+                    }
+
+                    break;
+                case WSDataType.Close:
+                    Console.WriteLine(@"服务端请求断开");
+                    client.Close("DisConnected");
+                    break;
+                case WSDataType.Ping:
+                    break;
+                case WSDataType.Pong:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ChatMessages.Add(new ChatMessageModel
+                {
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                    Message = message,
+                    IsSend = false
+                });
+            });
             return EasyTask.CompletedTask;
         }
 
@@ -392,65 +445,35 @@ namespace SocketDebugger.ViewModels
                 return;
             }
 
-            // if (_selectedConfig.MessageType.Equals("文本"))
-            // {
-            //     // _webSocketClient?.Send(_userInputText);
-            //
-            //     ChatMessages.Add(new ChatMessageModel
-            //     {
-            //         MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-            //         Message = _userInputText,
-            //         IsSend = true
-            //     });
-            // }
-            // else
-            // {
-            //     if (_userInputText.IsHex())
-            //     {
-            //         //以UTF-8的编码同步发送字符串
-            //         var result = _userInputText.GetBytesWithUtf8();
-            //         // _webSocketClient?.Send(result.Item2, 0, result.Item2.Length);
-            //
-            //         ChatMessages.Add(new ChatMessageModel
-            //         {
-            //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-            //             Message = result.Item1.FormatHexString(),
-            //             IsSend = true
-            //         });
-            //     }
-            //     else
-            //     {
-            //         MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            //     }
-            // }
+            if (_isHexChecked)
+            {
+                if (_userInputText.IsHex())
+                {
+                    var result = _userInputText.GetBytesWithUtf8();
+                    _webSocketClient.SendAsync(result.Item2);
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = result.Item1.FormatHexString(),
+                        IsSend = true
+                    });
+                }
+                else
+                {
+                    MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                _webSocketClient.SendAsync(_userInputText);
+                ChatMessages.Add(new ChatMessageModel
+                {
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                    Message = _userInputText,
+                    IsSend = true
+                });
+            }
         }
-
-        // private void WebSocketOpened(object sender, EventArgs e)
-        // {
-        //     ConnectColorBrush = "LimeGreen";
-        //     ConnectState = "已连接";
-        //     ConnectButtonState = "断开";
-        // }
-        //
-        // private void WebSocketClosed(object sender, EventArgs e)
-        // {
-        //     ConnectColorBrush = "DarkGray";
-        //     ConnectState = "未连接";
-        //     ConnectButtonState = "连接";
-        // }
-        //
-        // private void WebSocketMessageReceived(object sender, MessageReceivedEventArgs e)
-        // {
-        //     Application.Current.Dispatcher.Invoke(() =>
-        //     {
-        //         ChatMessages.Add(new ChatMessageModel
-        //         {
-        //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-        //             Message = e.Message,
-        //             IsSend = false
-        //         });
-        //     });
-        // }
 
         private void CycleSendMessage()
         {

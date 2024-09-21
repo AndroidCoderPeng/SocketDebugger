@@ -216,10 +216,10 @@
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                 <ListBox.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListViewItem}">
+                    <Style TargetType="{x:Type ListBoxItem}">
                         <Setter Property="Template">
                             <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
                                     <Border Name="ItemContainerBorder">
                                         <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
                                     </Border>
