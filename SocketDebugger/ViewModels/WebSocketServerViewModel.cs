@@ -11,6 +11,9 @@ using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
+using TouchSocket.Core;
+using TouchSocket.Http;
+using TouchSocket.Sockets;
 
 namespace SocketDebugger.ViewModels
 {
@@ -42,14 +45,14 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private ConnectionConfigModel _selectedConfigModel;
+        private ConnectionConfigModel _selectedConfig;
 
-        public ConnectionConfigModel SelectedConfigModel
+        public ConnectionConfigModel SelectedConfig
         {
-            get => _selectedConfigModel;
+            get => _selectedConfig;
             set
             {
-                _selectedConfigModel = value;
+                _selectedConfig = value;
                 RaisePropertyChanged();
             }
         }
@@ -139,6 +142,18 @@ namespace SocketDebugger.ViewModels
             }
         }
 
+        private bool _isHexChecked;
+
+        public bool IsHexChecked
+        {
+            get => _isHexChecked;
+            set
+            {
+                _isHexChecked = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -182,10 +197,10 @@ namespace SocketDebugger.ViewModels
 
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
-
-        // private WebSocketServer _webSocketService;
+        private readonly HttpService _webSocketService = new HttpService();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
-        private ConnectedClientModel _selectedClientModel;
+        private bool _isListened;
+        private ConnectedClientModel _selectedClient;
 
         public WebSocketServerViewModel(IApplicationDataService dataService, IDialogService dialogService,
             IEventAggregator eventAggregator)
@@ -196,7 +211,7 @@ namespace SocketDebugger.ViewModels
             InitDefaultConfig();
 
             eventAggregator.GetEvent<ChangeViewByMainMenuEvent>().Subscribe(ChangeViewByMainMenu);
-            
+
             ConnectionItemSelectedCommand = new DelegateCommand<ConnectionConfigModel>(ConnectionItemSelected);
             DeleteConnectionConfigCommand = new DelegateCommand<ConnectionConfigModel>(DeleteConnectionConfig);
             AddConnectionConfigCommand = new DelegateCommand<string>(AddConnectionConfig);
@@ -219,17 +234,17 @@ namespace SocketDebugger.ViewModels
             ConnectionConfigCollection = _dataService.GetConnectionCollection("WebSocket服务端");
             if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = _connectionConfigCollection.First();
+                SelectedConfig = _connectionConfigCollection.First();
                 CurrentIndex = 0;
             }
         }
-        
+
         private void ChangeViewByMainMenu(string type)
         {
             ConnectionConfigCollection = _dataService.GetConnectionCollection(type);
             if (_connectionConfigCollection.Any())
             {
-                SelectedConfigModel = _connectionConfigCollection.First();
+                SelectedConfig = _connectionConfigCollection.First();
                 CurrentIndex = 0;
             }
         }
@@ -243,10 +258,10 @@ namespace SocketDebugger.ViewModels
 
             if (configModel.ConnectionType.Equals("WebSocket服务端"))
             {
-                SelectedConfigModel = configModel;
+                SelectedConfig = configModel;
             }
         }
-        
+
         private void DeleteConnectionConfig(ConnectionConfigModel configModel)
         {
             if (configModel == null)
@@ -262,7 +277,7 @@ namespace SocketDebugger.ViewModels
                 ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
                 if (_connectionConfigCollection.Any())
                 {
-                    SelectedConfigModel = _connectionConfigCollection.First();
+                    SelectedConfig = _connectionConfigCollection.First();
                     CurrentIndex = 0;
                 }
             }
@@ -293,24 +308,24 @@ namespace SocketDebugger.ViewModels
                     {
                         //更新列表和面板
                         ConnectionConfigCollection = _dataService.GetConnectionCollection(configModel.ConnectionType);
-                        SelectedConfigModel = _connectionConfigCollection.Last();
+                        SelectedConfig = _connectionConfigCollection.Last();
                         CurrentIndex = _connectionConfigCollection.Count - 1;
                     }
                 }
             );
         }
-        
+
         private void EditConnectionConfig()
         {
             var dialogParameters = new DialogParameters
             {
-                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfigModel }
+                { "Title", "编辑配置" }, { "ConnectionConfigModel", _selectedConfig }
             };
             _dialogService.ShowDialog("ConfigDialog", dialogParameters, delegate(IDialogResult result)
                 {
                     if (result.Result == ButtonResult.OK)
                     {
-                        SelectedConfigModel = result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
+                        SelectedConfig = result.Parameters.GetValue<ConnectionConfigModel>("ConnectionConfigModel");
                     }
                 }
             );
@@ -318,11 +333,38 @@ namespace SocketDebugger.ViewModels
 
         private void StartListenPort()
         {
+            if (!_isListened)
+            {
+                var socketConfig = new TouchSocketConfig();
+                socketConfig.SetListenIPHosts(
+                    new IPHost($"{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}")
+                );
+                socketConfig.ConfigurePlugins(pm => { pm.UseWebSocket().SetWSUrl("/ws").UseAutoPong(); });
+                _webSocketService.Setup(socketConfig);
+                _webSocketService.Start();
+
+                ConnectColorBrush = "LimeGreen";
+                ConnectState = "监听中";
+                ConnectButtonState = "停止监听";
+
+                _isListened = true;
+            }
+            else
+            {
+                _timer.Stop();
+                _webSocketService.Stop();
+                ConnectColorBrush = "DarkGray";
+                ConnectState = "未在监听";
+                ConnectButtonState = "开始监听";
+
+                _isListened = false;
+            }
+
             // if (_webSocketService == null)
             // {
             //     _webSocketService = new WebSocketServer();
-            //     _webSocketService.Setup(_selectedConfigModel.ConnectionHost,
-            //         Convert.ToInt32(_selectedConfigModel.ConnectionPort));
+            //     _webSocketService.Setup(_selectedConfig.ConnectionHost,
+            //         Convert.ToInt32(_selectedConfig.ConnectionPort));
             // }
             //
             // _webSocketService.NewSessionConnected += SessionConnectedEvent;
@@ -359,102 +401,6 @@ namespace SocketDebugger.ViewModels
             // {
             //     MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             // }
-        }
-
-        private void ClearMessage()
-        {
-            ChatMessages.Clear();
-        }
-
-        private void ClientItemSelected(ConnectedClientModel clientModel)
-        {
-            _selectedClientModel = clientModel;
-        }
-
-        /// <summary>
-        /// 发送消息
-        /// </summary>
-        private void SendMessage()
-        {
-            if (string.IsNullOrEmpty(_userInputText))
-            {
-                MessageBox.Show("不能发送空消息", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            if (_selectedClientModel != null)
-            {
-                // try
-                // {
-                //     var socketSession = _webSocketService.GetSessionByID(_selectedClientModel.ClientId);
-                //     if (_isTextChecked)
-                //     {
-                //         socketSession.Send(_userInputText);
-                //
-                //         ChatMessages.Add(new ChatMessageModel
-                //         {
-                //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                //             Message = _userInputText,
-                //             IsSend = true
-                //         });
-                //     }
-                //     else
-                //     {
-                //         if (_userInputText.IsHex())
-                //         {
-                //             //以UTF-8的编码同步发送字符串
-                //             var result = _userInputText.GetBytesWithUtf8();
-                //             socketSession.Send(result.Item2, 0, result.Item2.Length);
-                //
-                //             ChatMessages.Add(new ChatMessageModel
-                //             {
-                //                 MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                //                 Message = result.Item1.FormatHexString(),
-                //                 IsSend = true
-                //             });
-                //         }
-                //     }
-                // }
-                // catch (ClientNotFindException e)
-                // {
-                //     MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                // }
-            }
-            else
-            {
-                MessageBox.Show("请指定接收消息的客户端", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void CycleSendMessage()
-        {
-            //判断周期时间是否为空
-            // if (_messageCycleTime.IsNullOrWhiteSpace())
-            // {
-            //     MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            //     IsCycleChecked = false;
-            //     return;
-            // }
-
-            //判断周期时间是否是数字
-            if (!_messageCycleTime.IsNumber())
-            {
-                MessageBox.Show("时间间隔只能是数字", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                IsCycleChecked = false;
-                return;
-            }
-
-            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(_messageCycleTime));
-            _timer.Start();
-        }
-
-        private void StopCycleSendMessage()
-        {
-            //停止timer
-            if (_timer.IsEnabled)
-            {
-                _timer.Stop();
-            }
         }
 
         // private void MessageReceivedEvent(WebSocketSession session, string value)
@@ -500,5 +446,97 @@ namespace SocketDebugger.ViewModels
         //         }
         //     });
         // }
+
+        private void ClearMessage()
+        {
+            ChatMessages.Clear();
+        }
+
+        private void ClientItemSelected(ConnectedClientModel clientModel)
+        {
+            _selectedClient = clientModel;
+        }
+
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        private void SendMessage()
+        {
+            if (string.IsNullOrEmpty(_userInputText))
+            {
+                MessageBox.Show("不能发送空消息", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (_selectedClient != null)
+            {
+                try
+                {
+                    if (_isHexChecked)
+                    {
+                        if (_userInputText.IsHex())
+                        {
+                            var result = _userInputText.GetBytesWithUtf8();
+                            // socketSession.Send(result.Item2, 0, result.Item2.Length);
+                            ChatMessages.Add(new ChatMessageModel
+                            {
+                                MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                                Message = result.Item1.FormatHexString(),
+                                IsSend = true
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // socketSession.Send(_userInputText);
+                        ChatMessages.Add(new ChatMessageModel
+                        {
+                            MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                            Message = _userInputText,
+                            IsSend = true
+                        });
+                    }
+                }
+                catch (ClientNotFindException e)
+                {
+                    MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("请指定接收消息的客户端", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CycleSendMessage()
+        {
+            //判断周期时间是否为空
+            if (string.IsNullOrWhiteSpace(_messageCycleTime))
+            {
+                MessageBox.Show("请先设置周期发送的时间间隔", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsCycleChecked = false;
+                return;
+            }
+
+            //判断周期时间是否是数字
+            if (!_messageCycleTime.IsNumber())
+            {
+                MessageBox.Show("时间间隔只能是数字", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsCycleChecked = false;
+                return;
+            }
+
+            _timer.Interval = TimeSpan.FromMilliseconds(double.Parse(_messageCycleTime));
+            _timer.Start();
+        }
+
+        private void StopCycleSendMessage()
+        {
+            //停止timer
+            if (_timer.IsEnabled)
+            {
+                _timer.Stop();
+            }
+        }
     }
 }
