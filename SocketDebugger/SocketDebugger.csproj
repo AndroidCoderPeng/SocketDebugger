@@ -204,6 +204,7 @@
         <Compile Include="Converts\ListConvert.cs"/>
         <Compile Include="Converts\SendMessageButtonStateConvert.cs"/>
         <Compile Include="Converts\SerialPortConfigStateConvert.cs"/>
+        <Compile Include="Converts\WebSocketPathStateConvert.cs" />
         <Compile Include="Dialogs\ConfigDialog.xaml.cs">
             <DependentUpon>ConfigDialog.xaml</DependentUpon>
         </Compile>

@@ -67,9 +67,10 @@
 
                             <TextBlock Grid.Row="1" Margin="10,8">
                                 <TextBlock.Text>
-                                    <MultiBinding StringFormat="{}{0}:{1}">
+                                    <MultiBinding StringFormat="{}{0}:{1}/{2}">
                                         <Binding Path="ConnectionHost" />
                                         <Binding Path="ConnectionPort" />
+                                        <Binding Path="WebSocketPath" />
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
@@ -154,9 +155,10 @@
                         Foreground="Gray">
                         <!--  多重绑定  -->
                         <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0}:{1}">
+                            <MultiBinding StringFormat="{}{0}:{1}/{2}">
                                 <Binding Path="SelectedConfig.ConnectionHost" />
                                 <Binding Path="SelectedConfig.ConnectionPort" />
+                                <Binding Path="SelectedConfig.WebSocketPath" />
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>

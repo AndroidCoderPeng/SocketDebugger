@@ -21,6 +21,11 @@ namespace SocketDebugger.Model
         /// 连接IP
         /// </summary>
         public string ConnectionHost { get; set; }
+        
+        /// <summary>
+        /// WebSocket路径，如：ws://192.168.92.146:8080/websocket/1。其中WebSocketPath => websocket
+        /// </summary>
+        public string WebSocketPath { get; set; }
 
         /// <summary>
         /// 连接端口
