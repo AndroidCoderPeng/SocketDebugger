@@ -313,8 +313,11 @@ namespace SocketDebugger.ViewModels
                 try
                 {
                     var socketConfig = new TouchSocketConfig();
-                    //ws://192.168.92.146:8080/websocket/1
-                    var remote = $"ws://{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}/websocket/1";
+                    var userUuid = Guid.NewGuid().ToString("N");
+                    var remote = string.IsNullOrWhiteSpace(_selectedConfig.WebSocketPath)
+                        ? $"ws://{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}/{userUuid}"
+                        : $"ws://{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}/{_selectedConfig.WebSocketPath}/{userUuid}";
+                    Console.WriteLine(remote);
                     socketConfig.SetRemoteIPHost(remote);
                     _webSocketClient.Setup(socketConfig);
                     _webSocketClient.Connect();
