@@ -324,8 +324,7 @@ namespace SocketDebugger.ViewModels
                     : $"ws://{host}:{port}/{webSocketPath}/{userUuid}";
 
                 var bootstrap = new Bootstrap();
-                var eventLoopGroup = new MultithreadEventLoopGroup();
-                bootstrap.Group(eventLoopGroup)
+                bootstrap.Group(new MultithreadEventLoopGroup())
                     .Channel<TcpSocketChannel>()
                     .Option(ChannelOption.TcpNodelay, true)
                     .Option(ChannelOption.SoKeepalive, true)
@@ -360,7 +359,7 @@ namespace SocketDebugger.ViewModels
             }
         }
 
-        private void WebSocketStateObserver(WebSocketState state)
+        private void WebSocketStateObserver(IChannelHandlerContext ctx, WebSocketState state)
         {
             switch (state)
             {
@@ -449,6 +448,12 @@ namespace SocketDebugger.ViewModels
                     var byteArray = Encoding.UTF8.GetBytes(_userInputText);
                     var byteBuffer = Unpooled.WrappedBuffer(byteArray);
                     await _channelTask.WriteAndFlushAsync(new BinaryWebSocketFrame(byteBuffer));
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = _userInputText,
+                        IsSend = true
+                    });
                 }
                 else
                 {
@@ -458,14 +463,13 @@ namespace SocketDebugger.ViewModels
             else
             {
                 await _channelTask.WriteAndFlushAsync(new TextWebSocketFrame(_userInputText));
+                ChatMessages.Add(new ChatMessageModel
+                {
+                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                    Message = _userInputText,
+                    IsSend = true
+                });
             }
-
-            ChatMessages.Add(new ChatMessageModel
-            {
-                MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                Message = _userInputText,
-                IsSend = true
-            });
         }
 
         private void CycleSendMessage()

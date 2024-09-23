@@ -1,8 +1,19 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Net.WebSockets;
+using System.Text;
 using System.Windows;
 using System.Windows.Threading;
+using DotNetty.Buffers;
+using DotNetty.Codecs.Http;
+using DotNetty.Codecs.Http.WebSockets;
+using DotNetty.Handlers.Logging;
+using DotNetty.Transport.Bootstrapping;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -11,8 +22,6 @@ using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
-using TouchSocket.Core;
-using TouchSocket.Http;
 using TouchSocket.Sockets;
 
 namespace SocketDebugger.ViewModels
@@ -197,8 +206,8 @@ namespace SocketDebugger.ViewModels
 
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
-        private readonly HttpService _webSocketService = new HttpService();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
+        private IChannel _channelTask;
         private bool _isListened;
         private ConnectedClientModel _selectedClient;
 
@@ -331,121 +340,135 @@ namespace SocketDebugger.ViewModels
             );
         }
 
-        private void StartListenPort()
+        private async void StartListenPort()
         {
             if (!_isListened)
             {
-                var socketConfig = new TouchSocketConfig();
-                socketConfig.SetListenIPHosts(
-                    new IPHost($"{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}")
-                );
-                socketConfig.ConfigurePlugins(pm => { pm.UseWebSocket().SetWSUrl("/ws").UseAutoPong(); });
-                _webSocketService.Setup(socketConfig);
-                _webSocketService.Start();
+                var port = Convert.ToInt32(_selectedConfig.ConnectionPort);
+                var webSocketPath = string.IsNullOrWhiteSpace(_selectedConfig.WebSocketPath)
+                    ? "/"
+                    : $"/{_selectedConfig.WebSocketPath}";
 
-                ConnectColorBrush = "LimeGreen";
-                ConnectState = "监听中";
-                ConnectButtonState = "停止监听";
+                var bootstrap = new ServerBootstrap();
+                bootstrap.Group(new MultithreadEventLoopGroup(1), new MultithreadEventLoopGroup())
+                    .Channel<TcpServerSocketChannel>()
+                    .Option(ChannelOption.SoBacklog, 100)
+                    .Option(ChannelOption.RcvbufAllocator, new AdaptiveRecvByteBufAllocator(64, 1024, 65536))
+                    .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
+                    {
+                        channel.Pipeline
+                            .AddLast(new LoggingHandler(LogLevel.INFO))
+                            .AddLast(new HttpServerCodec())
+                            .AddLast(new HttpObjectAggregator(8192))
+                            .AddLast(new WebSocketServerProtocolHandler(webSocketPath))
+                            .AddLast(
+                                new WebSocketServerDataFrameHandler(WebSocketStateObserver, WebSocketMessageObserver)
+                            );
+                    }));
+                try
+                {
+                    _channelTask = await bootstrap.BindAsync(port);
 
-                _isListened = true;
+                    ConnectColorBrush = "LimeGreen";
+                    ConnectState = "监听中";
+                    ConnectButtonState = "停止监听";
+
+                    _isListened = true;
+
+                    await _channelTask.CloseCompletion;
+                }
+                catch (SocketException ex)
+                {
+                    Console.WriteLine($@"WebSocket client error: {ex}");
+                }
             }
             else
             {
-                _timer.Stop();
-                _webSocketService.Stop();
+                await _channelTask.CloseAsync();
+
                 ConnectColorBrush = "DarkGray";
                 ConnectState = "未在监听";
                 ConnectButtonState = "开始监听";
 
+                if (_timer.IsEnabled)
+                {
+                    _timer.Stop();
+                }
+
                 _isListened = false;
             }
-
-            // if (_webSocketService == null)
-            // {
-            //     _webSocketService = new WebSocketServer();
-            //     _webSocketService.Setup(_selectedConfig.ConnectionHost,
-            //         Convert.ToInt32(_selectedConfig.ConnectionPort));
-            // }
-            //
-            // _webSocketService.NewSessionConnected += SessionConnectedEvent;
-            // _webSocketService.NewMessageReceived += MessageReceivedEvent;
-            // _webSocketService.SessionClosed += SessionClosedEvent;
-            //
-            // try
-            // {
-            //     if (_connectButtonState == "开始监听")
-            //     {
-            //         _webSocketService.Start();
-            //
-            //         ConnectColorBrush = "LimeGreen";
-            //         ConnectState = "监听中";
-            //         ConnectButtonState = "停止监听";
-            //     }
-            //     else
-            //     {
-            //         _timer.Stop();
-            //         _webSocketService.Stop();
-            //
-            //         ConnectColorBrush = "DarkGray";
-            //         ConnectState = "未在监听";
-            //         ConnectButtonState = "开始监听";
-            //
-            //         _webSocketService.NewSessionConnected -= SessionConnectedEvent;
-            //         _webSocketService.NewMessageReceived -= MessageReceivedEvent;
-            //         _webSocketService.SessionClosed -= SessionClosedEvent;
-            //
-            //         _webSocketService = null;
-            //     }
-            // }
-            // catch (SocketException e)
-            // {
-            //     MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            // }
         }
 
-        // private void MessageReceivedEvent(WebSocketSession session, string value)
-        // {
-        //     Application.Current.Dispatcher.Invoke(() =>
-        //     {
-        //         ChatMessages.Add(new ChatMessageModel
-        //         {
-        //             MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-        //             Message = value,
-        //             IsSend = false
-        //         });
-        //     });
-        // }
-        //
-        // private void SessionConnectedEvent(WebSocketSession session)
-        // {
-        //     Application.Current.Dispatcher.Invoke(delegate
-        //     {
-        //         ConnectedClients.Add(new ConnectedClientModel
-        //         {
-        //             ClientId = session.SessionID,
-        //             ClientConnectColorBrush = "LimeGreen",
-        //             ClientHostAddress = session.Config.Ip + ":" + session.Config.Port
-        //         });
-        //     });
-        // }
-        //
-        // private void SessionClosedEvent(WebSocketSession session, CloseReason value)
-        // {
-        //     Application.Current.Dispatcher.Invoke(delegate
-        //     {
-        //         var clientModel = ConnectedClients.FirstOrDefault(x => x.ClientId == $"{session.SessionID}");
-        //
-        //         if (clientModel != null)
-        //         {
-        //             //改变连接颜色
-        //             clientModel.ClientConnectColorBrush = "DarkGray";
-        //
-        //             //没有update函数，只能先删除再添加
-        //             ConnectedClients.Remove(clientModel);
-        //             ConnectedClients.Add(clientModel);
-        //         }
-        //     });
-        // }
+        private void WebSocketStateObserver(IChannelHandlerContext context, WebSocketState state)
+        {
+            var clientChannel = context.Channel;
+            var id = clientChannel.Id.AsShortText();
+            var remoteAddress = clientChannel.RemoteAddress;
+            Console.WriteLine($@"{clientChannel.RemoteAddress.Serialize()}");
+            switch (state)
+            {
+                case WebSocketState.Open:
+                    Application.Current.Dispatcher.Invoke(delegate
+                    {
+                        if (remoteAddress is IPEndPoint endPoint)
+                        {
+                            ConnectedClients.Add(new ConnectedClientModel
+                            {
+                                ClientId = id,
+                                ClientConnectColorBrush = "LimeGreen",
+                                ClientHostAddress = $"{endPoint.Address}:{endPoint.Port}"
+                            });
+
+                            ClientIndex = ConnectedClients.Count - 1;
+                        }
+                    });
+                    break;
+                case WebSocketState.Closed:
+                case WebSocketState.Aborted:
+                {
+                    Application.Current.Dispatcher.Invoke(delegate
+                    {
+                        //有客户端断开后，找到断开的那个客户端
+                        var clientModel = ConnectedClients.First(x => x.ClientId == $"{id}");
+                        //改变连接状态颜色
+                        clientModel.ClientConnectColorBrush = "DarkGray";
+                    });
+                    break;
+                }
+                case WebSocketState.None:
+                    break;
+                case WebSocketState.Connecting:
+                    break;
+                case WebSocketState.CloseSent:
+                    break;
+                case WebSocketState.CloseReceived:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+            }
+        }
+
+        private void WebSocketMessageObserver(WebSocketFrame dataFrame)
+        {
+            if (dataFrame is TextWebSocketFrame textFrame)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = textFrame.Text(),
+                        IsSend = false
+                    });
+                });
+            }
+            else if (dataFrame is CloseWebSocketFrame closeFrame)
+            {
+            }
+            else if (dataFrame is BinaryWebSocketFrame binaryFrame)
+            {
+            }
+        }
 
         private void ClearMessage()
         {
@@ -460,7 +483,7 @@ namespace SocketDebugger.ViewModels
         /// <summary>
         /// 发送消息
         /// </summary>
-        private void SendMessage()
+        private async void SendMessage()
         {
             if (string.IsNullOrEmpty(_userInputText))
             {
@@ -476,19 +499,24 @@ namespace SocketDebugger.ViewModels
                     {
                         if (_userInputText.IsHex())
                         {
-                            var result = _userInputText.GetBytesWithUtf8();
-                            // socketSession.Send(result.Item2, 0, result.Item2.Length);
+                            var byteArray = Encoding.UTF8.GetBytes(_userInputText);
+                            var byteBuffer = Unpooled.WrappedBuffer(byteArray);
+                            await _channelTask.WriteAndFlushAsync(new BinaryWebSocketFrame(byteBuffer));
                             ChatMessages.Add(new ChatMessageModel
                             {
                                 MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                                Message = result.Item1.FormatHexString(),
+                                Message = _userInputText,
                                 IsSend = true
                             });
+                        }
+                        else
+                        {
+                            MessageBox.Show("数据格式错误，无法发送", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                     else
                     {
-                        // socketSession.Send(_userInputText);
+                        await _channelTask.WriteAndFlushAsync(new TextWebSocketFrame(_userInputText));
                         ChatMessages.Add(new ChatMessageModel
                         {
                             MessageTime = DateTime.Now.ToString("HH:mm:ss"),

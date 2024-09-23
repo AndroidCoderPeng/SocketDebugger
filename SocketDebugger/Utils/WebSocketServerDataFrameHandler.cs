@@ -5,12 +5,12 @@ using DotNetty.Transport.Channels;
 
 namespace SocketDebugger.Utils
 {
-    public class WebSocketClientDataFrameHandler : SimpleChannelInboundHandler<WebSocketFrame>
+    public class WebSocketServerDataFrameHandler : SimpleChannelInboundHandler<WebSocketFrame>
     {
         private readonly DelegateAggregator.WebSocketStateDelegate _stateDelegate;
         private readonly DelegateAggregator.WebSocketMessageDelegate _messageDelegate;
 
-        public WebSocketClientDataFrameHandler(DelegateAggregator.WebSocketStateDelegate stateDelegate,
+        public WebSocketServerDataFrameHandler(DelegateAggregator.WebSocketStateDelegate stateDelegate,
             DelegateAggregator.WebSocketMessageDelegate messageDelegate)
         {
             _stateDelegate = stateDelegate;
