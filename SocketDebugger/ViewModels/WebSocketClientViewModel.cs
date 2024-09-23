@@ -1,10 +1,19 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
+using System.Net.WebSockets;
+using System.Text;
 using System.Windows;
 using System.Windows.Threading;
+using DotNetty.Buffers;
+using DotNetty.Codecs.Http;
+using DotNetty.Codecs.Http.WebSockets;
+using DotNetty.Handlers.Logging;
+using DotNetty.Transport.Bootstrapping;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -13,10 +22,6 @@ using SocketDebugger.Events;
 using SocketDebugger.Model;
 using SocketDebugger.Services;
 using SocketDebugger.Utils;
-using TouchSocket.Core;
-using TouchSocket.Http;
-using TouchSocket.Http.WebSockets;
-using TouchSocket.Sockets;
 
 namespace SocketDebugger.ViewModels
 {
@@ -131,7 +136,7 @@ namespace SocketDebugger.ViewModels
                 RaisePropertyChanged();
             }
         }
-        
+
         private string _messageCycleTime = string.Empty;
 
         public string MessageCycleTime
@@ -175,7 +180,7 @@ namespace SocketDebugger.ViewModels
         private readonly IApplicationDataService _dataService;
         private readonly IDialogService _dialogService;
         private readonly DispatcherTimer _timer = new DispatcherTimer();
-        private readonly WebSocketClient _webSocketClient = new WebSocketClient();
+        private IChannel _channelTask;
         private bool _isConnected;
 
         public WebSocketClientViewModel(IApplicationDataService dataService, IDialogService dialogService,
@@ -306,124 +311,113 @@ namespace SocketDebugger.ViewModels
             );
         }
 
-        private void ConnectWebsocketServer()
+        private async void ConnectWebsocketServer()
         {
             if (!_isConnected)
             {
+                var host = _selectedConfig.ConnectionHost;
+                var port = Convert.ToInt32(_selectedConfig.ConnectionPort);
+                var webSocketPath = _selectedConfig.WebSocketPath;
+                var userUuid = Guid.NewGuid().ToString("N");
+                var remote = string.IsNullOrWhiteSpace(webSocketPath)
+                    ? $"ws://{host}:{port}/{userUuid}"
+                    : $"ws://{host}:{port}/{webSocketPath}/{userUuid}";
+
+                var bootstrap = new Bootstrap();
+                var eventLoopGroup = new MultithreadEventLoopGroup();
+                bootstrap.Group(eventLoopGroup)
+                    .Channel<TcpSocketChannel>()
+                    .Option(ChannelOption.TcpNodelay, true)
+                    .Option(ChannelOption.SoKeepalive, true)
+                    .Option(ChannelOption.RcvbufAllocator, new AdaptiveRecvByteBufAllocator(64, 1024, 65536))
+                    .Option(ChannelOption.ConnectTimeout, TimeSpan.FromSeconds(10))
+                    .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
+                    {
+                        channel.Pipeline
+                            .AddLast(new LoggingHandler(LogLevel.INFO))
+                            .AddLast(new HttpClientCodec())
+                            .AddLast(new HttpObjectAggregator(8192))
+                            .AddLast(new WebSocketClientProtocolHandler(
+                                new Uri(remote), WebSocketVersion.V13, null, false, new DefaultHttpHeaders(), 8192)
+                            )
+                            .AddLast(
+                                new WebSocketClientDataFrameHandler(WebSocketStateObserver, WebSocketMessageObserver)
+                            );
+                    }));
                 try
                 {
-                    var socketConfig = new TouchSocketConfig();
-                    var userUuid = Guid.NewGuid().ToString("N");
-                    var remote = string.IsNullOrWhiteSpace(_selectedConfig.WebSocketPath)
-                        ? $"ws://{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}/{userUuid}"
-                        : $"ws://{_selectedConfig.ConnectionHost}:{_selectedConfig.ConnectionPort}/{_selectedConfig.WebSocketPath}/{userUuid}";
-                    Console.WriteLine(remote);
-                    socketConfig.SetRemoteIPHost(remote);
-                    _webSocketClient.Setup(socketConfig);
-                    _webSocketClient.Connect();
-                    _webSocketClient.Handshaked += Client_Connected;
-                    // _webSocketClient.Closing += Client_DisConnected;
-                    // _webSocketClient.Closed += Server_DisConnected;
-                    // _webSocketClient.Received += Message_Received;
+                    _channelTask = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Loopback, port));
+                    await _channelTask.CloseCompletion;
                 }
-                catch (SocketException e)
+                catch (SocketException ex)
                 {
-                    MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Console.WriteLine($@"WebSocket client error: {ex}");
                 }
             }
             else
             {
-                _webSocketClient.Close();
-                _webSocketClient.Handshaked -= Client_Connected;
-                // _webSocketClient.Closing -= Client_DisConnected;
-                // _webSocketClient.Closed -= Server_DisConnected;
-                // _webSocketClient.Received -= Message_Received;
+                await _channelTask.CloseAsync();
             }
         }
 
-        private Task Client_Connected(IWebSocketClient client, HttpContextEventArgs e)
+        private void WebSocketStateObserver(WebSocketState state)
         {
-            Console.WriteLine(@"Client_Connected");
-            _isConnected = true;
-            ConnectColorBrush = "LimeGreen";
-            ConnectState = "已连接";
-            ConnectButtonState = "断开";
-            return EasyTask.CompletedTask;
-        }
-
-        private Task Client_DisConnected(IWebSocketClient client, ClosingEventArgs e)
-        {
-            Console.WriteLine(@"Client_DisConnected");
-            WebSocketClosed();
-            return EasyTask.CompletedTask;
-        }
-
-        private Task Server_DisConnected(IWebSocketClient client, ClosedEventArgs e)
-        {
-            Console.WriteLine(@"Server_DisConnected");
-            WebSocketClosed();
-            return EasyTask.CompletedTask;
-        }
-
-        private void WebSocketClosed()
-        {
-            ConnectColorBrush = "DarkGray";
-            ConnectState = "未连接";
-            ConnectButtonState = "连接";
-
-            if (_timer.IsEnabled)
+            switch (state)
             {
-                _timer.Stop();
-            }
-
-            _isConnected = false;
-        }
-
-        private Task Message_Received(IWebSocketClient client, WSDataFrameEventArgs e)
-        {
-            Console.WriteLine(@"Message_Received");
-            var message = "";
-            switch (e.DataFrame.Opcode)
-            {
-                case WSDataType.Cont:
-                    Console.WriteLine($@"收到中间数据，长度为：{e.DataFrame.PayloadLength}");
+                case WebSocketState.Open:
+                    _isConnected = true;
+                    ConnectColorBrush = "LimeGreen";
+                    ConnectState = "已连接";
+                    ConnectButtonState = "断开";
                     break;
-                case WSDataType.Text:
-                    message = e.DataFrame.ToText();
-                    break;
-                case WSDataType.Binary:
-                    if (e.DataFrame.FIN)
+                case WebSocketState.Closed:
+                case WebSocketState.Aborted:
+                {
+                    ConnectColorBrush = "DarkGray";
+                    ConnectState = "未连接";
+                    ConnectButtonState = "连接";
+
+                    if (_timer.IsEnabled)
                     {
-                        Console.WriteLine($@"收到二进制数据，长度为：{e.DataFrame.PayloadLength}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($@"收到未结束的二进制数据，长度为：{e.DataFrame.PayloadLength}");
+                        _timer.Stop();
                     }
 
+                    _isConnected = false;
                     break;
-                case WSDataType.Close:
-                    Console.WriteLine(@"服务端请求断开");
-                    client.Close("DisConnected");
+                }
+                case WebSocketState.None:
                     break;
-                case WSDataType.Ping:
+                case WebSocketState.Connecting:
                     break;
-                case WSDataType.Pong:
+                case WebSocketState.CloseSent:
+                    break;
+                case WebSocketState.CloseReceived:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
+        }
 
-            Application.Current.Dispatcher.Invoke(() =>
+        private void WebSocketMessageObserver(WebSocketFrame dataFrame)
+        {
+            if (dataFrame is TextWebSocketFrame textFrame)
             {
-                ChatMessages.Add(new ChatMessageModel
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                    Message = message,
-                    IsSend = false
+                    ChatMessages.Add(new ChatMessageModel
+                    {
+                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                        Message = textFrame.Text(),
+                        IsSend = false
+                    });
                 });
-            });
-            return EasyTask.CompletedTask;
+            }
+            else if (dataFrame is CloseWebSocketFrame closeFrame)
+            {
+            }
+            else if (dataFrame is BinaryWebSocketFrame binaryFrame)
+            {
+            }
         }
 
         private void ClearMessage()
@@ -434,7 +428,7 @@ namespace SocketDebugger.ViewModels
         /// <summary>
         /// 发送消息
         /// </summary>
-        private void SendMessage()
+        private async void SendMessage()
         {
             if (string.IsNullOrEmpty(_userInputText))
             {
@@ -452,14 +446,9 @@ namespace SocketDebugger.ViewModels
             {
                 if (_userInputText.IsHex())
                 {
-                    var result = _userInputText.GetBytesWithUtf8();
-                    _webSocketClient.SendAsync(result.Item2);
-                    ChatMessages.Add(new ChatMessageModel
-                    {
-                        MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                        Message = result.Item1.FormatHexString(),
-                        IsSend = true
-                    });
+                    var byteArray = Encoding.UTF8.GetBytes(_userInputText);
+                    var byteBuffer = Unpooled.WrappedBuffer(byteArray);
+                    await _channelTask.WriteAndFlushAsync(new BinaryWebSocketFrame(byteBuffer));
                 }
                 else
                 {
@@ -468,14 +457,15 @@ namespace SocketDebugger.ViewModels
             }
             else
             {
-                _webSocketClient.SendAsync(_userInputText);
-                ChatMessages.Add(new ChatMessageModel
-                {
-                    MessageTime = DateTime.Now.ToString("HH:mm:ss"),
-                    Message = _userInputText,
-                    IsSend = true
-                });
+                await _channelTask.WriteAndFlushAsync(new TextWebSocketFrame(_userInputText));
             }
+
+            ChatMessages.Add(new ChatMessageModel
+            {
+                MessageTime = DateTime.Now.ToString("HH:mm:ss"),
+                Message = _userInputText,
+                IsSend = true
+            });
         }
 
         private void CycleSendMessage()

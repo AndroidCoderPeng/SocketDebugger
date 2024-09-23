@@ -37,6 +37,27 @@
         <ApplicationIcon>Images\Net.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
+        <Reference Include="DotNetty.Buffers, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+          <HintPath>..\packages\DotNetty.Buffers.0.7.6\lib\net472\DotNetty.Buffers.dll</HintPath>
+        </Reference>
+        <Reference Include="DotNetty.Codecs, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+          <HintPath>..\packages\DotNetty.Codecs.0.7.6\lib\net472\DotNetty.Codecs.dll</HintPath>
+        </Reference>
+        <Reference Include="DotNetty.Codecs.Http, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+          <HintPath>..\packages\DotNetty.Codecs.Http.0.7.6\lib\net472\DotNetty.Codecs.Http.dll</HintPath>
+        </Reference>
+        <Reference Include="DotNetty.Common, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+          <HintPath>..\packages\DotNetty.Common.0.7.6\lib\net472\DotNetty.Common.dll</HintPath>
+        </Reference>
+        <Reference Include="DotNetty.Handlers, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+          <HintPath>..\packages\DotNetty.Handlers.0.7.6\lib\net472\DotNetty.Handlers.dll</HintPath>
+        </Reference>
+        <Reference Include="DotNetty.Transport, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+          <HintPath>..\packages\DotNetty.Transport.0.7.6\lib\net472\DotNetty.Transport.dll</HintPath>
+        </Reference>
+        <Reference Include="DotNetty.Transport.Libuv, Version=0.7.6.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+          <HintPath>..\packages\DotNetty.Transport.Libuv.0.7.6\lib\net472\DotNetty.Transport.Libuv.dll</HintPath>
+        </Reference>
         <Reference Include="DryIoc, Version=4.7.7.0, Culture=neutral, PublicKeyToken=dfbf2bd50fcf7768, processorArchitecture=MSIL">
             <HintPath>..\packages\DryIoc.dll.4.7.7\lib\net45\DryIoc.dll</HintPath>
         </Reference>
@@ -189,9 +210,6 @@
         <Reference Include="TouchSocket.Core, Version=2.1.2.0, Culture=neutral, PublicKeyToken=d6c415a2f58eda72, processorArchitecture=MSIL">
           <HintPath>..\packages\TouchSocket.Core.2.1.2\lib\net472\TouchSocket.Core.dll</HintPath>
         </Reference>
-        <Reference Include="TouchSocket.Http, Version=2.1.2.0, Culture=neutral, PublicKeyToken=ecea290704fb8ddd, processorArchitecture=MSIL">
-          <HintPath>..\packages\TouchSocket.Http.2.1.2\lib\net472\TouchSocket.Http.dll</HintPath>
-        </Reference>
         <Reference Include="WindowsBase"/>
         <Reference Include="PresentationCore"/>
         <Reference Include="PresentationFramework"/>
@@ -208,6 +226,7 @@
         <Compile Include="Dialogs\ConfigDialog.xaml.cs">
             <DependentUpon>ConfigDialog.xaml</DependentUpon>
         </Compile>
+        <Compile Include="Dialogs\SerialPortConfigDialog.xaml.cs" />
         <Compile Include="Events\ChangeViewByMainMenuEvent.cs" />
         <Compile Include="Model\ChatMessageModel.cs"/>
         <Compile Include="Model\ConnectedClientModel.cs"/>
@@ -218,8 +237,10 @@
         <Compile Include="Utils\AutoScrollBehavior.cs"/>
         <Compile Include="Utils\ClientChatBubbleSelector.cs"/>
         <Compile Include="Utils\DataBaseManager.cs"/>
+        <Compile Include="Utils\DelegateAggregator.cs" />
         <Compile Include="Utils\MethodExtensions.cs"/>
         <Compile Include="Utils\ServerChatBubbleSelector.cs"/>
+        <Compile Include="Utils\WebSocketClientDataFrameHandler.cs" />
         <Compile Include="ViewModels\ConfigDialogViewModel.cs"/>
         <Compile Include="ViewModels\MainWindowViewModel.cs"/>
         <Compile Include="ViewModels\SerialPortViewModel.cs"/>
@@ -280,6 +301,7 @@
     </ItemGroup>
     <ItemGroup>
         <Page Include="Dialogs\ConfigDialog.xaml"/>
+        <Page Include="Dialogs\SerialPortConfigDialog.xaml" />
         <Page Include="Styles\ClientMessageDataTemplate.xaml"/>
         <Page Include="Styles\ConnectionListBoxItemStyle.xaml" />
         <Page Include="Styles\ServerMessageDataTemplate.xaml"/>
